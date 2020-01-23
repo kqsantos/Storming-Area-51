@@ -25,9 +25,20 @@ function Building() {
      */
 }
 
+/**
+ * Tile ID list:
+ * 0 to positive integers = Regions
+ * -1 = Inaccesible
+ * -2 = Add Unit
+ * -3 = Add Building
+ * -4 = Move Unit
+ * -5 = Split Unit
+ * -6 = Upgrade Building
+ */
 function Tile() {
     /**
      * ID
+     * name
      * region
      * owner
      * garrisonedUnit
@@ -38,6 +49,7 @@ function Tile() {
 function Region() {
     /**
      * ID
+     * name
      * bonus effect
      */
 }
@@ -45,7 +57,10 @@ function Region() {
 function LoadMap() {
     /**
      * Line 1 - Width, Height
-     * Line 2 - Region Mapping - 
+     * Line 2 - Region Mapping - ex. Region[0] = [0,1,2], Region[1] = [3,4]
+     * Comma delimited
+     * Height = number of rows + 2
+     * Width = # of elements per row
      */
 }
 
@@ -101,12 +116,40 @@ function SplitUnit(source, destination) {
 }
 
 /**
+ * 
+ * @param {*} x x-coordinate of mouse click event
+ * @param {*} y y-coordinate of mouse click event
+ */
+function SelectCell(x, y) {
+    /**
+     * Check which region is selected
+     * Shows Action Menu
+     */
+}
+
+function EndTurn() {
+    /**
+     * Calculate food
+     * activates the AI
+     */
+}
+
+function ActivateAI() {
+    /**
+     * AI will decide what to do depending on variables visible to it.
+     */
+}
+
+/**
  * This function will be onLoad from the canvas
  */
 function Main() {
     /**
-     * Attach onClick event
-     * load Welcome Sreen
+     * load Welcome Sreen and button entities with onClick events
+     * 
+     * unload Welcome Scren onClick events
+     * attach GAME onCLick events
+     * attach GAME keyboard events
      * loadMap
      */
 }
