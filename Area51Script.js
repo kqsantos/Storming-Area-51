@@ -1,3 +1,46 @@
+// === START OF BOILERPLATE CODE ===
+function Animation(spriteSheet, frameWidth, frameHeight, sheetWidth, frameDuration, frames, loop, scale) {
+    this.spriteSheet = spriteSheet;
+    this.frameWidth = frameWidth;
+    this.frameDuration = frameDuration;
+    this.frameHeight = frameHeight;
+    this.sheetWidth = sheetWidth;
+    this.frames = frames;
+    this.totalTime = frameDuration * frames;
+    this.elapsedTime = 0;
+    this.loop = loop;
+    this.scale = scale;
+}
+
+Animation.prototype.drawFrame = function (tick, ctx, x, y) {
+    this.elapsedTime += tick;
+    if (this.isDone()) {
+        if (this.loop) this.elapsedTime = 0;
+    }
+    var frame = this.currentFrame();
+    var xindex = 0;
+    var yindex = 0;
+    xindex = frame % this.sheetWidth;
+    yindex = Math.floor(frame / this.sheetWidth);
+
+    ctx.drawImage(this.spriteSheet,
+                 xindex * this.frameWidth, yindex * this.frameHeight,  // source from sheet
+                 this.frameWidth, this.frameHeight,
+                 x, y,
+                 this.frameWidth * this.scale,
+                 this.frameHeight * this.scale);
+}
+
+Animation.prototype.currentFrame = function () {
+    return Math.floor(this.elapsedTime / this.frameDuration);
+}
+
+Animation.prototype.isDone = function () {
+    return (this.elapsedTime >= this.totalTime);
+}
+// === END OF BOILERPLATE CODE ===
+
+
 //Global variables
 var myCells = [[], []]; // Tile grid
 var myRegions = []; // Contains IDs of tiles per region
@@ -182,6 +225,25 @@ ResourceDisplay.prototype.draw = function (ctx) {
     ctx.fillRect(900, 0, 380, 50);
     ctx.strokeRect(900, 0, 380, 50);
     Entity.prototype.draw.call(this);
+}
+
+function ResourceFoodIcon(game, spritesheet) {
+    this.animation = new Animation(spritesheet, 189, 230, 5, 0.10, 14, true, 1);
+    this.x = 0;
+    this.y = 0;
+    this.speed = 100;
+    this.game = game;
+    this.ctx = game.ctx;
+}
+
+ResourceFoodIcon.prototype.draw = function () {
+    this.animation.drawFrame(this.game.clockTick, this.ctx, this.x, this.y);
+}
+
+ResourceFoodIcon.prototype.update = function () {
+    if (this.animation.elapsedTime < this.animation.totalTime * 8 / 14)
+        this.x += this.game.clockTick * this.speed;
+    if (this.x > 800) this.x = -230;
 }
 // === END OF RESOURCE DISPLAY ===
 
