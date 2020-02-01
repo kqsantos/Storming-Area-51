@@ -356,6 +356,20 @@ Hydralisk.prototype.draw = function () {
 }
 //=== END OF HYDRALISK ===
 
+// === START OF MAP DISPLAY ===
+function MapDisplay(game) {
+    this.border = AM.getAsset("./img/map/game map9072.png");
+    Entity.call(this, game, 0, 0);
+}
+
+MapDisplay.prototype = new Entity();
+MapDisplay.prototype.constructor =  MapDisplay;
+
+MapDisplay.prototype.draw = function (ctx) {
+    ctx.drawImage(this.border, this.x, this.y);
+}
+// === END OF MAP DISPLAY ===
+
 
 
 ///// REFACTOR ////////
@@ -388,6 +402,10 @@ function Main() {
     AM.queueDownload("./img/sidebar/end_turn_button.png");
     AM.queueDownload("./img/sidebar/end_turn_button_pressed.png");
 
+    // Game Map Display
+
+    AM.queueDownload("./img/map/game map9072.png");
+
     // Animation
     AM.queueDownload("./img/Hydralisk2_east.png");
     AM.queueDownload("./img/Marine_walking_south1.png");
@@ -401,6 +419,7 @@ function Main() {
         var gameEngine = new GameEngine();
         gameEngine.init(ctx);
         gameEngine.start();
+        gameEngine.addEntity(new MapDisplay(gameEngine));
         gameEngine.addEntity(new ResourceDisplay(gameEngine));
         gameEngine.addEntity(new MoveDisplay(gameEngine));
         gameEngine.addEntity(new BuildDisplay(gameEngine));
