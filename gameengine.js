@@ -88,7 +88,7 @@ GameEngine.prototype.startInput = function () {
             var rect = collides(rects, e.offsetX, e.offsetY);
             console.log(rect);
             if (rect.name === "endTurn") {
-                GameEngine.get
+                that.endTurnPress = true;
                 console.log('End Turn collision: ' + rect.x + '/' + rect.y);
             } else {
                 console.log('no collision');
@@ -133,6 +133,7 @@ GameEngine.prototype.loop = function () {
     this.clockTick = this.timer.tick();
     this.update();
     this.draw();
+    this.endTurnPress = null;
 }
 
 function Timer() {
