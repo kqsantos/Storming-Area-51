@@ -1,4 +1,6 @@
 // === START OF BOILERPLATE CODE ===
+
+var AM = new AssetManager();
 function Animation(spriteSheet, frameWidth, frameHeight, sheetWidth, frameDuration, frames, loop, scale) {
     this.spriteSheet = spriteSheet;
     this.frameWidth = frameWidth;
@@ -209,110 +211,59 @@ function ActivateAI() {
 
 // === START OF RESOURCE DISPLAY ===
 function ResourceDisplay(game) {
-    Entity.call(this, game, 0, 0);
+    this.spritesheet = AM.getAsset("./img/resource_display.png");
+    this.foodIcon = AM.getAsset("./img/food_icon.png")
+    Entity.call(this, game, 900, 0);
 }
 
 ResourceDisplay.prototype = new Entity();
 ResourceDisplay.prototype.constructor =  ResourceDisplay;
 
-ResourceDisplay.prototype.update = function () {
-    // this.x += this.game.clockTick * this.speed;
-    // if (this.x > 800) this.x = -230;
-    // Entity.prototype.update.call(this);
-}
-
 ResourceDisplay.prototype.draw = function (ctx, foodIcon) {
-    ctx.fillStyle = "#a7b0c2";
-    ctx.strokeStyle = "black";
-    ctx.fillRect(900, 0, 380, 50);
-    ctx.strokeRect(900, 0, 380, 50);
-    ctx.drawImage("./img/food_icon.png", 0, 0);
-    Entity.prototype.draw.call(this);
+    ctx.drawImage(this.spritesheet, this.x, this.y);
+    ctx.drawImage(this.foodIcon, this.x+30, this.y+10);
 }
-
-// function ResourceFoodIcon(game, spritesheet) {
-//     this.animation = new Animation(spritesheet, 45, 45, 1, 1, 1, true, 1);
-//     this.speed = 100;
-//     this.ctx = game.ctx;
-//     Entity.call(this, game, 0, 250);
-// }
-
-// ResourceFoodIcon.prototype = new Entity();
-// ResourceFoodIcon.prototype.constructor = ResourceFoodIcon;
-
-// ResourceFoodIcon.prototype.update = function () {
-//     this.x += this.game.clockTick * this.speed;
-//     if (this.x > 800) this.x = -230;
-//     Entity.prototype.update.call(this);
-// }
-
-// ResourceFoodIcon.prototype.draw = function () {
-//     this.animation.drawFrame(this.game.clockTick, this.ctx, this.x, this.y);
-//     Entity.prototype.draw.call(this);
-// }
-
 // === END OF RESOURCE DISPLAY ===
 
 // === START OF BUILD DISPLAY ===
 function BuildDisplay(game) {
-    Entity.call(this, game, 0, 400);
-    this.radius = 200;
+    this.spritesheet = AM.getAsset("./img/build_display.png");
+    Entity.call(this, game, 900, 50);
 }
 
 BuildDisplay.prototype = new Entity();
-BuildDisplay.prototype.constructor = ResourceDisplay;
+BuildDisplay.prototype.constructor =  BuildDisplay;
 
-BuildDisplay.prototype.update = function () {
-}
-
-BuildDisplay.prototype.draw = function (ctx) {
-    ctx.fillStyle = "#7e8594";
-    ctx.strokeStyle = "black";
-    ctx.fillRect(900, 50, 380, 310);
-    ctx.strokeRect(900, 50, 380, 310);
-    Entity.prototype.draw.call(this);
+BuildDisplay.prototype.draw = function (ctx, foodIcon) {
+    ctx.drawImage(this.spritesheet, this.x, this.y);
 }
 // === END OF BUILD DISPLAY ===
 
 // === START OF MOVE DISPLAY ===
 function MoveDisplay(game) {
-    Entity.call(this, game, 0, 400);
-    this.radius = 200;
+    this.spritesheet = AM.getAsset("./img/move_display.png");
+    Entity.call(this, game, 900, 360);
 }
 
 MoveDisplay.prototype = new Entity();
-MoveDisplay.prototype.constructor = ResourceDisplay;
+MoveDisplay.prototype.constructor =  MoveDisplay;
 
-MoveDisplay.prototype.update = function () {
-}
-
-MoveDisplay.prototype.draw = function (ctx) {
-    ctx.fillStyle = "#676d7a";
-    ctx.strokeStyle = "black";
-    ctx.fillRect(900, 360, 380, 310);
-    ctx.strokeRect(900, 360, 380, 310);
-    Entity.prototype.draw.call(this);
+MoveDisplay.prototype.draw = function (ctx, foodIcon) {
+    ctx.drawImage(this.spritesheet, this.x, this.y);
 }
 // === END OF MOVE DISPLAY ===
 
 // === START OF ENDTURN DISPLAY ===
 function EndTurnDisplay(game) {
-    Entity.call(this, game, 0, 400);
-    this.radius = 200;
+    this.spritesheet = AM.getAsset("./img/end_turn_display.png");
+    Entity.call(this, game, 900, 670);
 }
 
 EndTurnDisplay.prototype = new Entity();
-EndTurnDisplay.prototype.constructor = ResourceDisplay;
+EndTurnDisplay.prototype.constructor =  EndTurnDisplay;
 
-EndTurnDisplay.prototype.update = function () {
-}
-
-EndTurnDisplay.prototype.draw = function (ctx) {
-    ctx.fillStyle = "#4d525c";
-    ctx.strokeStyle = "black";
-    ctx.fillRect(900, 670, 380, 50);
-    ctx.strokeRect(900, 670, 380, 50);
-    Entity.prototype.draw.call(this);
+EndTurnDisplay.prototype.draw = function (ctx, foodIcon) {
+    ctx.drawImage(this.spritesheet, this.x, this.y);
 }
 // === END OF ENDTURN DISPLAY ===
 
@@ -329,13 +280,14 @@ function Main() {
      * attach GAME keyboard events
      * loadMap
      */
-    var AM = new AssetManager();
 
     AM.queueDownload("./img/food_icon.png");
     AM.queueDownload("./img/resource_display.png");
+    AM.queueDownload("./img/build_display.png");
+    AM.queueDownload("./img/move_display.png");
+    AM.queueDownload("./img/end_turn_display.png");
 
     AM.downloadAll(function () {
-        console.log("starting up da shield");
         var canvas = document.getElementById('gameWorld');
         var ctx = canvas.getContext('2d');
 
@@ -344,7 +296,10 @@ function Main() {
         gameEngine.start();
     
         
-        gameEngine.addEntity(new ResourceDisplay(gameEngine, AM.getAsset("./img/resource_display.png")));
+        gameEngine.addEntity(new ResourceDisplay(gameEngine));
+        gameEngine.addEntity(new MoveDisplay(gameEngine));
+        gameEngine.addEntity(new BuildDisplay(gameEngine));
+        gameEngine.addEntity(new EndTurnDisplay(gameEngine));
     });
 
 }
