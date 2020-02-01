@@ -26,11 +26,11 @@ Animation.prototype.drawFrame = function (tick, ctx, x, y) {
     yindex = Math.floor(frame / this.sheetWidth);
 
     ctx.drawImage(this.spriteSheet,
-                 xindex * this.frameWidth, yindex * this.frameHeight,  // source from sheet
-                 this.frameWidth, this.frameHeight,
-                 x, y,
-                 this.frameWidth * this.scale,
-                 this.frameHeight * this.scale);
+        xindex * this.frameWidth, yindex * this.frameHeight,  // source from sheet
+        this.frameWidth, this.frameHeight,
+        x, y,
+        this.frameWidth * this.scale,
+        this.frameHeight * this.scale);
 }
 
 Animation.prototype.currentFrame = function () {
@@ -204,21 +204,21 @@ function ResourceDisplay(game) {
 }
 
 ResourceDisplay.prototype = new Entity();
-ResourceDisplay.prototype.constructor =  ResourceDisplay;
+ResourceDisplay.prototype.constructor = ResourceDisplay;
 
 ResourceDisplay.prototype.draw = function (ctx) {
     // Draw the border
     ctx.drawImage(this.border, this.x, this.y);
 
     // Draw the Food Icon and Count
-    ctx.drawImage(this.foodIcon, this.x+30, this.y+10);
+    ctx.drawImage(this.foodIcon, this.x + 30, this.y + 10);
     ctx.font = "24px Arial";
-    ctx.fillText(this.foodCount, this.x+70, this.y+35);
+    ctx.fillText(this.foodCount, this.x + 70, this.y + 35);
 
     // Draw the Money Icon and Count
-    ctx.drawImage(this.moneyIcon, this.x+130, this.y+10);
+    ctx.drawImage(this.moneyIcon, this.x + 130, this.y + 10);
     ctx.font = "24px Arial";
-    ctx.fillText(this.moneyCount, this.x+160, this.y+35);
+    ctx.fillText(this.moneyCount, this.x + 160, this.y + 35);
 }
 // === END OF RESOURCE DISPLAY ===
 
@@ -227,38 +227,59 @@ function BuildDisplay(game) {
     this.border = AM.getAsset("./img/sidebar/build_display.png");
     this.buildTroopButton = AM.getAsset("./img/sidebar/build_soldier_button.png");
     this.buildTroopButtonPressed = AM.getAsset("./img/sidebar/build_soldier_button_pressed.png");
+    this.buildBarracksButton = AM.getAsset("./img/sidebar/build_barracks_button.png");
+    this.buildBarracksButtonPressed = AM.getAsset("./img/sidebar/build_barracks_button_pressed.png");
     Entity.call(this, game, 900, 50);
 }
 
 BuildDisplay.prototype = new Entity();
-BuildDisplay.prototype.constructor =  BuildDisplay;
+BuildDisplay.prototype.constructor = BuildDisplay;
 
 BuildDisplay.prototype.draw = function (ctx) {
     // Background and Title Display
     ctx.drawImage(this.border, this.x, this.y);
     ctx.font = "24px Arial";
-    ctx.fillText("Build", this.x+30, this.y+35);
+    ctx.fillText("Build", this.x + 30, this.y + 35);
 
     // Troop Display
     ctx.drawImage(this.buildTroopButton, this.x + 40, this.y + 50);
     ctx.font = "20px Arial";
-    ctx.fillText("Troop Count: 0", this.x+100, this.y+80);
+    ctx.fillText("Troop Count: 0", this.x + 100, this.y + 80);
+
+    // Building Display
+    ctx.drawImage(this.buildBarracksButton, this.x + 40, this.y + 110);
+    ctx.font = "20px Arial";
+    ctx.fillText("Barracks Built: No", this.x + 100, this.y + 140);
 }
 // === END OF BUILD DISPLAY ===
 
 // === START OF MOVE DISPLAY ===
 function MoveDisplay(game) {
     this.border = AM.getAsset("./img/sidebar/move_display.png");
+    this.moveButton = AM.getAsset("./img/sidebar/move_button.png");
+    this.moveButtonPressed = AM.getAsset("./img/sidebar/move_button_pressed.png");
+    this.fightButton = AM.getAsset("./img/sidebar/fight_button.png");
+    this.fightButtonPressed = AM.getAsset("./img/sidebar/fight_button_pressed.png");
     Entity.call(this, game, 900, 360);
 }
 
 MoveDisplay.prototype = new Entity();
-MoveDisplay.prototype.constructor =  MoveDisplay;
+MoveDisplay.prototype.constructor = MoveDisplay;
 
 MoveDisplay.prototype.draw = function (ctx) {
     ctx.drawImage(this.border, this.x, this.y);
     ctx.font = "24px Arial";
-    ctx.fillText("Move/Fight", this.x+30, this.y+35);
+    ctx.fillText("Move/Fight", this.x + 30, this.y + 35);
+
+    // Move Display
+    ctx.drawImage(this.moveButton, this.x + 40, this.y + 50);
+    ctx.font = "20px Arial";
+    ctx.fillText("Move", this.x + 100, this.y + 80);
+
+    // Attack Display
+    ctx.drawImage(this.fightButton, this.x + 40, this.y + 110);
+    ctx.font = "20px Arial";
+    ctx.fillText("Attack!", this.x + 100, this.y + 140);
 }
 // === END OF MOVE DISPLAY ===
 
@@ -266,16 +287,23 @@ MoveDisplay.prototype.draw = function (ctx) {
 function EndTurnDisplay(game) {
     this.border = AM.getAsset("./img/sidebar/end_turn_display.png");
     this.endTurnButton = AM.getAsset("./img/sidebar/end_turn_button.png");
+    this.isEndTurnButtonPressed = false;
     this.endTurnButtonPressed = AM.getAsset("./img/sidebar/end_turn_button_pressed.png");
     Entity.call(this, game, 900, 670);
 }
 
 EndTurnDisplay.prototype = new Entity();
-EndTurnDisplay.prototype.constructor =  EndTurnDisplay;
+EndTurnDisplay.prototype.constructor = EndTurnDisplay;
+
+EndTurnDisplay.prototype.update = function () {
+    if (this.game.endTurnPressed) this.isEndTurnButtonPressed = true;
+    Entity.prototype.update.call(this);
+}
 
 EndTurnDisplay.prototype.draw = function (ctx) {
     ctx.drawImage(this.border, this.x, this.y);
-    ctx.drawImage(this.endTurnButton, this.x + 117, this.y + 7);
+    if (this.isEndTurnButtonPressed) ctx.drawImage(this.endTurnButtonPressed, this.x + 117, this.y + 7);
+    else ctx.drawImage(this.endTurnButton, this.x + 117, this.y + 7);
 }
 // === END OF ENDTURN DISPLAY ===
 
@@ -289,7 +317,7 @@ function Marine(game, spritesheet) {
     this.speed = 10;
     this.ctx = game.ctx;
     Entity.call(this, game, 100, 100);
-    
+
 }
 
 Marine.prototype = new Entity();
@@ -301,7 +329,7 @@ Marine.prototype.update = function () {
     if (this.y < 220) {
         this.y += 1;
         Entity.prototype.update.call(this);
-    }else{
+    } else {
         this.y = 221;
         this.animation.frameDuration = 1;
     }
@@ -313,7 +341,7 @@ Marine.prototype.draw = function () {
 }
 //=== END OF MARINE ===
 
- 
+
 //=== START OF MARINEEAST ===
 function MarineEast(game, spritesheet) {
     this.animation = new Animation(spritesheet, 22, 33, 3, 0.15, 3, true, 1);
@@ -331,11 +359,11 @@ MarineEast.prototype.update = function () {
     if (this.x < 800) {
         this.x += 0.3;
         Entity.prototype.update.call(this);
-    } else{
+    } else {
         this.x = 801;
         this.animation.frameDuration = 1;
     }
-    
+
 }
 
 MarineEast.prototype.draw = function () {
@@ -359,10 +387,10 @@ Hydralisk.prototype.constructor = Hydralisk;
 
 Hydralisk.prototype.update = function () {
     this.x += this.game.clockTick * this.speed;
-    if (this.x < 530) { 
+    if (this.x < 530) {
         this.x += 0.3;
         Entity.prototype.update.call(this);
-    } else{
+    } else {
         this.x = 531;
         this.animation.frameDuration = 1;
     }
@@ -382,7 +410,7 @@ function MapDisplay(game) {
 }
 
 MapDisplay.prototype = new Entity();
-MapDisplay.prototype.constructor =  MapDisplay;
+MapDisplay.prototype.constructor = MapDisplay;
 
 MapDisplay.prototype.draw = function (ctx) {
     ctx.drawImage(this.border, this.x, this.y);
@@ -410,22 +438,27 @@ function Main() {
     AM.queueDownload("./img/sidebar/resource_display.png");
     AM.queueDownload("./img/sidebar/food_icon.png");
     AM.queueDownload("./img/sidebar/money_icon.png");
-    
+
     // Build Display
     AM.queueDownload("./img/sidebar/build_display.png");
     AM.queueDownload("./img/sidebar/build_soldier_button.png");
     AM.queueDownload("./img/sidebar/build_soldier_button_pressed.png");
+    AM.queueDownload("./img/sidebar/build_barracks_button.png");
+    AM.queueDownload("./img/sidebar/build_barracks_button_pressed.png");
 
     // Move Display
     AM.queueDownload("./img/sidebar/move_display.png");
-    
+    AM.queueDownload("./img/sidebar/move_button.png");
+    AM.queueDownload("./img/sidebar/move_button_pressed.png");
+    AM.queueDownload("./img/sidebar/fight_button.png");
+    AM.queueDownload("./img/sidebar/fight_button_pressed.png");
+
     // End Turn Display
     AM.queueDownload("./img/sidebar/end_turn_display.png");
     AM.queueDownload("./img/sidebar/end_turn_button.png");
     AM.queueDownload("./img/sidebar/end_turn_button_pressed.png");
 
     // Game Map Display
-
     AM.queueDownload("./img/map/game map9072.png");
 
     // Animation
@@ -436,7 +469,7 @@ function Main() {
     AM.downloadAll(function () {
         var canvas = document.getElementById('gameWorld');
         var ctx = canvas.getContext('2d');
-        
+
 
         var gameEngine = new GameEngine();
 
