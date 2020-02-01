@@ -21,6 +21,7 @@ GameEngine.prototype.init = function (ctx) {
     this.surfaceWidth = this.ctx.canvas.width;
     this.surfaceHeight = this.ctx.canvas.height;
     this.timer = new Timer();
+    this.startInput();
     console.log('game initialized');
 }
 
@@ -31,6 +32,77 @@ GameEngine.prototype.start = function () {
         that.loop();
         requestAnimFrame(gameLoop, that.ctx.canvas);
     })();
+}
+
+GameEngine.prototype.startInput = function () {
+    console.log('Starting input');
+
+    var getXandY = function (e) {
+        var x = e.clientX - that.ctx.canvas.getBoundingClientRect().left;
+        var y = e.clientY - that.ctx.canvas.getBoundingClientRect().top;
+
+        if (x < 1024) {
+            x = Math.floor(x / 32);
+            y = Math.floor(y / 32);
+        }
+
+        return { x: x, y: y };
+    }
+
+    var that = this;
+
+    function collides(rects, x, y) {
+        var isCollision = false;
+        for (var i = 0, len = rects.length; i < len; i++) {
+            var left = rects[i].x, right = rects[i].x+rects[i].w;
+            var top = rects[i].y, bottom = rects[i].y+rects[i].h;
+            if (right >= x
+                && left <= x
+                && bottom >= y
+                && top <= y) {
+                isCollision = rects[i];
+            }
+        }
+        return isCollision;
+    }
+
+    var elem = this.ctx.canvas;
+    
+    if (elem && elem.getContext) {
+        // list of rectangles to render
+        var rects = [{name: "endTurn", x: 1018, y: 678, w: 136, h: 35},
+                     {name: "buildTroop", x: 75, y: 0, w: 50, h: 50}];
+      // get context
+      var context = elem.getContext('2d');
+      if (context) {
+    
+          for (var i = 0, len = rects.length; i < len; i++) {
+            context.fillRect(rects[i].x, rects[i].y, rects[i].w, rects[i].h);
+          }
+    
+      }
+    
+        // listener, using W3C style for example    
+        elem.addEventListener('click', function(e) {
+            console.log('click: ' + e.offsetX + '/' + e.offsetY);
+            var rect = collides(rects, e.offsetX, e.offsetY);
+            console.log(rect);
+            if (rect.name === "endTurn") {
+                GameEngine.get
+                console.log('End Turn collision: ' + rect.x + '/' + rect.y);
+            } else {
+                console.log('no collision');
+            }
+        }, false);
+    }
+
+    this.ctx.canvas.addEventListener("click", function (e) {
+        that.click = getXandY(e);
+        console.log(e);
+        console.log("Left Click Event - X,Y " + e.layerX + ", " + e.layerY);
+    }, false);
+
+    console.log('Input started');
 }
 
 GameEngine.prototype.addEntity = function (entity) {
