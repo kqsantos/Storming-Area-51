@@ -211,23 +211,29 @@ function ActivateAI() {
 
 // === START OF RESOURCE DISPLAY ===
 function ResourceDisplay(game) {
-    this.spritesheet = AM.getAsset("./img/sidebar/resource_display.png");
+    this.border = AM.getAsset("./img/sidebar/resource_display.png");
     this.foodIcon = AM.getAsset("./img/sidebar/food_icon.png")
+    this.foodCount = 0;
     Entity.call(this, game, 900, 0);
 }
 
 ResourceDisplay.prototype = new Entity();
 ResourceDisplay.prototype.constructor =  ResourceDisplay;
 
+ResourceDisplay.prototype.update = function () {
+}
+
 ResourceDisplay.prototype.draw = function (ctx) {
-    ctx.drawImage(this.spritesheet, this.x, this.y);
+    ctx.drawImage(this.border, this.x, this.y);
     ctx.drawImage(this.foodIcon, this.x+30, this.y+10);
+    ctx.font = "24px Arial";
+    ctx.fillText(this.foodCount, this.x+70, this.y+35);
 }
 // === END OF RESOURCE DISPLAY ===
 
 // === START OF BUILD DISPLAY ===
 function BuildDisplay(game) {
-    this.spritesheet = AM.getAsset("./img/sidebar/build_display.png");
+    this.border = AM.getAsset("./img/sidebar/build_display.png");
     Entity.call(this, game, 900, 50);
 }
 
@@ -235,13 +241,15 @@ BuildDisplay.prototype = new Entity();
 BuildDisplay.prototype.constructor =  BuildDisplay;
 
 BuildDisplay.prototype.draw = function (ctx) {
-    ctx.drawImage(this.spritesheet, this.x, this.y);
+    ctx.drawImage(this.border, this.x, this.y);
+    ctx.font = "24px Arial";
+    ctx.fillText("Build", this.x+30, this.y+35);
 }
 // === END OF BUILD DISPLAY ===
 
 // === START OF MOVE DISPLAY ===
 function MoveDisplay(game) {
-    this.spritesheet = AM.getAsset("./img/sidebar/move_display.png");
+    this.border = AM.getAsset("./img/sidebar/move_display.png");
     Entity.call(this, game, 900, 360);
 }
 
@@ -249,13 +257,16 @@ MoveDisplay.prototype = new Entity();
 MoveDisplay.prototype.constructor =  MoveDisplay;
 
 MoveDisplay.prototype.draw = function (ctx) {
-    ctx.drawImage(this.spritesheet, this.x, this.y);
+    ctx.drawImage(this.border, this.x, this.y);
+    ctx.font = "24px Arial";
+    ctx.fillText("Move/Fight", this.x+30, this.y+35);
 }
 // === END OF MOVE DISPLAY ===
 
 // === START OF ENDTURN DISPLAY ===
 function EndTurnDisplay(game) {
-    this.spritesheet = AM.getAsset("./img/sidebar/end_turn_display.png");
+    this.border = AM.getAsset("./img/sidebar/end_turn_display.png");
+    this.button = AM.getAsset("./img/sidebar/end_turn_button.png");
     Entity.call(this, game, 900, 670);
 }
 
@@ -263,7 +274,8 @@ EndTurnDisplay.prototype = new Entity();
 EndTurnDisplay.prototype.constructor =  EndTurnDisplay;
 
 EndTurnDisplay.prototype.draw = function (ctx) {
-    ctx.drawImage(this.spritesheet, this.x, this.y);
+    ctx.drawImage(this.border, this.x, this.y);
+    ctx.drawImage(this.button, this.x + 117, this.y + 7);
 }
 // === END OF ENDTURN DISPLAY ===
 
@@ -281,11 +293,20 @@ function Main() {
      * loadMap
      */
 
-    AM.queueDownload("./img/sidebar/food_icon.png");
+    // Resource Display
     AM.queueDownload("./img/sidebar/resource_display.png");
+    AM.queueDownload("./img/sidebar/food_icon.png");
+    
+    // Build Display
     AM.queueDownload("./img/sidebar/build_display.png");
+
+    // Move Display
     AM.queueDownload("./img/sidebar/move_display.png");
+    
+    // End Turn Display
     AM.queueDownload("./img/sidebar/end_turn_display.png");
+    AM.queueDownload("./img/sidebar/end_turn_button.png");
+    AM.queueDownload("./img/sidebar/end_turn_button_pressed.png");
 
     AM.downloadAll(function () {
         var canvas = document.getElementById('gameWorld');
@@ -295,7 +316,6 @@ function Main() {
         gameEngine.init(ctx);
         gameEngine.start();
     
-        
         gameEngine.addEntity(new ResourceDisplay(gameEngine));
         gameEngine.addEntity(new MoveDisplay(gameEngine));
         gameEngine.addEntity(new BuildDisplay(gameEngine));
