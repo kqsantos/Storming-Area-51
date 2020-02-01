@@ -209,42 +209,48 @@ function ActivateAI() {
 
 // === START OF RESOURCE DISPLAY ===
 function ResourceDisplay(game) {
-    Entity.call(this, game, 0, 400);
-    this.radius = 200;
+    Entity.call(this, game, 0, 0);
 }
 
 ResourceDisplay.prototype = new Entity();
-ResourceDisplay.prototype.constructor = ResourceDisplay;
+ResourceDisplay.prototype.constructor =  ResourceDisplay;
 
 ResourceDisplay.prototype.update = function () {
+    // this.x += this.game.clockTick * this.speed;
+    // if (this.x > 800) this.x = -230;
+    // Entity.prototype.update.call(this);
 }
 
-ResourceDisplay.prototype.draw = function (ctx) {
+ResourceDisplay.prototype.draw = function (ctx, foodIcon) {
     ctx.fillStyle = "#a7b0c2";
     ctx.strokeStyle = "black";
     ctx.fillRect(900, 0, 380, 50);
     ctx.strokeRect(900, 0, 380, 50);
+    ctx.drawImage("./img/food_icon.png", 0, 0);
     Entity.prototype.draw.call(this);
 }
 
-function ResourceFoodIcon(game, spritesheet) {
-    this.animation = new Animation(spritesheet, 189, 230, 5, 0.10, 14, true, 1);
-    this.x = 0;
-    this.y = 0;
-    this.speed = 100;
-    this.game = game;
-    this.ctx = game.ctx;
-}
+// function ResourceFoodIcon(game, spritesheet) {
+//     this.animation = new Animation(spritesheet, 45, 45, 1, 1, 1, true, 1);
+//     this.speed = 100;
+//     this.ctx = game.ctx;
+//     Entity.call(this, game, 0, 250);
+// }
 
-ResourceFoodIcon.prototype.draw = function () {
-    this.animation.drawFrame(this.game.clockTick, this.ctx, this.x, this.y);
-}
+// ResourceFoodIcon.prototype = new Entity();
+// ResourceFoodIcon.prototype.constructor = ResourceFoodIcon;
 
-ResourceFoodIcon.prototype.update = function () {
-    if (this.animation.elapsedTime < this.animation.totalTime * 8 / 14)
-        this.x += this.game.clockTick * this.speed;
-    if (this.x > 800) this.x = -230;
-}
+// ResourceFoodIcon.prototype.update = function () {
+//     this.x += this.game.clockTick * this.speed;
+//     if (this.x > 800) this.x = -230;
+//     Entity.prototype.update.call(this);
+// }
+
+// ResourceFoodIcon.prototype.draw = function () {
+//     this.animation.drawFrame(this.game.clockTick, this.ctx, this.x, this.y);
+//     Entity.prototype.draw.call(this);
+// }
+
 // === END OF RESOURCE DISPLAY ===
 
 // === START OF BUILD DISPLAY ===
@@ -323,28 +329,22 @@ function Main() {
      * attach GAME keyboard events
      * loadMap
      */
-    var ASSET_MANAGER = new AssetManager();
+    var AM = new AssetManager();
 
-    ASSET_MANAGER.queueDownload("./img/food_icon.png");
+    AM.queueDownload("./img/food_icon.png");
+    AM.queueDownload("./img/resource_display.png");
 
-    ASSET_MANAGER.downloadAll(function () {
+    AM.downloadAll(function () {
         console.log("starting up da shield");
         var canvas = document.getElementById('gameWorld');
         var ctx = canvas.getContext('2d');
 
         var gameEngine = new GameEngine();
-        var resourceDP = new ResourceDisplay(gameEngine);
-        var buildDP = new BuildDisplay(gameEngine);
-        var moveDP = new MoveDisplay(gameEngine);
-        var endTurnDP = new EndTurnDisplay(gameEngine);
-
-        gameEngine.addEntity(resourceDP);
-        gameEngine.addEntity(buildDP);
-        gameEngine.addEntity(moveDP);
-        gameEngine.addEntity(endTurnDP);
-
         gameEngine.init(ctx);
         gameEngine.start();
+    
+        
+        gameEngine.addEntity(new ResourceDisplay(gameEngine, AM.getAsset("./img/resource_display.png")));
     });
 
 }
