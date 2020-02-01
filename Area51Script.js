@@ -225,6 +225,8 @@ ResourceDisplay.prototype.draw = function (ctx) {
 // === START OF BUILD DISPLAY ===
 function BuildDisplay(game) {
     this.border = AM.getAsset("./img/sidebar/build_display.png");
+    this.buildTroopButton = AM.getAsset("./img/sidebar/build_soldier_button.png");
+    this.buildTroopButtonPressed = AM.getAsset("./img/sidebar/build_soldier_button_pressed.png");
     Entity.call(this, game, 900, 50);
 }
 
@@ -232,9 +234,15 @@ BuildDisplay.prototype = new Entity();
 BuildDisplay.prototype.constructor =  BuildDisplay;
 
 BuildDisplay.prototype.draw = function (ctx) {
+    // Background and Title Display
     ctx.drawImage(this.border, this.x, this.y);
     ctx.font = "24px Arial";
     ctx.fillText("Build", this.x+30, this.y+35);
+
+    // Troop Display
+    ctx.drawImage(this.buildTroopButton, this.x + 40, this.y + 50);
+    ctx.font = "20px Arial";
+    ctx.fillText("Troop Count: 0", this.x+100, this.y+80);
 }
 // === END OF BUILD DISPLAY ===
 
@@ -257,7 +265,8 @@ MoveDisplay.prototype.draw = function (ctx) {
 // === START OF ENDTURN DISPLAY ===
 function EndTurnDisplay(game) {
     this.border = AM.getAsset("./img/sidebar/end_turn_display.png");
-    this.button = AM.getAsset("./img/sidebar/end_turn_button.png");
+    this.endTurnButton = AM.getAsset("./img/sidebar/end_turn_button.png");
+    this.endTurnButtonPressed = AM.getAsset("./img/sidebar/end_turn_button_pressed.png");
     Entity.call(this, game, 900, 670);
 }
 
@@ -266,7 +275,7 @@ EndTurnDisplay.prototype.constructor =  EndTurnDisplay;
 
 EndTurnDisplay.prototype.draw = function (ctx) {
     ctx.drawImage(this.border, this.x, this.y);
-    ctx.drawImage(this.button, this.x + 117, this.y + 7);
+    ctx.drawImage(this.endTurnButton, this.x + 117, this.y + 7);
 }
 // === END OF ENDTURN DISPLAY ===
 
@@ -279,7 +288,7 @@ function Marine(game, spritesheet) {
     this.animation = new Animation(spritesheet, 22, 33, 3, 0.15, 3, true, 1);
     this.speed = 10;
     this.ctx = game.ctx;
-    Entity.call(this, game, 0, 20);
+    Entity.call(this, game, 100, 100);
     
 }
 
@@ -289,11 +298,11 @@ Marine.prototype.constructor = Marine;
 Marine.prototype.update = function () {
 
     this.y += this.game.clockTick * this.speed;
-    if (this.y < 120) {
+    if (this.y < 220) {
         this.y += 1;
         Entity.prototype.update.call(this);
     }else{
-        this.y = 121;
+        this.y = 221;
         this.animation.frameDuration = 1;
     }
 }
@@ -310,7 +319,7 @@ function MarineEast(game, spritesheet) {
     this.animation = new Animation(spritesheet, 22, 33, 3, 0.15, 3, true, 1);
     this.speed = 50;
     this.ctx = game.ctx;
-    Entity.call(this, game, 50, 200);
+    Entity.call(this, game, 461, 40);
 
 }
 
@@ -319,11 +328,11 @@ MarineEast.prototype.constructor = MarineEast;
 
 MarineEast.prototype.update = function () {
     this.x += this.game.clockTick * this.speed;
-    if (this.x < 700) {
+    if (this.x < 800) {
         this.x += 0.3;
         Entity.prototype.update.call(this);
     } else{
-        this.x = 701;
+        this.x = 801;
         this.animation.frameDuration = 1;
     }
     
@@ -341,7 +350,7 @@ function Hydralisk(game, spritesheet) {
     this.animation = new Animation(spritesheet, 45, 70, 3, 0.15, 3, true, 1);
     this.speed = 10;
     this.ctx = game.ctx;
-    Entity.call(this, game, 0, 350);
+    Entity.call(this, game, 60, 560);
 }
 
 Hydralisk.prototype = new Entity();
@@ -350,11 +359,11 @@ Hydralisk.prototype.constructor = Hydralisk;
 
 Hydralisk.prototype.update = function () {
     this.x += this.game.clockTick * this.speed;
-    if (this.x < 800) { 
+    if (this.x < 530) { 
         this.x += 0.3;
         Entity.prototype.update.call(this);
     } else{
-        this.x = 801;
+        this.x = 531;
         this.animation.frameDuration = 1;
     }
 }
@@ -404,6 +413,8 @@ function Main() {
     
     // Build Display
     AM.queueDownload("./img/sidebar/build_display.png");
+    AM.queueDownload("./img/sidebar/build_soldier_button.png");
+    AM.queueDownload("./img/sidebar/build_soldier_button_pressed.png");
 
     // Move Display
     AM.queueDownload("./img/sidebar/move_display.png");
