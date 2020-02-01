@@ -211,15 +211,15 @@ function ActivateAI() {
 
 // === START OF RESOURCE DISPLAY ===
 function ResourceDisplay(game) {
-    this.spritesheet = AM.getAsset("./img/resource_display.png");
-    this.foodIcon = AM.getAsset("./img/food_icon.png")
+    this.spritesheet = AM.getAsset("./img/sidebar/resource_display.png");
+    this.foodIcon = AM.getAsset("./img/sidebar/food_icon.png")
     Entity.call(this, game, 900, 0);
 }
 
 ResourceDisplay.prototype = new Entity();
 ResourceDisplay.prototype.constructor =  ResourceDisplay;
 
-ResourceDisplay.prototype.draw = function (ctx, foodIcon) {
+ResourceDisplay.prototype.draw = function (ctx) {
     ctx.drawImage(this.spritesheet, this.x, this.y);
     ctx.drawImage(this.foodIcon, this.x+30, this.y+10);
 }
@@ -227,42 +227,42 @@ ResourceDisplay.prototype.draw = function (ctx, foodIcon) {
 
 // === START OF BUILD DISPLAY ===
 function BuildDisplay(game) {
-    this.spritesheet = AM.getAsset("./img/build_display.png");
+    this.spritesheet = AM.getAsset("./img/sidebar/build_display.png");
     Entity.call(this, game, 900, 50);
 }
 
 BuildDisplay.prototype = new Entity();
 BuildDisplay.prototype.constructor =  BuildDisplay;
 
-BuildDisplay.prototype.draw = function (ctx, foodIcon) {
+BuildDisplay.prototype.draw = function (ctx) {
     ctx.drawImage(this.spritesheet, this.x, this.y);
 }
 // === END OF BUILD DISPLAY ===
 
 // === START OF MOVE DISPLAY ===
 function MoveDisplay(game) {
-    this.spritesheet = AM.getAsset("./img/move_display.png");
+    this.spritesheet = AM.getAsset("./img/sidebar/move_display.png");
     Entity.call(this, game, 900, 360);
 }
 
 MoveDisplay.prototype = new Entity();
 MoveDisplay.prototype.constructor =  MoveDisplay;
 
-MoveDisplay.prototype.draw = function (ctx, foodIcon) {
+MoveDisplay.prototype.draw = function (ctx) {
     ctx.drawImage(this.spritesheet, this.x, this.y);
 }
 // === END OF MOVE DISPLAY ===
 
 // === START OF ENDTURN DISPLAY ===
 function EndTurnDisplay(game) {
-    this.spritesheet = AM.getAsset("./img/end_turn_display.png");
+    this.spritesheet = AM.getAsset("./img/sidebar/end_turn_display.png");
     Entity.call(this, game, 900, 670);
 }
 
 EndTurnDisplay.prototype = new Entity();
 EndTurnDisplay.prototype.constructor =  EndTurnDisplay;
 
-EndTurnDisplay.prototype.draw = function (ctx, foodIcon) {
+EndTurnDisplay.prototype.draw = function (ctx) {
     ctx.drawImage(this.spritesheet, this.x, this.y);
 }
 // === END OF ENDTURN DISPLAY ===
@@ -281,11 +281,11 @@ function Main() {
      * loadMap
      */
 
-    AM.queueDownload("./img/food_icon.png");
-    AM.queueDownload("./img/resource_display.png");
-    AM.queueDownload("./img/build_display.png");
-    AM.queueDownload("./img/move_display.png");
-    AM.queueDownload("./img/end_turn_display.png");
+    AM.queueDownload("./img/sidebar/food_icon.png");
+    AM.queueDownload("./img/sidebar/resource_display.png");
+    AM.queueDownload("./img/sidebar/build_display.png");
+    AM.queueDownload("./img/sidebar/move_display.png");
+    AM.queueDownload("./img/sidebar/end_turn_display.png");
 
     AM.downloadAll(function () {
         var canvas = document.getElementById('gameWorld');
