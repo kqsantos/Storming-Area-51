@@ -1,6 +1,6 @@
 // === START OF BOILERPLATE CODE ===
-
 var AM = new AssetManager();
+
 function Animation(spriteSheet, frameWidth, frameHeight, sheetWidth, frameDuration, frames, loop, scale) {
     this.spriteSheet = spriteSheet;
     this.frameWidth = frameWidth;
@@ -47,22 +47,6 @@ Animation.prototype.isDone = function () {
 var myCells = [[], []]; // Tile grid
 var myRegions = []; // Contains IDs of tiles per region
 var myCanvasSize;
-
-function Animation(spriteSheet, startX, startY, frameWidth, frameHeight, frameDuration, frames, loop, reverse) {
-    this.spriteSheet = spriteSheet;
-    this.startX = startX;
-    this.startY = startY;
-    this.frameWidth = frameWidth;
-    this.frameDuration = frameDuration;
-    this.frameHeight = frameHeight;
-    this.frames = frames;
-    this.totalTime = frameDuration * frames;
-    this.elapsedTime = 0;
-    this.loop = loop;
-    this.reverse = reverse;
-}
-
-
 
 /**
  * Creates a troop in the game.
@@ -220,9 +204,6 @@ function ResourceDisplay(game) {
 ResourceDisplay.prototype = new Entity();
 ResourceDisplay.prototype.constructor =  ResourceDisplay;
 
-ResourceDisplay.prototype.update = function () {
-}
-
 ResourceDisplay.prototype.draw = function (ctx) {
     ctx.drawImage(this.border, this.x, this.y);
     ctx.drawImage(this.foodIcon, this.x+30, this.y+10);
@@ -285,7 +266,7 @@ EndTurnDisplay.prototype.draw = function (ctx) {
 
 //=== START OF MARINE ===
 function Marine(game, spritesheet) {
-    this.animation = new Animation(spritesheet, 22, 33, 3, 0.15, 3, true, 4);
+    this.animation = new Animation(spritesheet, 22, 33, 3, 0.15, 3, true, 1);
     this.speed = 10;
     this.ctx = game.ctx;
     Entity.call(this, game, 0, 20);
@@ -316,7 +297,7 @@ Marine.prototype.draw = function () {
  
 //=== START OF MARINEEAST ===
 function MarineEast(game, spritesheet) {
-    this.animation = new Animation(spritesheet, 22, 33, 3, 0.15, 3, true, 4);
+    this.animation = new Animation(spritesheet, 22, 33, 3, 0.15, 3, true, 1);
     this.speed = 50;
     this.ctx = game.ctx;
     Entity.call(this, game, 50, 200);
@@ -347,7 +328,7 @@ MarineEast.prototype.draw = function () {
 
 //=== START OF HYDRALISK ===
 function Hydralisk(game, spritesheet) {
-    this.animation = new Animation(spritesheet, 45, 70, 3, 0.15, 3, true, 4);
+    this.animation = new Animation(spritesheet, 45, 70, 3, 0.15, 3, true, 1);
     this.speed = 10;
     this.ctx = game.ctx;
     Entity.call(this, game, 0, 350);
@@ -378,9 +359,6 @@ Hydralisk.prototype.draw = function () {
 
 
 ///// REFACTOR ////////
-
-
-
 
 /**
  * This function will be onLoad from the canvas
@@ -414,6 +392,7 @@ function Main() {
     AM.queueDownload("./img/Hydralisk2_east.png");
     AM.queueDownload("./img/Marine_walking_south1.png");
     AM.queueDownload("./img/Marine_walking_east1.png");
+    AM.queueDownload("./img/chrono_walk.png");
 
     AM.downloadAll(function () {
         var canvas = document.getElementById('gameWorld');
@@ -422,7 +401,6 @@ function Main() {
         var gameEngine = new GameEngine();
         gameEngine.init(ctx);
         gameEngine.start();
-    
         gameEngine.addEntity(new ResourceDisplay(gameEngine));
         gameEngine.addEntity(new MoveDisplay(gameEngine));
         gameEngine.addEntity(new BuildDisplay(gameEngine));
