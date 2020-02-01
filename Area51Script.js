@@ -197,7 +197,9 @@ function ActivateAI() {
 function ResourceDisplay(game) {
     this.border = AM.getAsset("./img/sidebar/resource_display.png");
     this.foodIcon = AM.getAsset("./img/sidebar/food_icon.png")
-    this.foodCount = 0;
+    this.foodCount = 100;
+    this.moneyIcon = AM.getAsset("./img/sidebar/money_icon.png")
+    this.moneyCount = 999;
     Entity.call(this, game, 900, 0);
 }
 
@@ -205,10 +207,18 @@ ResourceDisplay.prototype = new Entity();
 ResourceDisplay.prototype.constructor =  ResourceDisplay;
 
 ResourceDisplay.prototype.draw = function (ctx) {
+    // Draw the border
     ctx.drawImage(this.border, this.x, this.y);
+
+    // Draw the Food Icon and Count
     ctx.drawImage(this.foodIcon, this.x+30, this.y+10);
     ctx.font = "24px Arial";
     ctx.fillText(this.foodCount, this.x+70, this.y+35);
+
+    // Draw the Money Icon and Count
+    ctx.drawImage(this.moneyIcon, this.x+130, this.y+10);
+    ctx.font = "24px Arial";
+    ctx.fillText(this.moneyCount, this.x+160, this.y+35);
 }
 // === END OF RESOURCE DISPLAY ===
 
@@ -356,6 +366,20 @@ Hydralisk.prototype.draw = function () {
 }
 //=== END OF HYDRALISK ===
 
+// === START OF MAP DISPLAY ===
+function MapDisplay(game) {
+    this.border = AM.getAsset("./img/map/game map9072.png");
+    Entity.call(this, game, 0, 0);
+}
+
+MapDisplay.prototype = new Entity();
+MapDisplay.prototype.constructor =  MapDisplay;
+
+MapDisplay.prototype.draw = function (ctx) {
+    ctx.drawImage(this.border, this.x, this.y);
+}
+// === END OF MAP DISPLAY ===
+
 
 
 ///// REFACTOR ////////
@@ -376,6 +400,7 @@ function Main() {
     // Resource Display
     AM.queueDownload("./img/sidebar/resource_display.png");
     AM.queueDownload("./img/sidebar/food_icon.png");
+    AM.queueDownload("./img/sidebar/money_icon.png");
     
     // Build Display
     AM.queueDownload("./img/sidebar/build_display.png");
@@ -388,6 +413,10 @@ function Main() {
     AM.queueDownload("./img/sidebar/end_turn_button.png");
     AM.queueDownload("./img/sidebar/end_turn_button_pressed.png");
 
+    // Game Map Display
+
+    AM.queueDownload("./img/map/game map9072.png");
+
     // Animation
     AM.queueDownload("./img/Hydralisk2_east.png");
     AM.queueDownload("./img/Marine_walking_south1.png");
@@ -396,10 +425,13 @@ function Main() {
     AM.downloadAll(function () {
         var canvas = document.getElementById('gameWorld');
         var ctx = canvas.getContext('2d');
+        
 
         var gameEngine = new GameEngine();
+
         gameEngine.init(ctx);
         gameEngine.start();
+        gameEngine.addEntity(new MapDisplay(gameEngine));
         gameEngine.addEntity(new ResourceDisplay(gameEngine));
         gameEngine.addEntity(new MoveDisplay(gameEngine));
         gameEngine.addEntity(new BuildDisplay(gameEngine));
@@ -407,6 +439,8 @@ function Main() {
         gameEngine.addEntity(new Marine(gameEngine, AM.getAsset("./img/Marine_walking_south1.png")));
         gameEngine.addEntity(new MarineEast(gameEngine, AM.getAsset("./img/Marine_walking_east1.png")));
         gameEngine.addEntity(new Hydralisk(gameEngine, AM.getAsset("./img/Hydralisk2_east.png")));
+
+        console.log(gameEngine);
     });
 
 }
