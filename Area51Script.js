@@ -280,6 +280,108 @@ EndTurnDisplay.prototype.draw = function (ctx) {
 // === END OF ENDTURN DISPLAY ===
 
 
+
+///// REFACTOR ////////
+
+//=== START OF MARINE ===
+function Marine(game, spritesheet) {
+    this.animation = new Animation(spritesheet, 22, 33, 3, 0.15, 3, true, 4);
+    this.speed = 10;
+    this.ctx = game.ctx;
+    Entity.call(this, game, 0, 20);
+    
+}
+
+Marine.prototype = new Entity();
+Marine.prototype.constructor = Marine;
+
+Marine.prototype.update = function () {
+
+    this.y += this.game.clockTick * this.speed;
+    if (this.y < 120) {
+        this.y += 1;
+        Entity.prototype.update.call(this);
+    }else{
+        this.y = 121;
+        this.animation.frameDuration = 1;
+    }
+}
+
+Marine.prototype.draw = function () {
+    this.animation.drawFrame(this.game.clockTick, this.ctx, this.x, this.y);
+    Entity.prototype.draw.call(this);
+}
+//=== END OF MARINE ===
+
+ 
+//=== START OF MARINEEAST ===
+function MarineEast(game, spritesheet) {
+    this.animation = new Animation(spritesheet, 22, 33, 3, 0.15, 3, true, 4);
+    this.speed = 50;
+    this.ctx = game.ctx;
+    Entity.call(this, game, 50, 200);
+
+}
+
+MarineEast.prototype = new Entity();
+MarineEast.prototype.constructor = MarineEast;
+
+MarineEast.prototype.update = function () {
+    this.x += this.game.clockTick * this.speed;
+    if (this.x < 700) {
+        this.x += 0.3;
+        Entity.prototype.update.call(this);
+    } else{
+        this.x = 701;
+        this.animation.frameDuration = 1;
+    }
+    
+}
+
+MarineEast.prototype.draw = function () {
+    this.animation.drawFrame(this.game.clockTick, this.ctx, this.x, this.y);
+    Entity.prototype.draw.call(this);
+}
+//=== END OF MarineEast ===
+
+
+//=== START OF HYDRALISK ===
+function Hydralisk(game, spritesheet) {
+    this.animation = new Animation(spritesheet, 45, 70, 3, 0.15, 3, true, 4);
+    this.speed = 10;
+    this.ctx = game.ctx;
+    Entity.call(this, game, 0, 350);
+}
+
+Hydralisk.prototype = new Entity();
+Hydralisk.prototype.constructor = Hydralisk;
+
+
+Hydralisk.prototype.update = function () {
+    this.x += this.game.clockTick * this.speed;
+    if (this.x < 800) { 
+        this.x += 0.3;
+        Entity.prototype.update.call(this);
+    } else{
+        this.x = 801;
+        this.animation.frameDuration = 1;
+    }
+}
+
+
+Hydralisk.prototype.draw = function () {
+    this.animation.drawFrame(this.game.clockTick, this.ctx, this.x, this.y);
+    Entity.prototype.draw.call(this);
+}
+//=== END OF HYDRALISK ===
+
+
+
+///// REFACTOR ////////
+
+
+
+
 /**
  * This function will be onLoad from the canvas
  */
@@ -308,6 +410,11 @@ function Main() {
     AM.queueDownload("./img/sidebar/end_turn_button.png");
     AM.queueDownload("./img/sidebar/end_turn_button_pressed.png");
 
+    // Animation
+    AM.queueDownload("./img/Hydralisk2_east.png");
+    AM.queueDownload("./img/Marine_walking_south1.png");
+    AM.queueDownload("./img/Marine_walking_east1.png");
+
     AM.downloadAll(function () {
         var canvas = document.getElementById('gameWorld');
         var ctx = canvas.getContext('2d');
@@ -320,6 +427,9 @@ function Main() {
         gameEngine.addEntity(new MoveDisplay(gameEngine));
         gameEngine.addEntity(new BuildDisplay(gameEngine));
         gameEngine.addEntity(new EndTurnDisplay(gameEngine));
+        gameEngine.addEntity(new Marine(gameEngine, AM.getAsset("./img/Marine_walking_south1.png")));
+        gameEngine.addEntity(new MarineEast(gameEngine, AM.getAsset("./img/Marine_walking_east1.png")));
+        gameEngine.addEntity(new Hydralisk(gameEngine, AM.getAsset("./img/Hydralisk2_east.png")));
     });
 
 }
