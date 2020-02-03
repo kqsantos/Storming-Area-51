@@ -209,7 +209,12 @@ function ActivateAI() {
 
 // === START OF RESOURCE DISPLAY ===
 function ResourceDisplay(game) {
-    Entity.call(this, game, 0, 0);
+    this.animation = new Animation(spritesheet, 180, 280, 6, .2, 6, true, 0.5);
+    this.foodIcon = new Animation(AM.getAsset("./img/food_icon.png"), 240, 280, 1, .2, 1, true, 0.5);
+    this.speed = 100;
+
+    this.ctx = game.ctx;
+    Entity.call(this, game, 0, 350);
 }
 
 ResourceDisplay.prototype = new Entity();
