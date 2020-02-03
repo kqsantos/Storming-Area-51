@@ -1,5 +1,3 @@
-// This game shell was happily copied from Googler Seth Ladd's "Bad Aliens" game and his Google IO talk in 2011
-
 window.requestAnimFrame = (function () {
     return window.requestAnimationFrame ||
             window.webkitRequestAnimationFrame ||
@@ -11,6 +9,132 @@ window.requestAnimFrame = (function () {
             };
 })();
 
+function GameEngine() {
+    this.entities = [];
+    this.ctx = null;
+    this.surfaceWidth = null;
+    this.surfaceHeight = null;
+}
+
+GameEngine.prototype.init = function (ctx) {
+    this.ctx = ctx;
+    this.surfaceWidth = this.ctx.canvas.width;
+    this.surfaceHeight = this.ctx.canvas.height;
+    this.timer = new Timer();
+    this.startInput();
+    console.log('game initialized');
+}
+
+GameEngine.prototype.start = function () {
+    console.log("starting game");
+    var that = this;
+    (function gameLoop() {
+        that.loop();
+        requestAnimFrame(gameLoop, that.ctx.canvas);
+    })();
+}
+
+GameEngine.prototype.startInput = function () {
+    console.log('Starting input');
+
+    var getXandY = function (e) {
+        var x = e.clientX - that.ctx.canvas.getBoundingClientRect().left;
+        var y = e.clientY - that.ctx.canvas.getBoundingClientRect().top;
+
+        if (x < 1024) {
+            x = Math.floor(x / 32);
+            y = Math.floor(y / 32);
+        }
+
+        return { x: x, y: y };
+    }
+
+    var that = this;
+
+    function collides(rects, x, y) {
+        var isCollision = false;
+        for (var i = 0, len = rects.length; i < len; i++) {
+            var left = rects[i].x, right = rects[i].x+rects[i].w;
+            var top = rects[i].y, bottom = rects[i].y+rects[i].h;
+            if (right >= x
+                && left <= x
+                && bottom >= y
+                && top <= y) {
+                isCollision = rects[i];
+            }
+        }
+        return isCollision;
+    }
+
+    var elem = this.ctx.canvas;
+    
+    if (elem && elem.getContext) {
+        // list of rectangles to render
+        var rects = [{name: "endTurn", x: 1018, y: 678, w: 136, h: 35},
+                     {name: "buildTroop", x: 75, y: 0, w: 50, h: 50}];
+      // get context
+      var context = elem.getContext('2d');
+      if (context) {
+    
+          for (var i = 0, len = rects.length; i < len; i++) {
+            context.fillRect(rects[i].x, rects[i].y, rects[i].w, rects[i].h);
+          }
+    
+      }
+    
+        // listener, using W3C style for example    
+        elem.addEventListener('click', function(e) {
+            console.log('click: ' + e.offsetX + '/' + e.offsetY);
+            var rect = collides(rects, e.offsetX, e.offsetY);
+            console.log(rect);
+            if (rect.name === "endTurn") {
+                that.endTurnPress = true;
+                console.log('End Turn collision: ' + rect.x + '/' + rect.y);
+            } else {
+                console.log('no collision');
+            }
+        }, false);
+    }
+
+    this.ctx.canvas.addEventListener("click", function (e) {
+        that.click = getXandY(e);
+        console.log(e);
+        console.log("Left Click Event - X,Y " + e.layerX + ", " + e.layerY);
+    }, false);
+
+    console.log('Input started');
+}
+
+GameEngine.prototype.addEntity = function (entity) {
+    console.log('added entity');
+    this.entities.push(entity);
+}
+
+GameEngine.prototype.draw = function () {
+    this.ctx.clearRect(0, 0, this.surfaceWidth, this.surfaceHeight);
+    this.ctx.save();
+    for (var i = 0; i < this.entities.length; i++) {
+        this.entities[i].draw(this.ctx);
+    }
+    this.ctx.restore();
+}
+
+GameEngine.prototype.update = function () {
+    var entitiesCount = this.entities.length;
+
+    for (var i = 0; i < entitiesCount; i++) {
+        var entity = this.entities[i];
+
+        entity.update();
+    }
+}
+
+GameEngine.prototype.loop = function () {
+    this.clockTick = this.timer.tick();
+    this.update();
+    this.draw();
+    this.endTurnPress = null;
+}
 
 function Timer() {
     this.gameTime = 0;
@@ -26,87 +150,6 @@ Timer.prototype.tick = function () {
     var gameDelta = Math.min(wallDelta, this.maxStep);
     this.gameTime += gameDelta;
     return gameDelta;
-}
-
-function GameEngine() {
-    this.entities = [];
-    this.showOutlines = false;
-    this.ctx = null;
-    this.click = null;
-    this.mouse = null;
-    this.wheel = null;
-    this.surfaceWidth = null;
-    this.surfaceHeight = null;
-}
-
-GameEngine.prototype.init = function (ctx) {
-    this.ctx = ctx;
-    this.surfaceWidth = this.ctx.canvas.width;
-    this.surfaceHeight = this.ctx.canvas.height;
-    this.startInput();
-    this.timer = new Timer();
-    console.log('game initialized');
-}
-
-GameEngine.prototype.start = function () {
-    console.log("starting game");
-    var that = this;
-    (function gameLoop() {
-        that.loop();
-        requestAnimFrame(gameLoop, that.ctx.canvas);
-    })();
-}
-
-GameEngine.prototype.startInput = function () {
-    console.log('Starting input');
-    var that = this;
-
-    this.ctx.canvas.addEventListener("keydown", function (e) {
-        if (String.fromCharCode(e.which) === ' ') that.space = true;
-//        console.log(e);
-        e.preventDefault();
-    }, false);
-
-    console.log('Input started');
-}
-
-GameEngine.prototype.addEntity = function (entity) {
-    console.log('added entity');
-    this.entities.push(entity);
-}
-
-GameEngine.prototype.draw = function () {
-    this.ctx.clearRect(0, 0, this.ctx.canvas.width, this.ctx.canvas.height);
-    this.ctx.save();
-    for (var i = 0; i < this.entities.length; i++) {
-        this.entities[i].draw(this.ctx);
-    }
-    this.ctx.restore();
-}
-
-GameEngine.prototype.update = function () {
-    var entitiesCount = this.entities.length;
-
-    for (var i = 0; i < entitiesCount; i++) {
-        var entity = this.entities[i];
-
-        if (!entity.removeFromWorld) {
-            entity.update();
-        }
-    }
-
-    for (var i = this.entities.length - 1; i >= 0; --i) {
-        if (this.entities[i].removeFromWorld) {
-            this.entities.splice(i, 1);
-        }
-    }
-}
-
-GameEngine.prototype.loop = function () {
-    this.clockTick = this.timer.tick();
-    this.update();
-    this.draw();
-    this.space = null;
 }
 
 function Entity(game, x, y) {

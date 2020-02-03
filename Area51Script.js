@@ -1,4 +1,6 @@
 // === START OF BOILERPLATE CODE ===
+var AM = new AssetManager();
+
 function Animation(spriteSheet, frameWidth, frameHeight, sheetWidth, frameDuration, frames, loop, scale) {
     this.spriteSheet = spriteSheet;
     this.frameWidth = frameWidth;
@@ -24,11 +26,11 @@ Animation.prototype.drawFrame = function (tick, ctx, x, y) {
     yindex = Math.floor(frame / this.sheetWidth);
 
     ctx.drawImage(this.spriteSheet,
-                 xindex * this.frameWidth, yindex * this.frameHeight,  // source from sheet
-                 this.frameWidth, this.frameHeight,
-                 x, y,
-                 this.frameWidth * this.scale,
-                 this.frameHeight * this.scale);
+        xindex * this.frameWidth, yindex * this.frameHeight,  // source from sheet
+        this.frameWidth, this.frameHeight,
+        x, y,
+        this.frameWidth * this.scale,
+        this.frameHeight * this.scale);
 }
 
 Animation.prototype.currentFrame = function () {
@@ -45,22 +47,6 @@ Animation.prototype.isDone = function () {
 var myCells = [[], []]; // Tile grid
 var myRegions = []; // Contains IDs of tiles per region
 var myCanvasSize;
-
-function Animation(spriteSheet, startX, startY, frameWidth, frameHeight, frameDuration, frames, loop, reverse) {
-    this.spriteSheet = spriteSheet;
-    this.startX = startX;
-    this.startY = startY;
-    this.frameWidth = frameWidth;
-    this.frameDuration = frameDuration;
-    this.frameHeight = frameHeight;
-    this.frames = frames;
-    this.totalTime = frameDuration * frames;
-    this.elapsedTime = 0;
-    this.loop = loop;
-    this.reverse = reverse;
-}
-
-
 
 /**
  * Creates a troop in the game.
@@ -209,118 +195,231 @@ function ActivateAI() {
 
 // === START OF RESOURCE DISPLAY ===
 function ResourceDisplay(game) {
-    this.animation = new Animation(spritesheet, 180, 280, 6, .2, 6, true, 0.5);
-    this.foodIcon = new Animation(AM.getAsset("./img/food_icon.png"), 240, 280, 1, .2, 1, true, 0.5);
-    this.speed = 100;
-
-    this.ctx = game.ctx;
-    Entity.call(this, game, 0, 350);
+    this.border = AM.getAsset("./img/sidebar/resource_display.png");
+    this.foodIcon = AM.getAsset("./img/sidebar/food_icon.png")
+    this.foodCount = 100;
+    this.moneyIcon = AM.getAsset("./img/sidebar/money_icon.png")
+    this.moneyCount = 999;
+    Entity.call(this, game, 900, 0);
 }
 
 ResourceDisplay.prototype = new Entity();
-ResourceDisplay.prototype.constructor =  ResourceDisplay;
+ResourceDisplay.prototype.constructor = ResourceDisplay;
 
-ResourceDisplay.prototype.update = function () {
-    // this.x += this.game.clockTick * this.speed;
-    // if (this.x > 800) this.x = -230;
-    // Entity.prototype.update.call(this);
+ResourceDisplay.prototype.draw = function (ctx) {
+    // Draw the border
+    ctx.drawImage(this.border, this.x, this.y);
+
+    // Draw the Food Icon and Count
+    ctx.drawImage(this.foodIcon, this.x + 30, this.y + 10);
+    ctx.font = "24px Arial";
+    ctx.fillText(this.foodCount, this.x + 70, this.y + 35);
+
+    // Draw the Money Icon and Count
+    ctx.drawImage(this.moneyIcon, this.x + 130, this.y + 10);
+    ctx.font = "24px Arial";
+    ctx.fillText(this.moneyCount, this.x + 160, this.y + 35);
 }
-
-ResourceDisplay.prototype.draw = function (ctx, foodIcon) {
-    ctx.fillStyle = "#a7b0c2";
-    ctx.strokeStyle = "black";
-    ctx.fillRect(900, 0, 380, 50);
-    ctx.strokeRect(900, 0, 380, 50);
-    ctx.drawImage("./img/food_icon.png", 0, 0);
-    Entity.prototype.draw.call(this);
-}
-
-// function ResourceFoodIcon(game, spritesheet) {
-//     this.animation = new Animation(spritesheet, 45, 45, 1, 1, 1, true, 1);
-//     this.speed = 100;
-//     this.ctx = game.ctx;
-//     Entity.call(this, game, 0, 250);
-// }
-
-// ResourceFoodIcon.prototype = new Entity();
-// ResourceFoodIcon.prototype.constructor = ResourceFoodIcon;
-
-// ResourceFoodIcon.prototype.update = function () {
-//     this.x += this.game.clockTick * this.speed;
-//     if (this.x > 800) this.x = -230;
-//     Entity.prototype.update.call(this);
-// }
-
-// ResourceFoodIcon.prototype.draw = function () {
-//     this.animation.drawFrame(this.game.clockTick, this.ctx, this.x, this.y);
-//     Entity.prototype.draw.call(this);
-// }
-
 // === END OF RESOURCE DISPLAY ===
 
 // === START OF BUILD DISPLAY ===
 function BuildDisplay(game) {
-    Entity.call(this, game, 0, 400);
-    this.radius = 200;
+    this.border = AM.getAsset("./img/sidebar/build_display.png");
+    this.buildTroopButton = AM.getAsset("./img/sidebar/build_soldier_button.png");
+    this.buildTroopButtonPressed = AM.getAsset("./img/sidebar/build_soldier_button_pressed.png");
+    this.buildBarracksButton = AM.getAsset("./img/sidebar/build_barracks_button.png");
+    this.buildBarracksButtonPressed = AM.getAsset("./img/sidebar/build_barracks_button_pressed.png");
+    Entity.call(this, game, 900, 50);
 }
 
 BuildDisplay.prototype = new Entity();
-BuildDisplay.prototype.constructor = ResourceDisplay;
-
-BuildDisplay.prototype.update = function () {
-}
+BuildDisplay.prototype.constructor = BuildDisplay;
 
 BuildDisplay.prototype.draw = function (ctx) {
-    ctx.fillStyle = "#7e8594";
-    ctx.strokeStyle = "black";
-    ctx.fillRect(900, 50, 380, 310);
-    ctx.strokeRect(900, 50, 380, 310);
-    Entity.prototype.draw.call(this);
+    // Background and Title Display
+    ctx.drawImage(this.border, this.x, this.y);
+    ctx.font = "24px Arial";
+    ctx.fillText("Build", this.x + 30, this.y + 35);
+
+    // Troop Display
+    ctx.drawImage(this.buildTroopButton, this.x + 40, this.y + 50);
+    ctx.font = "20px Arial";
+    ctx.fillText("Troop Count: 0", this.x + 100, this.y + 80);
+
+    // Building Display
+    ctx.drawImage(this.buildBarracksButton, this.x + 40, this.y + 110);
+    ctx.font = "20px Arial";
+    ctx.fillText("Barracks Built: No", this.x + 100, this.y + 140);
 }
 // === END OF BUILD DISPLAY ===
 
 // === START OF MOVE DISPLAY ===
 function MoveDisplay(game) {
-    Entity.call(this, game, 0, 400);
-    this.radius = 200;
+    this.border = AM.getAsset("./img/sidebar/move_display.png");
+    this.moveButton = AM.getAsset("./img/sidebar/move_button.png");
+    this.moveButtonPressed = AM.getAsset("./img/sidebar/move_button_pressed.png");
+    this.fightButton = AM.getAsset("./img/sidebar/fight_button.png");
+    this.fightButtonPressed = AM.getAsset("./img/sidebar/fight_button_pressed.png");
+    Entity.call(this, game, 900, 360);
 }
 
 MoveDisplay.prototype = new Entity();
-MoveDisplay.prototype.constructor = ResourceDisplay;
-
-MoveDisplay.prototype.update = function () {
-}
+MoveDisplay.prototype.constructor = MoveDisplay;
 
 MoveDisplay.prototype.draw = function (ctx) {
-    ctx.fillStyle = "#676d7a";
-    ctx.strokeStyle = "black";
-    ctx.fillRect(900, 360, 380, 310);
-    ctx.strokeRect(900, 360, 380, 310);
-    Entity.prototype.draw.call(this);
+    ctx.drawImage(this.border, this.x, this.y);
+    ctx.font = "24px Arial";
+    ctx.fillText("Move/Fight", this.x + 30, this.y + 35);
+
+    // Move Display
+    ctx.drawImage(this.moveButton, this.x + 40, this.y + 50);
+    ctx.font = "20px Arial";
+    ctx.fillText("Move", this.x + 100, this.y + 80);
+
+    // Attack Display
+    ctx.drawImage(this.fightButton, this.x + 40, this.y + 110);
+    ctx.font = "20px Arial";
+    ctx.fillText("Attack!", this.x + 100, this.y + 140);
 }
 // === END OF MOVE DISPLAY ===
 
 // === START OF ENDTURN DISPLAY ===
 function EndTurnDisplay(game) {
-    Entity.call(this, game, 0, 400);
-    this.radius = 200;
+    this.border = AM.getAsset("./img/sidebar/end_turn_display.png");
+    this.endTurnButton = AM.getAsset("./img/sidebar/end_turn_button.png");
+    this.isEndTurnButtonPressed = false;
+    this.endTurnButtonPressed = AM.getAsset("./img/sidebar/end_turn_button_pressed.png");
+    Entity.call(this, game, 900, 670);
 }
 
 EndTurnDisplay.prototype = new Entity();
-EndTurnDisplay.prototype.constructor = ResourceDisplay;
+EndTurnDisplay.prototype.constructor = EndTurnDisplay;
 
 EndTurnDisplay.prototype.update = function () {
+    if (this.game.endTurnPressed) this.isEndTurnButtonPressed = true;
+    Entity.prototype.update.call(this);
 }
 
 EndTurnDisplay.prototype.draw = function (ctx) {
-    ctx.fillStyle = "#4d525c";
-    ctx.strokeStyle = "black";
-    ctx.fillRect(900, 670, 380, 50);
-    ctx.strokeRect(900, 670, 380, 50);
-    Entity.prototype.draw.call(this);
+    ctx.drawImage(this.border, this.x, this.y);
+    if (this.isEndTurnButtonPressed) ctx.drawImage(this.endTurnButtonPressed, this.x + 117, this.y + 7);
+    else ctx.drawImage(this.endTurnButton, this.x + 117, this.y + 7);
 }
 // === END OF ENDTURN DISPLAY ===
 
+
+
+///// REFACTOR ////////
+
+//=== START OF MARINE ===
+function Marine(game, spritesheet) {
+    this.animation = new Animation(spritesheet, 22, 33, 3, 0.15, 3, true, 1);
+    this.speed = 10;
+    this.ctx = game.ctx;
+    Entity.call(this, game, 100, 100);
+
+}
+
+Marine.prototype = new Entity();
+Marine.prototype.constructor = Marine;
+
+Marine.prototype.update = function () {
+
+    this.y += this.game.clockTick * this.speed;
+    if (this.y < 220) {
+        this.y += 1;
+        Entity.prototype.update.call(this);
+    } else {
+        this.y = 221;
+        this.animation.frameDuration = 1;
+    }
+}
+
+Marine.prototype.draw = function () {
+    this.animation.drawFrame(this.game.clockTick, this.ctx, this.x, this.y);
+    Entity.prototype.draw.call(this);
+}
+//=== END OF MARINE ===
+
+
+//=== START OF MARINEEAST ===
+function MarineEast(game, spritesheet) {
+    this.animation = new Animation(spritesheet, 22, 33, 3, 0.15, 3, true, 1);
+    this.speed = 50;
+    this.ctx = game.ctx;
+    Entity.call(this, game, 461, 40);
+
+}
+
+MarineEast.prototype = new Entity();
+MarineEast.prototype.constructor = MarineEast;
+
+MarineEast.prototype.update = function () {
+    this.x += this.game.clockTick * this.speed;
+    if (this.x < 800) {
+        this.x += 0.3;
+        Entity.prototype.update.call(this);
+    } else {
+        this.x = 801;
+        this.animation.frameDuration = 1;
+    }
+
+}
+
+MarineEast.prototype.draw = function () {
+    this.animation.drawFrame(this.game.clockTick, this.ctx, this.x, this.y);
+    Entity.prototype.draw.call(this);
+}
+//=== END OF MarineEast ===
+
+
+//=== START OF HYDRALISK ===
+function Hydralisk(game, spritesheet) {
+    this.animation = new Animation(spritesheet, 45, 70, 3, 0.15, 3, true, 1);
+    this.speed = 10;
+    this.ctx = game.ctx;
+    Entity.call(this, game, 60, 560);
+}
+
+Hydralisk.prototype = new Entity();
+Hydralisk.prototype.constructor = Hydralisk;
+
+
+Hydralisk.prototype.update = function () {
+    this.x += this.game.clockTick * this.speed;
+    if (this.x < 530) {
+        this.x += 0.3;
+        Entity.prototype.update.call(this);
+    } else {
+        this.x = 531;
+        this.animation.frameDuration = 1;
+    }
+}
+
+
+Hydralisk.prototype.draw = function () {
+    this.animation.drawFrame(this.game.clockTick, this.ctx, this.x, this.y);
+    Entity.prototype.draw.call(this);
+}
+//=== END OF HYDRALISK ===
+
+// === START OF MAP DISPLAY ===
+function MapDisplay(game) {
+    this.border = AM.getAsset("./img/map/game map9072.png");
+    Entity.call(this, game, 0, 0);
+}
+
+MapDisplay.prototype = new Entity();
+MapDisplay.prototype.constructor = MapDisplay;
+
+MapDisplay.prototype.draw = function (ctx) {
+    ctx.drawImage(this.border, this.x, this.y);
+}
+// === END OF MAP DISPLAY ===
+
+
+
+///// REFACTOR ////////
 
 /**
  * This function will be onLoad from the canvas
@@ -334,22 +433,58 @@ function Main() {
      * attach GAME keyboard events
      * loadMap
      */
-    var AM = new AssetManager();
 
-    AM.queueDownload("./img/food_icon.png");
-    AM.queueDownload("./img/resource_display.png");
+    // Resource Display
+    AM.queueDownload("./img/sidebar/resource_display.png");
+    AM.queueDownload("./img/sidebar/food_icon.png");
+    AM.queueDownload("./img/sidebar/money_icon.png");
+
+    // Build Display
+    AM.queueDownload("./img/sidebar/build_display.png");
+    AM.queueDownload("./img/sidebar/build_soldier_button.png");
+    AM.queueDownload("./img/sidebar/build_soldier_button_pressed.png");
+    AM.queueDownload("./img/sidebar/build_barracks_button.png");
+    AM.queueDownload("./img/sidebar/build_barracks_button_pressed.png");
+
+    // Move Display
+    AM.queueDownload("./img/sidebar/move_display.png");
+    AM.queueDownload("./img/sidebar/move_button.png");
+    AM.queueDownload("./img/sidebar/move_button_pressed.png");
+    AM.queueDownload("./img/sidebar/fight_button.png");
+    AM.queueDownload("./img/sidebar/fight_button_pressed.png");
+
+    // End Turn Display
+    AM.queueDownload("./img/sidebar/end_turn_display.png");
+    AM.queueDownload("./img/sidebar/end_turn_button.png");
+    AM.queueDownload("./img/sidebar/end_turn_button_pressed.png");
+
+    // Game Map Display
+    AM.queueDownload("./img/map/game map9072.png");
+
+    // Animation
+    AM.queueDownload("./img/Hydralisk2_east.png");
+    AM.queueDownload("./img/Marine_walking_south1.png");
+    AM.queueDownload("./img/Marine_walking_east1.png");
 
     AM.downloadAll(function () {
-        console.log("starting up da shield");
         var canvas = document.getElementById('gameWorld');
         var ctx = canvas.getContext('2d');
 
+
         var gameEngine = new GameEngine();
+
         gameEngine.init(ctx);
         gameEngine.start();
-    
-        
-        gameEngine.addEntity(new ResourceDisplay(gameEngine, AM.getAsset("./img/resource_display.png")));
+        gameEngine.addEntity(new MapDisplay(gameEngine));
+        gameEngine.addEntity(new ResourceDisplay(gameEngine));
+        gameEngine.addEntity(new MoveDisplay(gameEngine));
+        gameEngine.addEntity(new BuildDisplay(gameEngine));
+        gameEngine.addEntity(new EndTurnDisplay(gameEngine));
+        gameEngine.addEntity(new Marine(gameEngine, AM.getAsset("./img/Marine_walking_south1.png")));
+        gameEngine.addEntity(new MarineEast(gameEngine, AM.getAsset("./img/Marine_walking_east1.png")));
+        gameEngine.addEntity(new Hydralisk(gameEngine, AM.getAsset("./img/Hydralisk2_east.png")));
+
+        console.log(gameEngine);
     });
 
 }
