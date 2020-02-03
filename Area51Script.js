@@ -255,9 +255,14 @@ BuildDisplay.prototype.draw = function (ctx) {
 
 // === START OF MOVE DISPLAY ===
 function MoveDisplay(game) {
+    // Background image
     this.border = AM.getAsset("./img/sidebar/move_display.png");
+    
+    // Move Button
     this.moveButton = AM.getAsset("./img/sidebar/move_button.png");
     this.moveButtonPressed = AM.getAsset("./img/sidebar/move_button_pressed.png");
+
+    // Fight Button
     this.fightButton = AM.getAsset("./img/sidebar/fight_button.png");
     this.fightButtonPressed = AM.getAsset("./img/sidebar/fight_button_pressed.png");
     Entity.call(this, game, 900, 360);
@@ -265,6 +270,17 @@ function MoveDisplay(game) {
 
 MoveDisplay.prototype = new Entity();
 MoveDisplay.prototype.constructor = MoveDisplay;
+
+MoveDisplay.prototype.update = function () {
+    // Hover animation of end turn
+    if (this.game.endTurnPress === null) {
+    } else if (this.game.endTurnPress) {
+        this.image = this.endTurnButtonPressed;
+    } else {
+        this.image = this.endTurnButton;
+    }
+    Entity.prototype.update.call(this);
+}
 
 MoveDisplay.prototype.draw = function (ctx) {
     ctx.drawImage(this.border, this.x, this.y);
@@ -287,8 +303,8 @@ MoveDisplay.prototype.draw = function (ctx) {
 function EndTurnDisplay(game) {
     this.border = AM.getAsset("./img/sidebar/end_turn_display.png");
     this.endTurnButton = AM.getAsset("./img/sidebar/end_turn_button.png");
-    this.isEndTurnButtonPressed = false;
     this.endTurnButtonPressed = AM.getAsset("./img/sidebar/end_turn_button_pressed.png");
+    this.image = this.endTurnButton;
     Entity.call(this, game, 900, 670);
 }
 
@@ -296,14 +312,19 @@ EndTurnDisplay.prototype = new Entity();
 EndTurnDisplay.prototype.constructor = EndTurnDisplay;
 
 EndTurnDisplay.prototype.update = function () {
-    if (this.game.endTurnPressed) this.isEndTurnButtonPressed = true;
+    // Hover animation of end turn
+    if (this.game.endTurnPress === null) {
+    } else if (this.game.endTurnPress) {
+        this.image = this.endTurnButtonPressed;
+    } else {
+        this.image = this.endTurnButton;
+    }
     Entity.prototype.update.call(this);
 }
 
 EndTurnDisplay.prototype.draw = function (ctx) {
     ctx.drawImage(this.border, this.x, this.y);
-    if (this.isEndTurnButtonPressed) ctx.drawImage(this.endTurnButtonPressed, this.x + 117, this.y + 7);
-    else ctx.drawImage(this.endTurnButton, this.x + 117, this.y + 7);
+    ctx.drawImage(this.image, this.x + 117, this.y + 7);
 }
 // === END OF ENDTURN DISPLAY ===
 
