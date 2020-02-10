@@ -1,6 +1,18 @@
-// === START OF BOILERPLATE CODE ===
+// ===================================================================
+// Start - Init Values
+// ===================================================================
 var AM = new AssetManager();
+var player;
+var enemy;
+// ===================================================================
+// End - Init Values
+// ===================================================================
 
+
+
+// ===================================================================
+// Start - Animation
+// ===================================================================
 function Animation(spriteSheet, frameWidth, frameHeight, sheetWidth, frameDuration, frames, loop, scale) {
     this.spriteSheet = spriteSheet;
     this.frameWidth = frameWidth;
@@ -40,7 +52,12 @@ Animation.prototype.currentFrame = function () {
 Animation.prototype.isDone = function () {
     return (this.elapsedTime >= this.totalTime);
 }
-// === END OF BOILERPLATE CODE ===
+// ===================================================================
+// End - Animation
+// ===================================================================
+
+
+
 
 
 //Global variables
@@ -193,7 +210,56 @@ function ActivateAI() {
      */
 }
 
-// === START OF RESOURCE DISPLAY ===
+
+// ===================================================================
+// Start - Faction Template
+// ===================================================================
+function Faction(game) {
+    this.food = 0;
+    this.money = 0;
+    Entity.call(this, game, 0, 0);
+}
+
+Faction.prototype = new Entity();
+Faction.prototype.constructor = ResourceDisplay;
+// ===================================================================
+// End - Faction Template
+// ===================================================================
+
+
+
+// ===================================================================
+// Start - Player
+// ===================================================================
+player = new Faction()
+
+Faction.prototype = new Entity();
+Faction.prototype.constructor = ResourceDisplay;
+// ===================================================================
+// End - Player
+// ===================================================================
+
+
+
+// ===================================================================
+// Start - Enemy
+// ===================================================================
+// function Faction(game) {
+//     this.food = 0;
+//     this.money = 0;
+//     Entity.call(this, game, 0, 0);
+// }
+
+// Faction.prototype = new Entity();
+// Faction.prototype.constructor = ResourceDisplay;
+// ===================================================================
+// End - Enemy
+// ===================================================================
+
+
+// ===================================================================
+// Start - Resource Display
+// ===================================================================
 function ResourceDisplay(game) {
     this.border = AM.getAsset("./img/sidebar/resource_display.png");
     this.foodIcon = AM.getAsset("./img/sidebar/food_icon.png")
@@ -220,7 +286,12 @@ ResourceDisplay.prototype.draw = function (ctx) {
     ctx.font = "24px Arial";
     ctx.fillText(this.moneyCount, this.x + 160, this.y + 35);
 }
-// === END OF RESOURCE DISPLAY ===
+// ===================================================================
+// End - Resource Display
+// ===================================================================
+
+
+
 
 // === START OF BUILD DISPLAY ===
 function BuildDisplay(game) {
@@ -328,7 +399,6 @@ EndTurnDisplay.prototype.draw = function (ctx) {
     ctx.drawImage(this.image, this.x + 117, this.y + 7);
 }
 // === END OF ENDTURN DISPLAY ===
-
 
 
 ///// REFACTOR ////////
