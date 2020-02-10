@@ -283,16 +283,17 @@ MoveDisplay.prototype.update = function () {
 }
 
 MoveDisplay.prototype.draw = function (ctx) {
+    // Move Display Background and Title
     ctx.drawImage(this.border, this.x, this.y);
     ctx.font = "24px Arial";
     ctx.fillText("Move/Fight", this.x + 30, this.y + 35);
 
-    // Move Display
+    // Move Button
     ctx.drawImage(this.moveButton, this.x + 40, this.y + 50);
     ctx.font = "20px Arial";
     ctx.fillText("Move", this.x + 100, this.y + 80);
 
-    // Attack Display
+    // Attack Button
     ctx.drawImage(this.fightButton, this.x + 40, this.y + 110);
     ctx.font = "20px Arial";
     ctx.fillText("Attack!", this.x + 100, this.y + 140);
