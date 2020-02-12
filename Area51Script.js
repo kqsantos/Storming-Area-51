@@ -1,4 +1,4 @@
-// === START OF BOILERPLATE CODE ===
+// === START OF BOILERPLATE CODE === gg
 var AM = new AssetManager();
 
 function Animation(spriteSheet, frameWidth, frameHeight, sheetWidth, frameDuration, frames, loop, scale) {
