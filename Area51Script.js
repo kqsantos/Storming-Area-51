@@ -315,10 +315,10 @@ Faction.prototype.constructor = ResourceDisplay;
 // ===================================================================
 // Start - Player
 // ===================================================================
-player = new Faction()
+// player = new Faction()
 
-Faction.prototype = new Entity();
-Faction.prototype.constructor = ResourceDisplay;
+// Faction.prototype = new Entity();
+// Faction.prototype.constructor = ResourceDisplay;
 // ===================================================================
 // End - Player
 // ===================================================================
@@ -608,7 +608,6 @@ function Main() {
     AM.queueDownload("./img/Hydralisk2_east.png");
     AM.queueDownload("./img/Marine_walking_south1.png");
     AM.queueDownload("./img/Marine_walking_east1.png");
-    AM.queueDownload("./img/chrono_walk.png");
 
     AM.downloadAll(function () {
         var canvas = document.getElementById('gameWorld');
