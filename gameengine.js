@@ -1,12 +1,12 @@
 window.requestAnimFrame = (function () {
     return window.requestAnimationFrame ||
-            window.webkitRequestAnimationFrame ||
-            window.mozRequestAnimationFrame ||
-            window.oRequestAnimationFrame ||
-            window.msRequestAnimationFrame ||
-            function (/* function */ callback, /* DOMElement */ element) {
-                window.setTimeout(callback, 1000 / 60);
-            };
+        window.webkitRequestAnimationFrame ||
+        window.mozRequestAnimationFrame ||
+        window.oRequestAnimationFrame ||
+        window.msRequestAnimationFrame ||
+        function (/* function */ callback, /* DOMElement */ element) {
+            window.setTimeout(callback, 1000 / 60);
+        };
 })();
 
 function GameEngine() {
@@ -37,75 +37,80 @@ GameEngine.prototype.start = function () {
 GameEngine.prototype.startInput = function () {
     console.log('Starting input');
 
-    var getXandY = function (e) {
-        var x = e.clientX - that.ctx.canvas.getBoundingClientRect().left;
-        var y = e.clientY - that.ctx.canvas.getBoundingClientRect().top;
+    // var getXandY = function (e) {
+    //     var x = e.clientX - that.ctx.canvas.getBoundingClientRect().left;
+    //     var y = e.clientY - that.ctx.canvas.getBoundingClientRect().top;
 
-        if (x < 1024) {
-            x = Math.floor(x / 32);
-            y = Math.floor(y / 32);
-        }
+    //     if (x < 1024) {
+    //         x = Math.floor(x / 32);
+    //         y = Math.floor(y / 32);
+    //     }
 
-        return { x: x, y: y };
-    }
+    //     return { x: x, y: y };
+    // }
 
     var that = this;
 
-    function collides(rects, x, y) {
-        var isCollision = false;
+    function checkForHover(rects, x, y) {
+        var isHovering = false;
         for (var i = 0, len = rects.length; i < len; i++) {
-            var left = rects[i].x, right = rects[i].x+rects[i].w;
-            var top = rects[i].y, bottom = rects[i].y+rects[i].h;
+            var left = rects[i].x, right = rects[i].x + rects[i].w;
+            var top = rects[i].y, bottom = rects[i].y + rects[i].h;
             if (right >= x
                 && left <= x
                 && bottom >= y
                 && top <= y) {
-                isCollision = rects[i];
+                isHovering = rects[i];
             }
         }
-        return isCollision;
+        return isHovering;
     }
 
     var elem = this.ctx.canvas;
-    
+
     if (elem && elem.getContext) {
         // list of rectangles to render
-        var rects = [{name: "endTurn", x: 1018, y: 678, w: 136, h: 35},
-                     {name: "buildTroop", x: 75, y: 0, w: 50, h: 50}];
-      // get context
-      var context = elem.getContext('2d');
-      if (context) {
-    
-          for (var i = 0, len = rects.length; i < len; i++) {
-            context.fillRect(rects[i].x, rects[i].y, rects[i].w, rects[i].h);
-          }
-    
-      }
-    
-        // listener, using W3C style for example    
-        elem.addEventListener('click', function(e) {
-            console.log('click: ' + e.offsetX + '/' + e.offsetY);
-            var rect = collides(rects, e.offsetX, e.offsetY);
+        var rects = [{ name: "endTurn", x: 1018, y: 678, w: 136, h: 35 },
+        { name: "buildTroop", x: 75, y: 0, w: 50, h: 50 }];
+        // get context
+        var context = elem.getContext('2d');
+        if (context) {
+
+            for (var i = 0, len = rects.length; i < len; i++) {
+                context.fillRect(rects[i].x, rects[i].y, rects[i].w, rects[i].h);
+            }
+
+        }
+
+        elem.addEventListener('mousemove', function (e) {
+            var rect = checkForHover(rects, e.offsetX, e.offsetY);
             console.log(rect);
             if (rect.name === "endTurn") {
-                that.endTurnPress = true;
-                console.log('End Turn collision: ' + rect.x + '/' + rect.y);
+                that.endTurnButtonHoverFlag = true;
+                console.log('Mouseover!: ' + rect.x + '/' + rect.y);
             } else {
+                that.endTurnButtonHoverFlag = false;
                 console.log('no collision');
             }
         }, false);
-    }
 
-    this.ctx.canvas.addEventListener("click", function (e) {
-        that.click = getXandY(e);
-        console.log(e);
-        console.log("Left Click Event - X,Y " + e.layerX + ", " + e.layerY);
-    }, false);
+        // Animation Mouse Down Listener
+        elem.addEventListener('click', function (e) {
+            return e;
+        }, false);
+
+
+    }
 
     console.log('Input started');
 }
 
 GameEngine.prototype.addEntity = function (entity) {
+    console.log('added entity');
+    this.entities.push(entity);
+}
+
+GameEngine.prototype.addFactionEntity = function (entity) {
     console.log('added entity');
     this.entities.push(entity);
 }
@@ -133,7 +138,7 @@ GameEngine.prototype.loop = function () {
     this.clockTick = this.timer.tick();
     this.update();
     this.draw();
-    this.endTurnPress = null;
+    this.endTurnButtonHoverFlag = null;
 }
 
 function Timer() {
@@ -159,32 +164,8 @@ function Entity(game, x, y) {
     this.removeFromWorld = false;
 }
 
-Entity.prototype.update = function () {
-}
+// Entity.prototype.update = function () {
+// }
 
-Entity.prototype.draw = function (ctx) {
-    if (this.game.showOutlines && this.radius) {
-        this.game.ctx.beginPath();
-        this.game.ctx.strokeStyle = "green";
-        this.game.ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
-        this.game.ctx.stroke();
-        this.game.ctx.closePath();
-    }
-}
-
-Entity.prototype.rotateAndCache = function (image, angle) {
-    var offscreenCanvas = document.createElement('canvas');
-    var size = Math.max(image.width, image.height);
-    offscreenCanvas.width = size;
-    offscreenCanvas.height = size;
-    var offscreenCtx = offscreenCanvas.getContext('2d');
-    offscreenCtx.save();
-    offscreenCtx.translate(size / 2, size / 2);
-    offscreenCtx.rotate(angle);
-    offscreenCtx.translate(0, 0);
-    offscreenCtx.drawImage(image, -(image.width / 2), -(image.height / 2));
-    offscreenCtx.restore();
-    //offscreenCtx.strokeStyle = "red";
-    //offscreenCtx.strokeRect(0,0,size,size);
-    return offscreenCanvas;
-}
+// Entity.prototype.draw = function (ctx) {
+// }

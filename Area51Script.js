@@ -1,6 +1,18 @@
-// === START OF BOILERPLATE CODE === gg
+// ===================================================================
+// Start - Init Values
+// ===================================================================
 var AM = new AssetManager();
+var player;
+var enemy;
+// ===================================================================
+// End - Init Values
+// ===================================================================
 
+
+
+// ===================================================================
+// Start - Animation
+// ===================================================================
 function Animation(spriteSheet, frameWidth, frameHeight, sheetWidth, frameDuration, frames, loop, scale) {
     this.spriteSheet = spriteSheet;
     this.frameWidth = frameWidth;
@@ -40,7 +52,12 @@ Animation.prototype.currentFrame = function () {
 Animation.prototype.isDone = function () {
     return (this.elapsedTime >= this.totalTime);
 }
-// === END OF BOILERPLATE CODE ===
+// ===================================================================
+// End - Animation
+// ===================================================================
+
+
+
 
 
 //Global variables
@@ -277,7 +294,56 @@ function ActivateAI() {
      */
 }
 
-// === START OF RESOURCE DISPLAY ===
+
+// ===================================================================
+// Start - Faction Template
+// ===================================================================
+function Faction(game) {
+    this.food = 0;
+    this.money = 0;
+    Entity.call(this, game, 0, 0);
+}
+
+Faction.prototype = new Entity();
+Faction.prototype.constructor = ResourceDisplay;
+// ===================================================================
+// End - Faction Template
+// ===================================================================
+
+
+
+// ===================================================================
+// Start - Player
+// ===================================================================
+player = new Faction()
+
+Faction.prototype = new Entity();
+Faction.prototype.constructor = ResourceDisplay;
+// ===================================================================
+// End - Player
+// ===================================================================
+
+
+
+// ===================================================================
+// Start - Enemy
+// ===================================================================
+// function Faction(game) {
+//     this.food = 0;
+//     this.money = 0;
+//     Entity.call(this, game, 0, 0);
+// }
+
+// Faction.prototype = new Entity();
+// Faction.prototype.constructor = ResourceDisplay;
+// ===================================================================
+// End - Enemy
+// ===================================================================
+
+
+// ===================================================================
+// Start - Resource Display
+// ===================================================================
 function ResourceDisplay(game) {
     this.border = AM.getAsset("./img/sidebar/resource_display.png");
     this.foodIcon = AM.getAsset("./img/sidebar/food_icon.png")
@@ -294,7 +360,12 @@ ResourceDisplay.prototype.draw = function (ctx) {
     ctx.font = "24px Arial";
     ctx.fillText(this.foodCount, this.x+70, this.y+35);
 }
-// === END OF RESOURCE DISPLAY ===
+// ===================================================================
+// End - Resource Display
+// ===================================================================
+
+
+
 
 // === START OF BUILD DISPLAY ===
 function BuildDisplay(game) {
@@ -314,36 +385,79 @@ BuildDisplay.prototype.draw = function (ctx) {
 
 // === START OF MOVE DISPLAY ===
 function MoveDisplay(game) {
+    // Background image
     this.border = AM.getAsset("./img/sidebar/move_display.png");
+    
+    // Move Button
+    this.moveButton = AM.getAsset("./img/sidebar/move_button.png");
+    this.moveButtonPressed = AM.getAsset("./img/sidebar/move_button_pressed.png");
+
+    // Fight Button
+    this.fightButton = AM.getAsset("./img/sidebar/fight_button.png");
+    this.fightButtonPressed = AM.getAsset("./img/sidebar/fight_button_pressed.png");
     Entity.call(this, game, 900, 360);
 }
 
 MoveDisplay.prototype = new Entity();
 MoveDisplay.prototype.constructor =  MoveDisplay;
 
+MoveDisplay.prototype.update = function () {
+    // Hover animation of end turn
+    if (this.game.endTurnPress === null) {
+    } else if (this.game.endTurnPress) {
+        this.image = this.endTurnButtonPressed;
+    } else {
+        this.image = this.endTurnButton;
+    }
+    Entity.prototype.update.call(this);
+}
+
 MoveDisplay.prototype.draw = function (ctx) {
+    // Move Display Background and Title
     ctx.drawImage(this.border, this.x, this.y);
     ctx.font = "24px Arial";
-    ctx.fillText("Move/Fight", this.x+30, this.y+35);
+    ctx.fillText("Move/Fight", this.x + 30, this.y + 35);
+
+    // Move Button
+    ctx.drawImage(this.moveButton, this.x + 40, this.y + 50);
+    ctx.font = "20px Arial";
+    ctx.fillText("Move", this.x + 100, this.y + 80);
+
+    // Attack Button
+    ctx.drawImage(this.fightButton, this.x + 40, this.y + 110);
+    ctx.font = "20px Arial";
+    ctx.fillText("Attack!", this.x + 100, this.y + 140);
 }
 // === END OF MOVE DISPLAY ===
 
 // === START OF ENDTURN DISPLAY ===
 function EndTurnDisplay(game) {
     this.border = AM.getAsset("./img/sidebar/end_turn_display.png");
-    this.button = AM.getAsset("./img/sidebar/end_turn_button.png");
+    this.endTurnButton = AM.getAsset("./img/sidebar/end_turn_button.png");
+    this.endTurnButtonPressed = AM.getAsset("./img/sidebar/end_turn_button_pressed.png");
+    this.image = this.endTurnButton;
     Entity.call(this, game, 900, 670);
 }
 
 EndTurnDisplay.prototype = new Entity();
-EndTurnDisplay.prototype.constructor =  EndTurnDisplay;
+EndTurnDisplay.prototype.constructor = EndTurnDisplay;
+
+EndTurnDisplay.prototype.update = function () {
+    // Hover animation of end turn
+    if (this.game.endTurnPress === null) {
+    } else if (this.game.endTurnPress) {
+        this.image = this.endTurnButtonPressed;
+    } else {
+        this.image = this.endTurnButton;
+    }
+    Entity.prototype.update.call(this);
+}
 
 EndTurnDisplay.prototype.draw = function (ctx) {
     ctx.drawImage(this.border, this.x, this.y);
-    ctx.drawImage(this.button, this.x + 117, this.y + 7);
+    ctx.drawImage(this.image, this.x + 117, this.y + 7);
 }
 // === END OF ENDTURN DISPLAY ===
-
 
 
 ///// REFACTOR ////////
