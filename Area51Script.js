@@ -363,67 +363,63 @@ ResourceDisplay.prototype.draw = function (ctx) {
 // ===================================================================
 // End - Resource Display
 // ===================================================================
-
-
-
+=
 
 // === START OF BUILD DISPLAY ===
 function BuildDisplay(game) {
     this.border = AM.getAsset("./img/sidebar/build_display.png");
+    this.buildTroopButton = AM.getAsset("./img/sidebar/build_soldier_button.png");
+    this.buildTroopButtonPressed = AM.getAsset("./img/sidebar/build_soldier_button_pressed.png");
+    this.buildBarracksButton = AM.getAsset("./img/sidebar/build_barracks_button.png");
+    this.buildBarracksButtonPressed = AM.getAsset("./img/sidebar/build_barracks_button_pressed.png");
     Entity.call(this, game, 900, 50);
 }
 
 BuildDisplay.prototype = new Entity();
-BuildDisplay.prototype.constructor =  BuildDisplay;
+BuildDisplay.prototype.constructor = BuildDisplay;
 
 BuildDisplay.prototype.draw = function (ctx) {
+    // Background and Title Display
     ctx.drawImage(this.border, this.x, this.y);
     ctx.font = "24px Arial";
-    ctx.fillText("Build", this.x+30, this.y+35);
+    ctx.fillText("Build", this.x + 30, this.y + 35);
+
+    // Troop Display
+    ctx.drawImage(this.buildTroopButton, this.x + 40, this.y + 50);
+    ctx.font = "20px Arial";
+    ctx.fillText("Troop Count: 0", this.x + 100, this.y + 80);
+
+    // Building Display
+    ctx.drawImage(this.buildBarracksButton, this.x + 40, this.y + 110);
+    ctx.font = "20px Arial";
+    ctx.fillText("Barracks Built: No", this.x + 100, this.y + 140);
 }
 // === END OF BUILD DISPLAY ===
 
 // === START OF MOVE DISPLAY ===
 function MoveDisplay(game) {
-    // Background image
     this.border = AM.getAsset("./img/sidebar/move_display.png");
-    
-    // Move Button
     this.moveButton = AM.getAsset("./img/sidebar/move_button.png");
     this.moveButtonPressed = AM.getAsset("./img/sidebar/move_button_pressed.png");
-
-    // Fight Button
     this.fightButton = AM.getAsset("./img/sidebar/fight_button.png");
     this.fightButtonPressed = AM.getAsset("./img/sidebar/fight_button_pressed.png");
     Entity.call(this, game, 900, 360);
 }
 
 MoveDisplay.prototype = new Entity();
-MoveDisplay.prototype.constructor =  MoveDisplay;
-
-MoveDisplay.prototype.update = function () {
-    // Hover animation of end turn
-    if (this.game.endTurnPress === null) {
-    } else if (this.game.endTurnPress) {
-        this.image = this.endTurnButtonPressed;
-    } else {
-        this.image = this.endTurnButton;
-    }
-    Entity.prototype.update.call(this);
-}
+MoveDisplay.prototype.constructor = MoveDisplay;
 
 MoveDisplay.prototype.draw = function (ctx) {
-    // Move Display Background and Title
     ctx.drawImage(this.border, this.x, this.y);
     ctx.font = "24px Arial";
     ctx.fillText("Move/Fight", this.x + 30, this.y + 35);
 
-    // Move Button
+    // Move Display
     ctx.drawImage(this.moveButton, this.x + 40, this.y + 50);
     ctx.font = "20px Arial";
     ctx.fillText("Move", this.x + 100, this.y + 80);
 
-    // Attack Button
+    // Attack Display
     ctx.drawImage(this.fightButton, this.x + 40, this.y + 110);
     ctx.font = "20px Arial";
     ctx.fillText("Attack!", this.x + 100, this.y + 140);
@@ -434,8 +430,8 @@ MoveDisplay.prototype.draw = function (ctx) {
 function EndTurnDisplay(game) {
     this.border = AM.getAsset("./img/sidebar/end_turn_display.png");
     this.endTurnButton = AM.getAsset("./img/sidebar/end_turn_button.png");
+    this.isEndTurnButtonPressed = false;
     this.endTurnButtonPressed = AM.getAsset("./img/sidebar/end_turn_button_pressed.png");
-    this.image = this.endTurnButton;
     Entity.call(this, game, 900, 670);
 }
 
@@ -443,21 +439,17 @@ EndTurnDisplay.prototype = new Entity();
 EndTurnDisplay.prototype.constructor = EndTurnDisplay;
 
 EndTurnDisplay.prototype.update = function () {
-    // Hover animation of end turn
-    if (this.game.endTurnPress === null) {
-    } else if (this.game.endTurnPress) {
-        this.image = this.endTurnButtonPressed;
-    } else {
-        this.image = this.endTurnButton;
-    }
+    if (this.game.endTurnPressed) this.isEndTurnButtonPressed = true;
     Entity.prototype.update.call(this);
 }
 
 EndTurnDisplay.prototype.draw = function (ctx) {
     ctx.drawImage(this.border, this.x, this.y);
-    ctx.drawImage(this.image, this.x + 117, this.y + 7);
+    if (this.isEndTurnButtonPressed) ctx.drawImage(this.endTurnButtonPressed, this.x + 117, this.y + 7);
+    else ctx.drawImage(this.endTurnButton, this.x + 117, this.y + 7);
 }
 // === END OF ENDTURN DISPLAY ===
+
 
 
 ///// REFACTOR ////////
@@ -588,20 +580,28 @@ function Main() {
     // Resource Display
     AM.queueDownload("./img/sidebar/resource_display.png");
     AM.queueDownload("./img/sidebar/food_icon.png");
-    
+    AM.queueDownload("./img/sidebar/money_icon.png");
+
     // Build Display
     AM.queueDownload("./img/sidebar/build_display.png");
+    AM.queueDownload("./img/sidebar/build_soldier_button.png");
+    AM.queueDownload("./img/sidebar/build_soldier_button_pressed.png");
+    AM.queueDownload("./img/sidebar/build_barracks_button.png");
+    AM.queueDownload("./img/sidebar/build_barracks_button_pressed.png");
 
     // Move Display
     AM.queueDownload("./img/sidebar/move_display.png");
-    
+    AM.queueDownload("./img/sidebar/move_button.png");
+    AM.queueDownload("./img/sidebar/move_button_pressed.png");
+    AM.queueDownload("./img/sidebar/fight_button.png");
+    AM.queueDownload("./img/sidebar/fight_button_pressed.png");
+
     // End Turn Display
     AM.queueDownload("./img/sidebar/end_turn_display.png");
     AM.queueDownload("./img/sidebar/end_turn_button.png");
     AM.queueDownload("./img/sidebar/end_turn_button_pressed.png");
 
     // Game Map Display
-
     AM.queueDownload("./img/map/game map9072.png");
 
     // Animation
@@ -618,8 +618,9 @@ function Main() {
         gameEngine.start();
         gameEngine.addEntity(new MapDisplay(gameEngine));
         gameEngine.addEntity(new ResourceDisplay(gameEngine));
-        gameEngine.addEntity(new MoveDisplay(gameEngine));
         gameEngine.addEntity(new BuildDisplay(gameEngine));
+        gameEngine.addEntity(new MoveDisplay(gameEngine));
+        
         gameEngine.addEntity(new EndTurnDisplay(gameEngine));
         gameEngine.addEntity(new Marine(gameEngine, AM.getAsset("./img/Marine_walking_south1.png")));
         gameEngine.addEntity(new MarineEast(gameEngine, AM.getAsset("./img/Marine_walking_east1.png")));
