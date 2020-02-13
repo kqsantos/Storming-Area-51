@@ -4,6 +4,7 @@
 var AM = new AssetManager();
 var player;
 var enemy;
+var dim = 20;
 // ===================================================================
 // End - Init Values
 // ===================================================================
@@ -192,8 +193,10 @@ function BuildBoard() {
                 GAMEBOARD[i][j].land = true;
                 GAMEBOARD[i][j].region = csvVal;
                 GAMEBOARD[i][j].territory = 'grass';
-            } else {
-                GAMEBOARD[i][j] = null;
+            } else if(csvVal == 0 || csvVal == -1){
+                GAMEBOARD[i][j].land = null;
+                GAMEBOARD[i][j].region = csvVal;
+                GAMEBOARD[i][j].territory = null;
             }
         }
     }
@@ -567,6 +570,60 @@ MapDisplay.prototype.draw = function (ctx) {
     ctx.drawImage(this.border, this.x, this.y);
 }
 // === END OF MAP DISPLAY ===
+
+
+// ===================================================================
+// Start - create region array
+// ===================================================================
+
+let regionArray = [];
+// line 54 of gameengine
+function createArray(origin){
+    
+    for(var i = 0; i < 45; i++){
+        regionArray.push([]);
+        for(var j = 0; j < 36; j++){
+            regionArray[i].push([]);
+        }
+    }
+
+    // update the value of the array
+    for(var i = 0; i < 45; i++){
+        for(var j = 0; j < 36; j++){
+            let xCor = origin.x + i;
+            let yCor = origin.y + j;
+            regionArray[i][j].name = GAMEBOARD[xCor][yCor].region.toString();
+            regionArray[i][j].x = xCor;
+            regionArray[i][j].y = yCor;
+            regionArray[i][j].w = dim;
+            regionArray[i][j].h = dim;
+        }
+    }
+}
+// ===================================================================
+// End - create region array
+// ===================================================================
+
+
+
+// ===================================================================
+// Start - get region id for clicked region
+// ===================================================================
+function getClickedRegion(regionArray, clickX, clickY){
+    var regionId;
+    for(var i = 0; i < 45; i++){
+        for(var j = 0; j < 36; j++){
+            if(regionArray[i][j].x === clickX && regionArray[i][j].y === clickY){
+                regionId = regionArray[i][j].name;
+            }
+        }
+    }
+    return regionId;
+}
+
+// ===================================================================
+// End - get region id for clicked region
+// ===================================================================
 
 
 
