@@ -16,6 +16,8 @@ function GameEngine() {
     this.surfaceWidth = null;
     this.surfaceHeight = null;
     this.click = null;
+    this.keyDown = null;
+    this.cameraOrigin = null;
 }
 
 GameEngine.prototype.init = function (ctx) {
@@ -90,6 +92,23 @@ GameEngine.prototype.startInput = function () {
             this.click = { x: e.x, y: e.y };
         }, false);
 
+        elem.addEventListener("keydown", function (e) {
+            that.keyDown = e;
+            console.log(e);
+            console.log("Key Down Event - Char " + e.code + " Code " + e.keyCode);
+        }, false);
+    
+        elem.addEventListener("keypress", function (e) {
+            // if (e.code === "KeyD") that.d = true;
+            // that.chars[e.code] = true;
+            console.log(e);
+            console.log("Key Pressed Event - Char " + e.charCode + " Code " + e.keyCode);
+        }, false);
+    
+        elem.addEventListener("keyup", function (e) {
+            console.log(e);
+            console.log("Key Up Event - Char " + e.code + " Code " + e.keyCode);
+        }, false);
 
     }
 
@@ -153,6 +172,7 @@ function Entity(game, x, y) {
     this.x = x;
     this.y = y;
     this.removeFromWorld = false;
+    this.clickTrigger = null;
 }
 
 // function FactionEntity(game, x, y) {
