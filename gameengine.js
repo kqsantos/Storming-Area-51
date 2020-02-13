@@ -11,9 +11,13 @@ window.requestAnimFrame = (function () {
 
 function GameEngine() {
     this.entities = [];
+    // this.factionEntities = [];
     this.ctx = null;
     this.surfaceWidth = null;
     this.surfaceHeight = null;
+    this.click = null;
+    this.keyDown = null;
+    this.cameraOrigin = null;
 }
 
 GameEngine.prototype.init = function (ctx) {
@@ -36,18 +40,6 @@ GameEngine.prototype.start = function () {
 
 GameEngine.prototype.startInput = function () {
     console.log('Starting input');
-
-    // var getXandY = function (e) {
-    //     var x = e.clientX - that.ctx.canvas.getBoundingClientRect().left;
-    //     var y = e.clientY - that.ctx.canvas.getBoundingClientRect().top;
-
-    //     if (x < 1024) {
-    //         x = Math.floor(x / 32);
-    //         y = Math.floor(y / 32);
-    //     }
-
-    //     return { x: x, y: y };
-    // }
 
     var that = this;
 
@@ -73,6 +65,7 @@ GameEngine.prototype.startInput = function () {
         var rects = [{ name: "endTurn", x: 1018, y: 678, w: 136, h: 35 },
         { name: "buildTroop", x: 75, y: 0, w: 50, h: 50 }];
         // get context
+
         var context = elem.getContext('2d');
         if (context) {
 
@@ -82,23 +75,40 @@ GameEngine.prototype.startInput = function () {
 
         }
 
-        elem.addEventListener('mousemove', function (e) {
-            var rect = checkForHover(rects, e.offsetX, e.offsetY);
-            console.log(rect);
-            if (rect.name === "endTurn") {
-                that.endTurnButtonHoverFlag = true;
-                console.log('Mouseover!: ' + rect.x + '/' + rect.y);
-            } else {
-                that.endTurnButtonHoverFlag = false;
-                console.log('no collision');
-            }
-        }, false);
+        // elem.addEventListener('mousemove', function (e) {
+        //     var rect = checkForHover(rects, e.offsetX, e.offsetY);
+        //     console.log(rect);
+        //     if (rect.name === "endTurn") {
+        //         that.endTurnButtonHoverFlag = true;
+        //         console.log('Mouseover!: ' + rect.x + '/' + rect.y);
+        //     } else {
+        //         that.endTurnButtonHoverFlag = false;
+        //         console.log('no collision');
+        //     }
+        // }, false);
 
         // Animation Mouse Down Listener
         elem.addEventListener('click', function (e) {
-            return e;
+            this.click = { x: e.x, y: e.y };
         }, false);
 
+        elem.addEventListener("keydown", function (e) {
+            that.keyDown = e;
+            console.log(e);
+            console.log("Key Down Event - Char " + e.code + " Code " + e.keyCode);
+        }, false);
+    
+        elem.addEventListener("keypress", function (e) {
+            // if (e.code === "KeyD") that.d = true;
+            // that.chars[e.code] = true;
+            console.log(e);
+            console.log("Key Pressed Event - Char " + e.charCode + " Code " + e.keyCode);
+        }, false);
+    
+        elem.addEventListener("keyup", function (e) {
+            console.log(e);
+            console.log("Key Up Event - Char " + e.code + " Code " + e.keyCode);
+        }, false);
 
     }
 
@@ -110,10 +120,10 @@ GameEngine.prototype.addEntity = function (entity) {
     this.entities.push(entity);
 }
 
-GameEngine.prototype.addFactionEntity = function (entity) {
-    console.log('added entity');
-    this.entities.push(entity);
-}
+// GameEngine.prototype.addFactionEntity = function (entity) {
+//     console.log('added entity');
+//     this.factionEntities.push(entity);
+// }
 
 GameEngine.prototype.draw = function () {
     this.ctx.clearRect(0, 0, this.surfaceWidth, this.surfaceHeight);
@@ -162,10 +172,18 @@ function Entity(game, x, y) {
     this.x = x;
     this.y = y;
     this.removeFromWorld = false;
+    this.clickTrigger = null;
 }
 
-// Entity.prototype.update = function () {
+// function FactionEntity(game, x, y) {
+//     this.game = game;
+//     this.x = x;
+//     this.y = y;
+//     this.removeFromWorld = false;
 // }
 
-// Entity.prototype.draw = function (ctx) {
-// }
+Entity.prototype.update = function () {
+}
+
+Entity.prototype.draw = function (ctx) {
+}
