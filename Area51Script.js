@@ -200,7 +200,7 @@ function BuildBoard() {
                 GAMEBOARD[i][j].land = true;
                 GAMEBOARD[i][j].region = csvVal;
                 GAMEBOARD[i][j].territory = 'grass';
-            } else if(csvVal == 0 || csvVal == -1){
+            } else if (csvVal == 0 || csvVal == -1) {
                 GAMEBOARD[i][j].land = null;
                 GAMEBOARD[i][j].region = csvVal;
                 GAMEBOARD[i][j].territory = null;
@@ -355,12 +355,12 @@ Faction.prototype.constructor = ResourceDisplay;
 // ===================================================================
 // Start - Camera
 // ===================================================================
-function Camera(game) {
-    Entity.call(this, game, 0, 0);
-}
+// function Camera(game) {
+//     Entity.call(this, game, 0, 0);
+// }
 
-Camera.prototype = new Entity();
-Camera.prototype.constructor = Camera;
+// Camera.prototype = new Entity();
+// Camera.prototype.constructor = Camera;
 
 // Camera.prototype.update = function (ctx) {
 //     var key = gameEngine.keyDown;
@@ -420,94 +420,94 @@ ResourceDisplay.prototype.draw = function (ctx) {
 // End - Resource Display
 // ===================================================================
 
-// === START OF BUILD DISPLAY ===
-function BuildDisplay(game) {
-    this.border = AM.getAsset("./img/sidebar/build_display.png");
-    this.buildTroopButton = AM.getAsset("./img/sidebar/build_soldier_button.png");
-    this.buildTroopButtonPressed = AM.getAsset("./img/sidebar/build_soldier_button_pressed.png");
-    this.buildBarracksButton = AM.getAsset("./img/sidebar/build_barracks_button.png");
-    this.buildBarracksButtonPressed = AM.getAsset("./img/sidebar/build_barracks_button_pressed.png");
-    Entity.call(this, game, 900, 50);
-}
+// // === START OF BUILD DISPLAY ===
+// function BuildDisplay(game) {
+//     this.border = AM.getAsset("./img/sidebar/build_display.png");
+//     this.buildTroopButton = AM.getAsset("./img/sidebar/build_soldier_button.png");
+//     this.buildTroopButtonPressed = AM.getAsset("./img/sidebar/build_soldier_button_pressed.png");
+//     this.buildBarracksButton = AM.getAsset("./img/sidebar/build_barracks_button.png");
+//     this.buildBarracksButtonPressed = AM.getAsset("./img/sidebar/build_barracks_button_pressed.png");
+//     Entity.call(this, game, 900, 50);
+// }
 
-BuildDisplay.prototype = new Entity();
-BuildDisplay.prototype.constructor = BuildDisplay;
+// BuildDisplay.prototype = new Entity();
+// BuildDisplay.prototype.constructor = BuildDisplay;
 
-BuildDisplay.prototype.draw = function (ctx) {
-    // Background and Title Display
-    ctx.drawImage(this.border, this.x, this.y);
-    ctx.font = "24px Arial";
-    ctx.fillText("Build", this.x + 30, this.y + 35);
+// BuildDisplay.prototype.draw = function (ctx) {
+//     // Background and Title Display
+//     ctx.drawImage(this.border, this.x, this.y);
+//     ctx.font = "24px Arial";
+//     ctx.fillText("Build", this.x + 30, this.y + 35);
 
-    // Troop Display
-    ctx.drawImage(this.buildTroopButton, this.x + 40, this.y + 50);
-    ctx.font = "20px Arial";
-    ctx.fillText("Troop Count: 0", this.x + 100, this.y + 80);
+//     // Troop Display
+//     ctx.drawImage(this.buildTroopButton, this.x + 40, this.y + 50);
+//     ctx.font = "20px Arial";
+//     ctx.fillText("Troop Count: 0", this.x + 100, this.y + 80);
 
-    // Building Display
-    ctx.drawImage(this.buildBarracksButton, this.x + 40, this.y + 110);
-    ctx.font = "20px Arial";
-    ctx.fillText("Barracks Built: No", this.x + 100, this.y + 140);
-}
-// === END OF BUILD DISPLAY ===
+//     // Building Display
+//     ctx.drawImage(this.buildBarracksButton, this.x + 40, this.y + 110);
+//     ctx.font = "20px Arial";
+//     ctx.fillText("Barracks Built: No", this.x + 100, this.y + 140);
+// }
+// // === END OF BUILD DISPLAY ===
 
-// === START OF MOVE DISPLAY ===
-function MoveDisplay(game) {
-    this.border = AM.getAsset("./img/sidebar/move_display.png");
-    this.moveButton = AM.getAsset("./img/sidebar/move_button.png");
-    this.moveButtonPressed = AM.getAsset("./img/sidebar/move_button_pressed.png");
-    this.fightButton = AM.getAsset("./img/sidebar/fight_button.png");
-    this.fightButtonPressed = AM.getAsset("./img/sidebar/fight_button_pressed.png");
-    Entity.call(this, game, 900, 360);
-}
+// // === START OF MOVE DISPLAY ===
+// function MoveDisplay(game) {
+//     this.border = AM.getAsset("./img/sidebar/move_display.png");
+//     this.moveButton = AM.getAsset("./img/sidebar/move_button.png");
+//     this.moveButtonPressed = AM.getAsset("./img/sidebar/move_button_pressed.png");
+//     this.fightButton = AM.getAsset("./img/sidebar/fight_button.png");
+//     this.fightButtonPressed = AM.getAsset("./img/sidebar/fight_button_pressed.png");
+//     Entity.call(this, game, 900, 360);
+// }
 
-MoveDisplay.prototype = new Entity();
-MoveDisplay.prototype.constructor = MoveDisplay;
+// MoveDisplay.prototype = new Entity();
+// MoveDisplay.prototype.constructor = MoveDisplay;
 
-MoveDisplay.prototype.draw = function (ctx) {
-    ctx.drawImage(this.border, this.x, this.y);
-    ctx.font = "24px Arial";
-    ctx.fillText("Move/Fight", this.x + 30, this.y + 35);
+// MoveDisplay.prototype.draw = function (ctx) {
+//     ctx.drawImage(this.border, this.x, this.y);
+//     ctx.font = "24px Arial";
+//     ctx.fillText("Move/Fight", this.x + 30, this.y + 35);
 
-    // Move Display
-    ctx.drawImage(this.moveButton, this.x + 40, this.y + 50);
-    ctx.font = "20px Arial";
-    ctx.fillText("Move", this.x + 100, this.y + 80);
+//     // Move Display
+//     ctx.drawImage(this.moveButton, this.x + 40, this.y + 50);
+//     ctx.font = "20px Arial";
+//     ctx.fillText("Move", this.x + 100, this.y + 80);
 
-    // Attack Display
-    ctx.drawImage(this.fightButton, this.x + 40, this.y + 110);
-    ctx.font = "20px Arial";
-    ctx.fillText("Attack!", this.x + 100, this.y + 140);
-}
-// === END OF MOVE DISPLAY ===
+//     // Attack Display
+//     ctx.drawImage(this.fightButton, this.x + 40, this.y + 110);
+//     ctx.font = "20px Arial";
+//     ctx.fillText("Attack!", this.x + 100, this.y + 140);
+// }
+// // === END OF MOVE DISPLAY ===
 
-// === START OF ENDTURN DISPLAY ===
-function EndTurnDisplay(game) {
-    this.border = AM.getAsset("./img/sidebar/end_turn_display.png");
-    this.endTurnButton = AM.getAsset("./img/sidebar/end_turn_button.png");
-    this.isEndTurnButtonPressed = false;
-    this.endTurnButtonPressed = AM.getAsset("./img/sidebar/end_turn_button_pressed.png");
-    Entity.call(this, game, 900, 670);
-}
+// // === START OF ENDTURN DISPLAY ===
+// function EndTurnDisplay(game) {
+//     this.border = AM.getAsset("./img/sidebar/end_turn_display.png");
+//     this.endTurnButton = AM.getAsset("./img/sidebar/end_turn_button.png");
+//     this.isEndTurnButtonPressed = false;
+//     this.endTurnButtonPressed = AM.getAsset("./img/sidebar/end_turn_button_pressed.png");
+//     Entity.call(this, game, 900, 670);
+// }
 
-EndTurnDisplay.prototype = new Entity();
-EndTurnDisplay.prototype.constructor = EndTurnDisplay;
+// EndTurnDisplay.prototype = new Entity();
+// EndTurnDisplay.prototype.constructor = EndTurnDisplay;
 
-EndTurnDisplay.prototype.update = function () {
-    if (this.game.endTurnPressed) this.isEndTurnButtonPressed = true;
-    Entity.prototype.update.call(this);
-}
+// EndTurnDisplay.prototype.update = function () {
+//     if (this.game.endTurnPressed) this.isEndTurnButtonPressed = true;
+//     Entity.prototype.update.call(this);
+// }
 
-EndTurnDisplay.prototype.draw = function (ctx) {
-    ctx.drawImage(this.border, this.x, this.y);
-    if (this.isEndTurnButtonPressed) ctx.drawImage(this.endTurnButtonPressed, this.x + 117, this.y + 7);
-    else ctx.drawImage(this.endTurnButton, this.x + 117, this.y + 7);
-}
-// === END OF ENDTURN DISPLAY ===
+// EndTurnDisplay.prototype.draw = function (ctx) {
+//     ctx.drawImage(this.border, this.x, this.y);
+//     if (this.isEndTurnButtonPressed) ctx.drawImage(this.endTurnButtonPressed, this.x + 117, this.y + 7);
+//     else ctx.drawImage(this.endTurnButton, this.x + 117, this.y + 7);
+// }
+// // === END OF ENDTURN DISPLAY ===
 
 
 
-// ///// REFACTOR ////////
+// // ///// REFACTOR ////////
 
 // //=== START OF MARINE ===
 // function Marine(game, spritesheet) {
@@ -610,6 +610,7 @@ function MapDisplay(game) {
     this.miniMapHeight = this.bgHeight / 8;
     this.keyXMax = (this.bgWidth / 20) - 45;
     this.keyYMax = (this.bgHeight / 20) - 36;
+    this.btnDim = 80;
     Entity.call(this, game, 0, 0);
 }
 
@@ -621,20 +622,20 @@ MapDisplay.prototype.update = function (ctx) {
 
     if (key != null) {
         if (key["code"] === "KeyW") {
-            if(cameraOrigin.y > 0)
-            cameraOrigin.y--;
+            if (cameraOrigin.y > 0)
+                cameraOrigin.y--;
         }
         else if (key["code"] === "KeyA") {
-            if(cameraOrigin.x > 0)
-            cameraOrigin.x--;
+            if (cameraOrigin.x > 0)
+                cameraOrigin.x--;
         }
         else if (key["code"] === "KeyS") {
-            if(cameraOrigin.y < this.keyYMax)
-            cameraOrigin.y++;
+            if (cameraOrigin.y < this.keyYMax)
+                cameraOrigin.y++;
         }
         else if (key["code"] === "KeyD") {
-            if(cameraOrigin.x < this.keyXMax)
-            cameraOrigin.x++;
+            if (cameraOrigin.x < this.keyXMax)
+                cameraOrigin.x++;
         }
 
 
@@ -677,10 +678,21 @@ MapDisplay.prototype.draw = function (ctx) {
 
     ctx.strokeRect(mX + (cameraOrigin.x * 2),
         mY + (cameraOrigin.y * 2),
-        (gameEngine.surfaceWidth-380)/8,
-        gameEngine.surfaceHeight/8);
+        (gameEngine.surfaceWidth - 380) / 8,
+        gameEngine.surfaceHeight / 8);
+
+
+    ctx.fillRect(gameEngine.surfaceWidth - this.btnDim, gameEngine.surfaceHeight - this.btnDim, this.btnDim, this.btnDim);
+    ctx.strokeRect(gameEngine.surfaceWidth - this.btnDim, gameEngine.surfaceHeight - this.btnDim, this.btnDim, this.btnDim);
+    ctx.fillRect(gameEngine.surfaceWidth - this.btnDim * 2, gameEngine.surfaceHeight - this.btnDim, this.btnDim, this.btnDim);
+    ctx.strokeRect(gameEngine.surfaceWidth - this.btnDim * 2, gameEngine.surfaceHeight - this.btnDim, this.btnDim, this.btnDim);
+    ctx.fillRect(gameEngine.surfaceWidth - this.btnDim * 3, gameEngine.surfaceHeight - this.btnDim, this.btnDim, this.btnDim);
+    ctx.strokeRect(gameEngine.surfaceWidth - this.btnDim * 3, gameEngine.surfaceHeight - this.btnDim, this.btnDim, this.btnDim);
+    ctx.fillRect(gameEngine.surfaceWidth - this.btnDim * 4, gameEngine.surfaceHeight - this.btnDim, this.btnDim, this.btnDim);
+    ctx.strokeRect(gameEngine.surfaceWidth - this.btnDim * 4, gameEngine.surfaceHeight - this.btnDim, this.btnDim, this.btnDim);
 }
 // === END OF MAP DISPLAY ===
+
 
 
 // ===================================================================
@@ -689,6 +701,7 @@ MapDisplay.prototype.draw = function (ctx) {
 
 let regionArray = [];
 // line 54 of gameengine
+
 function createArray(origin){
     
     for(var i = 0; i < 45; i++){
@@ -699,6 +712,7 @@ function createArray(origin){
     }
 
     // update the value of the array
+
     for(var i = 0; i < 45; i++){
         for(var j = 0; j < 36; j++){
             let xCor = origin.x + i;
@@ -720,6 +734,7 @@ function createArray(origin){
 // ===================================================================
 // Start - get region id for clicked region
 // ===================================================================
+
 function getClickedRegion(regionArray, clickX, clickY){
     var regionId;
     for(var i = 0; i < 45; i++){
@@ -735,7 +750,6 @@ function getClickedRegion(regionArray, clickX, clickY){
 // ===================================================================
 // End - get region id for clicked region
 // ===================================================================
-
 
 
 ///// REFACTOR ////////
@@ -793,16 +807,17 @@ function Main() {
 
         gameEngine.init(ctx);
         gameEngine.start();
-        gameEngine.addEntity(new Camera(gameEngine));
+        // gameEngine.addEntity(new Camera(gameEngine));
         gameEngine.addEntity(new MapDisplay(gameEngine));
         gameEngine.addEntity(new ResourceDisplay(gameEngine));
         gameEngine.addEntity(new BuildDisplay(gameEngine));
         gameEngine.addEntity(new MoveDisplay(gameEngine));
 
         gameEngine.addEntity(new EndTurnDisplay(gameEngine));
-        gameEngine.addEntity(new Marine(gameEngine, AM.getAsset("./img/Marine_walking_south1.png")));
-        gameEngine.addEntity(new MarineEast(gameEngine, AM.getAsset("./img/Marine_walking_east1.png")));
-        gameEngine.addEntity(new Hydralisk(gameEngine, AM.getAsset("./img/Hydralisk2_east.png")));
+        
+        // gameEngine.addEntity(new Marine(gameEngine, AM.getAsset("./img/Marine_walking_south1.png")));
+        // gameEngine.addEntity(new MarineEast(gameEngine, AM.getAsset("./img/Marine_walking_east1.png")));
+        // gameEngine.addEntity(new Hydralisk(gameEngine, AM.getAsset("./img/Hydralisk2_east.png")));
     });
 
     BuildBoard();
