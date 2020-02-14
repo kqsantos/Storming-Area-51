@@ -1,5 +1,5 @@
 // ===================================================================
-// Start - Init Values
+// Start - Global Variables
 // ===================================================================
 var AM = new AssetManager();
 var canvas = document.getElementById('gameWorld');
@@ -11,9 +11,14 @@ var enemy;
 var dim = 20;
 
 var cameraOrigin = { x: 0, y: 0 };
+var myCells = [[], []]; // Tile grid
+var myRegions = []; // Contains IDs of tiles per region
+var myCanvasSize;
 
+var bgWidth = 1920;
+var bgHeight = 1080;
 // ===================================================================
-// End - Init Values
+// End - Global Variables
 // ===================================================================
 
 
@@ -66,13 +71,9 @@ Animation.prototype.isDone = function () {
 
 
 
-
-
-//Global variables
-var myCells = [[], []]; // Tile grid
-var myRegions = []; // Contains IDs of tiles per region
-var myCanvasSize;
-
+// ===================================================================
+// Start - Map Entities
+// ===================================================================
 /**
  * Creates a troop in the game.
  * 
@@ -131,9 +132,16 @@ function Region(name, bldg, owner, troopX, troopY, bldgX, bldgY, territory, neig
         this.neighbors = neighbors,
         this.troopCount = troopCount
 }
+// ===================================================================
+// End - Map Entities
+// ===================================================================
 
+
+
+// ===================================================================
+// Start - Utility Functions
+// ===================================================================
 function BuildRegions() {
-
     let Regions = [
         new Region('S - SW', false, 1, 40, 560, 40, 560, 'sand', [2, 4, 5], 0),
         new Region('S - SE', false, 1, 210, 560, 210, 560, 'sand', [2, 4, 5], 0),
@@ -152,22 +160,19 @@ function BuildRegions() {
         new Region('G - SE', false, 1, 690, 520, 690, 520, 'grass', [2, 4, 5], 0),
         new Region('G - SW', false, 1, 460, 520, 460, 580, 'grass', [2, 4, 5], 0),
     ];
-
     return Regions;
-
 }
 
 /**
  * Builds a Gameboard that is 90x72. By calling an index of the gameboard, the user is able to return whether or not the
  * tile is a land tile, it will return the region number and the territory type.
  */
-
 function BuildBoard() {
-    GAMEBOARD = [];
+    var gameboard = [];
     for (var i = 0; i < 90; i++) {
-        GAMEBOARD.push([]);
+        gameboard.push([]);
         for (var j = 0; j < 72; j++) {
-            GAMEBOARD[i].push({
+            gameboard[i].push({
                 land: false,
                 region: 0,
                 territory: 'none'
@@ -185,30 +190,30 @@ function BuildBoard() {
             let csvVal = data[72 * i + j];
 
             if (csvVal == 1 || csvVal == 2 || csvVal == 3 || csvVal == 4 || csvVal == 5) {
-                GAMEBOARD[i][j].land = true;
-                GAMEBOARD[i][j].region = csvVal;
-                GAMEBOARD[i][j].territory = 'sand';
+                gameboard[i][j].land = true;
+                gameboard[i][j].region = csvVal;
+                gameboard[i][j].territory = 'sand';
             } else if (csvVal == 6 || csvVal == 7 || csvVal == 8) {
-                GAMEBOARD[i][j].land = true;
-                GAMEBOARD[i][j].region = csvVal;
-                GAMEBOARD[i][j].territory = 'dirt';
+                gameboard[i][j].land = true;
+                gameboard[i][j].region = csvVal;
+                gameboard[i][j].territory = 'dirt';
             } else if (csvVal == 9 || csvVal == 10 || csvVal == 11 || csvVal == 12 || csvVal == 13) {
-                GAMEBOARD[i][j].land = true;
-                GAMEBOARD[i][j].region = csvVal;
-                GAMEBOARD[i][j].territory = 'ice';
+                gameboard[i][j].land = true;
+                gameboard[i][j].region = csvVal;
+                gameboard[i][j].territory = 'ice';
             } else if (csvVal == 14 || csvVal == 15 || csvVal == 16) {
-                GAMEBOARD[i][j].land = true;
-                GAMEBOARD[i][j].region = csvVal;
-                GAMEBOARD[i][j].territory = 'grass';
+                gameboard[i][j].land = true;
+                gameboard[i][j].region = csvVal;
+                gameboard[i][j].territory = 'grass';
             } else if (csvVal == 0 || csvVal == -1) {
-                GAMEBOARD[i][j].land = null;
-                GAMEBOARD[i][j].region = csvVal;
-                GAMEBOARD[i][j].territory = null;
+                gameboard[i][j].land = null;
+                gameboard[i][j].region = csvVal;
+                gameboard[i][j].territory = null;
             }
         }
     }
 
-    return GAMEBOARD;
+    return gameboard;
 
     // for (var i = 0; i < 90; i++){
     //     GAMEBOARD[i].forEach((element) => {
@@ -217,183 +222,9 @@ function BuildBoard() {
     // }
 
 }
-
-function LoadMap() {
-    /**
-     * Line 1 - Width, Height
-     * Line 2 - Region Mapping - ex. Region[0] = [0,1,2], Region[1] = [3,4]
-     * Comma delimited
-     * Height = number of rows + 2
-     * Width = # of elements per row
-     */
-}
-
-function AddBuilding() {
-    /**
-     * Add a building to a tile
-     */
-}
-
-function AddUnit(tileID) {
-    /**
-     * Add a unit to a tile
-     */
-}
-
-/**
- * Animates the troop from source tile to destination tile.
- * This function will also check if the destination tile has enemy troops.
- * 
- * @param {Tile} theSource 
- * @param {Tile} theDestination 
- */
-function MoveUnit(source, destination) {
-    /**
-     * Move from cell to cell
-     * walking animation
-     * 
-     * check for opponents
-     * 
-     * Combat animation start
-     * Battle system:
-     * Attacker's atk - Defender's def
-     * calculate remaining troops
-     */
-}
-
-/**
- * Upgrade the building in the tile
- */
-function UpgradeBuilding(tileID, buildingIndex) {
-    /**
-     * Animate the creation of the building (if possible)
-     */
-}
-
-/**
- * Moves the number of troops designated by player from source to destination.
- * 
- * @param {Tile} source  
- * @param {Tile} destination 
- */
-function SplitUnit(source, destination) {
-}
-
-/**
- * 
- * @param {*} x x-coordinate of mouse click event
- * @param {*} y y-coordinate of mouse click event
- */
-function SelectCell(x, y) {
-    /**
-     * Check which region is selected
-     * Shows Action Menu
-     */
-}
-
-function EndTurn() {
-    /**
-     * Calculate food
-     * activates the AI
-     */
-}
-
-function ActivateAI() {
-    /**
-     * AI will decide what to do depending on variables visible to it.
-     */
-}
-
-
 // ===================================================================
-// Start - Faction Template
+// End - Utility Functions
 // ===================================================================
-function Faction(game) {
-    this.food = 0;
-    this.money = 0;
-    Entity.call(this, game, 0, 0);
-}
-
-Faction.prototype = new Entity();
-Faction.prototype.constructor = ResourceDisplay;
-// ===================================================================
-// End - Faction Template
-// ===================================================================
-
-
-
-// ===================================================================
-// Start - Player
-// ===================================================================
-// player = new Faction()
-
-// Faction.prototype = new Entity();
-// Faction.prototype.constructor = ResourceDisplay;
-// ===================================================================
-// End - Player
-// ===================================================================
-
-
-
-// ===================================================================
-// Start - Enemy
-// ===================================================================
-// function Faction(game) {
-//     this.food = 0;
-//     this.money = 0;
-//     Entity.call(this, game, 0, 0);
-// }
-
-// Faction.prototype = new Entity();
-// Faction.prototype.constructor = ResourceDisplay;
-// ===================================================================
-// End - Enemy
-// ===================================================================
-
-
-
-// ===================================================================
-// Start - Camera
-// ===================================================================
-// function Camera(game) {
-//     Entity.call(this, game, 0, 0);
-// }
-
-// Camera.prototype = new Entity();
-// Camera.prototype.constructor = Camera;
-
-// Camera.prototype.update = function (ctx) {
-//     var key = gameEngine.keyDown;
-
-//     if (key != null) {
-//         if (key["code"] === "KeyW") {
-//             cameraOrigin.y--;
-//         }
-//         else if (key["code"] === "KeyA") {
-//             console.log("Pressed A");
-//         }
-//         else if (key["code"] === "KeyS") {
-//             console.log("Pressed S");
-//         }
-//         else if (key["code"] === "KeyD") {
-//             cameraOrigin.y++;
-//         }
-
-
-//         gameEngine.keyDown = null;
-//     }
-
-//     // ctx.drawImage(this.spriteSheet,
-//     //     xindex * this.frameWidth, yindex * this.frameHeight,  // source from sheet
-//     //     this.frameWidth, this.frameHeight,
-//     //     x, y,
-//     //     this.frameWidth * this.scale,
-//     //     this.frameHeight * this.scale);
-// }
-// ===================================================================
-// End - Camera
-// ===================================================================
-
 
 
 
@@ -403,7 +234,9 @@ Faction.prototype.constructor = ResourceDisplay;
 function ResourceDisplay(game) {
     this.border = AM.getAsset("./img/sidebar/resource_display.png");
     this.foodIcon = AM.getAsset("./img/sidebar/food_icon.png")
+    this.moneyIcon = AM.getAsset("./img/sidebar/money_icon.png")
     this.foodCount = 0;
+    this.moneyCount = 0;
     Entity.call(this, game, 900, 0);
 }
 
@@ -411,206 +244,35 @@ ResourceDisplay.prototype = new Entity();
 ResourceDisplay.prototype.constructor = ResourceDisplay;
 
 ResourceDisplay.prototype.draw = function (ctx) {
-    ctx.drawImage(this.border, this.x, this.y);
-    ctx.drawImage(this.foodIcon, this.x + 30, this.y + 10);
+    ctx.fillStyle = "black";
     ctx.font = "24px Arial";
+
+    // Draw the border
+    ctx.drawImage(this.border, this.x, this.y);
+
+    // Draw the Food Icon and Count
+    ctx.drawImage(this.foodIcon, this.x + 30, this.y + 10);
+    ctx.drawImage(this.foodIcon, this.x + 30, this.y + 10);
     ctx.fillText(this.foodCount, this.x + 70, this.y + 35);
+    ctx.fillText(this.foodCount, this.x + 70, this.y + 35);
+
+    // Draw the Money Icon and Count
+    ctx.drawImage(this.moneyIcon, this.x + 130, this.y + 10);
+    ctx.drawImage(this.moneyIcon, this.x + 130, this.y + 10);
+    ctx.fillText(this.moneyCount, this.x + 160, this.y + 35);
+    ctx.fillText(this.moneyCount, this.x + 160, this.y + 35);
 }
 // ===================================================================
 // End - Resource Display
 // ===================================================================
 
-// // === START OF BUILD DISPLAY ===
-// function BuildDisplay(game) {
-//     this.border = AM.getAsset("./img/sidebar/build_display.png");
-//     this.buildTroopButton = AM.getAsset("./img/sidebar/build_soldier_button.png");
-//     this.buildTroopButtonPressed = AM.getAsset("./img/sidebar/build_soldier_button_pressed.png");
-//     this.buildBarracksButton = AM.getAsset("./img/sidebar/build_barracks_button.png");
-//     this.buildBarracksButtonPressed = AM.getAsset("./img/sidebar/build_barracks_button_pressed.png");
-//     Entity.call(this, game, 900, 50);
-// }
-
-// BuildDisplay.prototype = new Entity();
-// BuildDisplay.prototype.constructor = BuildDisplay;
-
-// BuildDisplay.prototype.draw = function (ctx) {
-//     // Background and Title Display
-//     ctx.drawImage(this.border, this.x, this.y);
-//     ctx.font = "24px Arial";
-//     ctx.fillText("Build", this.x + 30, this.y + 35);
-
-//     // Troop Display
-//     ctx.drawImage(this.buildTroopButton, this.x + 40, this.y + 50);
-//     ctx.font = "20px Arial";
-//     ctx.fillText("Troop Count: 0", this.x + 100, this.y + 80);
-
-//     // Building Display
-//     ctx.drawImage(this.buildBarracksButton, this.x + 40, this.y + 110);
-//     ctx.font = "20px Arial";
-//     ctx.fillText("Barracks Built: No", this.x + 100, this.y + 140);
-// }
-// // === END OF BUILD DISPLAY ===
-
-// // === START OF MOVE DISPLAY ===
-// function MoveDisplay(game) {
-//     this.border = AM.getAsset("./img/sidebar/move_display.png");
-//     this.moveButton = AM.getAsset("./img/sidebar/move_button.png");
-//     this.moveButtonPressed = AM.getAsset("./img/sidebar/move_button_pressed.png");
-//     this.fightButton = AM.getAsset("./img/sidebar/fight_button.png");
-//     this.fightButtonPressed = AM.getAsset("./img/sidebar/fight_button_pressed.png");
-//     Entity.call(this, game, 900, 360);
-// }
-
-// MoveDisplay.prototype = new Entity();
-// MoveDisplay.prototype.constructor = MoveDisplay;
-
-// MoveDisplay.prototype.draw = function (ctx) {
-//     ctx.drawImage(this.border, this.x, this.y);
-//     ctx.font = "24px Arial";
-//     ctx.fillText("Move/Fight", this.x + 30, this.y + 35);
-
-//     // Move Display
-//     ctx.drawImage(this.moveButton, this.x + 40, this.y + 50);
-//     ctx.font = "20px Arial";
-//     ctx.fillText("Move", this.x + 100, this.y + 80);
-
-//     // Attack Display
-//     ctx.drawImage(this.fightButton, this.x + 40, this.y + 110);
-//     ctx.font = "20px Arial";
-//     ctx.fillText("Attack!", this.x + 100, this.y + 140);
-// }
-// // === END OF MOVE DISPLAY ===
-
-// // === START OF ENDTURN DISPLAY ===
-// function EndTurnDisplay(game) {
-//     this.border = AM.getAsset("./img/sidebar/end_turn_display.png");
-//     this.endTurnButton = AM.getAsset("./img/sidebar/end_turn_button.png");
-//     this.isEndTurnButtonPressed = false;
-//     this.endTurnButtonPressed = AM.getAsset("./img/sidebar/end_turn_button_pressed.png");
-//     Entity.call(this, game, 900, 670);
-// }
-
-// EndTurnDisplay.prototype = new Entity();
-// EndTurnDisplay.prototype.constructor = EndTurnDisplay;
-
-// EndTurnDisplay.prototype.update = function () {
-//     if (this.game.endTurnPressed) this.isEndTurnButtonPressed = true;
-//     Entity.prototype.update.call(this);
-// }
-
-// EndTurnDisplay.prototype.draw = function (ctx) {
-//     ctx.drawImage(this.border, this.x, this.y);
-//     if (this.isEndTurnButtonPressed) ctx.drawImage(this.endTurnButtonPressed, this.x + 117, this.y + 7);
-//     else ctx.drawImage(this.endTurnButton, this.x + 117, this.y + 7);
-// }
-// // === END OF ENDTURN DISPLAY ===
 
 
-
-// // ///// REFACTOR ////////
-
-// //=== START OF MARINE ===
-// function Marine(game, spritesheet) {
-//     this.animation = new Animation(spritesheet, 22, 33, 3, 0.15, 3, true, 1);
-//     this.speed = 10;
-//     this.ctx = game.ctx;
-//     Entity.call(this, game, 0, 20);
-
-// }
-
-// Marine.prototype = new Entity();
-// Marine.prototype.constructor = Marine;
-
-// Marine.prototype.update = function () {
-
-//     this.y += this.game.clockTick * this.speed;
-//     if (this.y < 120) {
-//         this.y += 1;
-//         Entity.prototype.update.call(this);
-//     } else {
-//         this.y = 121;
-//         this.animation.frameDuration = 1;
-//     }
-// }
-
-// Marine.prototype.draw = function () {
-//     this.animation.drawFrame(this.game.clockTick, this.ctx, this.x, this.y);
-//     Entity.prototype.draw.call(this);
-// }
-// //=== END OF MARINE ===
-
-
-// //=== START OF MARINEEAST ===
-// function MarineEast(game, spritesheet) {
-//     this.animation = new Animation(spritesheet, 22, 33, 3, 0.15, 3, true, 1);
-//     this.speed = 50;
-//     this.ctx = game.ctx;
-//     Entity.call(this, game, 50, 200);
-
-// }
-
-// MarineEast.prototype = new Entity();
-// MarineEast.prototype.constructor = MarineEast;
-
-// MarineEast.prototype.update = function () {
-//     this.x += this.game.clockTick * this.speed;
-//     if (this.x < 700) {
-//         this.x += 0.3;
-//         Entity.prototype.update.call(this);
-//     } else {
-//         this.x = 701;
-//         this.animation.frameDuration = 1;
-//     }
-
-// }
-
-// MarineEast.prototype.draw = function () {
-//     this.animation.drawFrame(this.game.clockTick, this.ctx, this.x, this.y);
-//     Entity.prototype.draw.call(this);
-// }
-// //=== END OF MarineEast ===
-
-
-// //=== START OF HYDRALISK ===
-// function Hydralisk(game, spritesheet) {
-//     this.animation = new Animation(spritesheet, 45, 70, 3, 0.15, 3, true, 1);
-//     this.speed = 10;
-//     this.ctx = game.ctx;
-//     Entity.call(this, game, 0, 350);
-// }
-
-// Hydralisk.prototype = new Entity();
-// Hydralisk.prototype.constructor = Hydralisk;
-
-
-// Hydralisk.prototype.update = function () {
-//     this.x += this.game.clockTick * this.speed;
-//     if (this.x < 800) {
-//         this.x += 0.3;
-//         Entity.prototype.update.call(this);
-//     } else {
-//         this.x = 801;
-//         this.animation.frameDuration = 1;
-//     }
-// }
-
-
-// Hydralisk.prototype.draw = function () {
-//     this.animation.drawFrame(this.game.clockTick, this.ctx, this.x, this.y);
-//     Entity.prototype.draw.call(this);
-// }
-// //=== END OF HYDRALISK ===
-
-// === START OF MAP DISPLAY ===
+// ===================================================================
+// Start - Map Display
+// ===================================================================
 function MapDisplay(game) {
     this.border = AM.getAsset("./img/background.png");
-    this.bgWidth = 1920;
-    this.bgHeight = 1080;
-    this.minimapWidth = this.bgWidth / 8;
-    this.miniMapHeight = this.bgHeight / 8;
-    this.keyXMax = (this.bgWidth / 20) - 45;
-    this.keyYMax = (this.bgHeight / 20) - 36;
-    this.btnDim = 80;
     Entity.call(this, game, 0, 0);
 }
 
@@ -618,8 +280,120 @@ MapDisplay.prototype = new Entity();
 MapDisplay.prototype.constructor = MapDisplay;
 
 MapDisplay.prototype.update = function (ctx) {
-    var key = gameEngine.keyDown;
+}
 
+MapDisplay.prototype.draw = function (ctx) {
+    ctx.drawImage(this.border, cameraOrigin.x * 20, cameraOrigin.y * 20,
+        bgWidth, bgHeight,
+        0, 0,
+        bgWidth, bgHeight);
+}
+// ===================================================================
+// End - Map Display
+// ===================================================================
+
+
+
+// ===================================================================
+// Start - Minimap Display
+// ===================================================================
+function MinimapDisplay(game) {
+    this.border = AM.getAsset("./img/background.png");
+    bgWidth = 1920;
+    bgHeight = 1080;
+    this.minimapBorderWidth = 220;
+    this.miniMapBorderHeight = 220;
+    this.keyXMax = (bgWidth / 20) - 45;
+    this.keyYMax = (bgHeight / 20) - 36;
+    this.btnDim = 80;
+    Entity.call(this, game, 0, 0);
+}
+
+MinimapDisplay.prototype = new Entity();
+MinimapDisplay.prototype.constructor = MinimapDisplay;
+
+MinimapDisplay.prototype.update = function (ctx) {
+}
+
+MinimapDisplay.prototype.draw = function (ctx) {
+    ctx.fillStyle = "#9e9e9e";
+    ctx.strokeStyle = "black";
+
+    ctx.strokeRect(0, 0, this.minimapWidth, this.miniMapHeight);
+    ctx.fillRect(0, 0, this.minimapWidth, this.miniMapHeight);
+
+    var mX = (this.minimapWidth / 2) - ((bgWidth / 8) / 2); // Start point of image in mini map
+    var mY = (this.miniMapHeight / 2) - ((bgHeight / 8) / 2); // Start point of image in mini map
+
+    ctx.drawImage(this.border, 0, 0,
+        bgWidth, bgHeight,
+        0,
+        0,
+        bgWidth / 10, bgHeight / 10);
+
+    ctx.strokeRect(mX + (cameraOrigin.x * 2),
+        mY + (cameraOrigin.y * 2),
+        (gameEngine.surfaceWidth - 380) / 8,
+        gameEngine.surfaceHeight / 8);
+}
+// ===================================================================
+// End - Minimap Display
+// ===================================================================
+
+
+
+// ===================================================================
+// Start - Control Display
+// ===================================================================
+function ControlDisplay(game) {
+    this.minimapBorderWidth = 220;
+    this.miniMapBorderHeight = 220;
+    this.keyXMax = (bgWidth / 20) - 45;
+    this.keyYMax = (bgHeight / 20) - 36;
+    this.btnDim = 80;
+    Entity.call(this, game, 0, 0);
+}
+
+ControlDisplay.prototype = new Entity();
+ControlDisplay.prototype.constructor = ControlDisplay;
+
+ControlDisplay.prototype.update = function (ctx) {
+}
+
+ControlDisplay.prototype.draw = function (ctx) {
+    ctx.fillStyle = "#9e9e9e";
+    ctx.strokeStyle = "black";
+
+    ctx.fillRect(gameEngine.surfaceWidth - this.btnDim, gameEngine.surfaceHeight - this.btnDim, this.btnDim, this.btnDim);
+    ctx.strokeRect(gameEngine.surfaceWidth - this.btnDim, gameEngine.surfaceHeight - this.btnDim, this.btnDim, this.btnDim);
+    ctx.fillRect(gameEngine.surfaceWidth - this.btnDim * 2, gameEngine.surfaceHeight - this.btnDim, this.btnDim, this.btnDim);
+    ctx.strokeRect(gameEngine.surfaceWidth - this.btnDim * 2, gameEngine.surfaceHeight - this.btnDim, this.btnDim, this.btnDim);
+    ctx.fillRect(gameEngine.surfaceWidth - this.btnDim * 3, gameEngine.surfaceHeight - this.btnDim, this.btnDim, this.btnDim);
+    ctx.strokeRect(gameEngine.surfaceWidth - this.btnDim * 3, gameEngine.surfaceHeight - this.btnDim, this.btnDim, this.btnDim);
+    ctx.fillRect(gameEngine.surfaceWidth - this.btnDim * 4, gameEngine.surfaceHeight - this.btnDim, this.btnDim, this.btnDim);
+    ctx.strokeRect(gameEngine.surfaceWidth - this.btnDim * 4, gameEngine.surfaceHeight - this.btnDim, this.btnDim, this.btnDim);
+}
+// ===================================================================
+// End - Control Display
+// ===================================================================
+
+
+
+// ===================================================================
+// Start - Input Handler
+// ===================================================================
+function InputHandler(game) {
+    this.keyXMax = (bgWidth / 20) - 45;
+    this.keyYMax = (bgHeight / 20) - 36;
+    Entity.call(this, game, 0, 0);
+}
+
+InputHandler.prototype = new Entity();
+InputHandler.prototype.constructor = MapDisplay;
+
+InputHandler.prototype.update = function (ctx) {
+    // Control for WASD map movement
+    var key = gameEngine.keyDown;
     if (key != null) {
         if (key["code"] === "KeyW") {
             if (cameraOrigin.y > 0)
@@ -637,84 +411,34 @@ MapDisplay.prototype.update = function (ctx) {
             if (cameraOrigin.x < this.keyXMax)
                 cameraOrigin.x++;
         }
-
-
         gameEngine.keyDown = null;
     }
-
-    // ctx.drawImage(this.spriteSheet,
-    //     xindex * this.frameWidth, yindex * this.frameHeight,  // source from sheet
-    //     this.frameWidth, this.frameHeight,
-    //     x, y,
-    //     this.frameWidth * this.scale,
-    //     this.frameHeight * this.scale);
 }
-
-MapDisplay.prototype.draw = function (ctx) {
-
-
-    ctx.drawImage(this.border, cameraOrigin.x * 20, cameraOrigin.y * 20,
-        this.bgWidth, this.bgHeight,
-        0, 0,
-        this.bgWidth, this.bgHeight);
-
-    ctx.fillStyle = "#9e9e9e";
-    ctx.strokeStyle = "black";
-    ctx.fillRect(900, 0, 380, 50);
-    ctx.strokeRect(900, 0, 380, 50);
-    // ctx.drawImage("./img/food_icon.png", 0, 0);
-    Entity.prototype.draw.call(this);
-
-    ctx.fillRect(0, 0, this.minimapWidth, this.miniMapHeight);
-
-    var mX = (this.minimapWidth / 2) - ((this.bgWidth / 8) / 2); // Start point of image in mini map
-    var mY = (this.miniMapHeight / 2) - ((this.bgHeight / 8) / 2); // Start point of image in mini map
-
-    ctx.drawImage(this.border, 0, 0,
-        this.bgWidth, this.bgHeight,
-        0,
-        0,
-        this.bgWidth / 8, this.bgHeight / 8);
-
-    ctx.strokeRect(mX + (cameraOrigin.x * 2),
-        mY + (cameraOrigin.y * 2),
-        (gameEngine.surfaceWidth - 380) / 8,
-        gameEngine.surfaceHeight / 8);
-
-
-    ctx.fillRect(gameEngine.surfaceWidth - this.btnDim, gameEngine.surfaceHeight - this.btnDim, this.btnDim, this.btnDim);
-    ctx.strokeRect(gameEngine.surfaceWidth - this.btnDim, gameEngine.surfaceHeight - this.btnDim, this.btnDim, this.btnDim);
-    ctx.fillRect(gameEngine.surfaceWidth - this.btnDim * 2, gameEngine.surfaceHeight - this.btnDim, this.btnDim, this.btnDim);
-    ctx.strokeRect(gameEngine.surfaceWidth - this.btnDim * 2, gameEngine.surfaceHeight - this.btnDim, this.btnDim, this.btnDim);
-    ctx.fillRect(gameEngine.surfaceWidth - this.btnDim * 3, gameEngine.surfaceHeight - this.btnDim, this.btnDim, this.btnDim);
-    ctx.strokeRect(gameEngine.surfaceWidth - this.btnDim * 3, gameEngine.surfaceHeight - this.btnDim, this.btnDim, this.btnDim);
-    ctx.fillRect(gameEngine.surfaceWidth - this.btnDim * 4, gameEngine.surfaceHeight - this.btnDim, this.btnDim, this.btnDim);
-    ctx.strokeRect(gameEngine.surfaceWidth - this.btnDim * 4, gameEngine.surfaceHeight - this.btnDim, this.btnDim, this.btnDim);
-}
-// === END OF MAP DISPLAY ===
+// ===================================================================
+// End - Input Controller
+// ===================================================================
 
 
 
 // ===================================================================
 // Start - create region array
 // ===================================================================
-
 let regionArray = [];
 // line 54 of gameengine
 
-function createArray(origin){
-    
-    for(var i = 0; i < 45; i++){
+function createArray(origin) {
+
+    for (var i = 0; i < 45; i++) {
         regionArray.push([]);
-        for(var j = 0; j < 36; j++){
+        for (var j = 0; j < 36; j++) {
             regionArray[i].push([]);
         }
     }
 
     // update the value of the array
 
-    for(var i = 0; i < 45; i++){
-        for(var j = 0; j < 36; j++){
+    for (var i = 0; i < 45; i++) {
+        for (var j = 0; j < 36; j++) {
             let xCor = origin.x + i;
             let yCor = origin.y + j;
             regionArray[i][j].name = GAMEBOARD[xCor][yCor].region.toString();
@@ -734,94 +458,52 @@ function createArray(origin){
 // ===================================================================
 // Start - get region id for clicked region
 // ===================================================================
-
-function getClickedRegion(regionArray, clickX, clickY){
+function getClickedRegion(regionArray, clickX, clickY) {
     var regionId;
-    for(var i = 0; i < 45; i++){
-        for(var j = 0; j < 36; j++){
-            if(regionArray[i][j].x === clickX && regionArray[i][j].y === clickY){
+    for (var i = 0; i < 45; i++) {
+        for (var j = 0; j < 36; j++) {
+            if (regionArray[i][j].x === clickX && regionArray[i][j].y === clickY) {
                 regionId = regionArray[i][j].name;
             }
         }
     }
     return regionId;
 }
-
 // ===================================================================
 // End - get region id for clicked region
 // ===================================================================
 
 
-///// REFACTOR ////////
 
-/**
- * This function will be onLoad from the canvas
- */
+// ===================================================================
+// Start - Main
+// ===================================================================
 function Main() {
-    /**
-     * load Welcome Sreen and button entities with onClick events
-     * 
-     * unload Welcome Scren onClick events
-     * attach GAME onCLick events
-     * attach GAME keyboard events
-     * loadMap
-     */
-
-
-    // Camera
-    AM.queueDownload("./img/background.png");
-
     // Resource Display
     AM.queueDownload("./img/sidebar/resource_display.png");
     AM.queueDownload("./img/sidebar/food_icon.png");
     AM.queueDownload("./img/sidebar/money_icon.png");
 
-    // Build Display
-    AM.queueDownload("./img/sidebar/build_display.png");
-    AM.queueDownload("./img/sidebar/build_soldier_button.png");
-    AM.queueDownload("./img/sidebar/build_soldier_button_pressed.png");
-    AM.queueDownload("./img/sidebar/build_barracks_button.png");
-    AM.queueDownload("./img/sidebar/build_barracks_button_pressed.png");
-
-    // Move Display
-    AM.queueDownload("./img/sidebar/move_display.png");
-    AM.queueDownload("./img/sidebar/move_button.png");
-    AM.queueDownload("./img/sidebar/move_button_pressed.png");
-    AM.queueDownload("./img/sidebar/fight_button.png");
-    AM.queueDownload("./img/sidebar/fight_button_pressed.png");
-
-    // End Turn Display
-    AM.queueDownload("./img/sidebar/end_turn_display.png");
-    AM.queueDownload("./img/sidebar/end_turn_button.png");
-    AM.queueDownload("./img/sidebar/end_turn_button_pressed.png");
-
     // Game Map Display
     AM.queueDownload("./img/map/game map9072.png");
-
-    // Animation
-    AM.queueDownload("./img/Hydralisk2_east.png");
-    AM.queueDownload("./img/Marine_walking_south1.png");
-    AM.queueDownload("./img/Marine_walking_east1.png");
+    AM.queueDownload("./img/background.png");
 
     AM.downloadAll(function () {
 
         gameEngine.init(ctx);
         gameEngine.start();
-        // gameEngine.addEntity(new Camera(gameEngine));
-        gameEngine.addEntity(new MapDisplay(gameEngine));
-        gameEngine.addEntity(new ResourceDisplay(gameEngine));
-        gameEngine.addEntity(new BuildDisplay(gameEngine));
-        gameEngine.addEntity(new MoveDisplay(gameEngine));
 
-        gameEngine.addEntity(new EndTurnDisplay(gameEngine));
-        
-        // gameEngine.addEntity(new Marine(gameEngine, AM.getAsset("./img/Marine_walking_south1.png")));
-        // gameEngine.addEntity(new MarineEast(gameEngine, AM.getAsset("./img/Marine_walking_east1.png")));
-        // gameEngine.addEntity(new Hydralisk(gameEngine, AM.getAsset("./img/Hydralisk2_east.png")));
+        gameEngine.addEntity(new MapDisplay(gameEngine));
+        gameEngine.addEntity(new MinimapDisplay(gameEngine));
+        gameEngine.addEntity(new ResourceDisplay(gameEngine));
+        gameEngine.addEntity(new ControlDisplay(gameEngine));
+        gameEngine.addEntity(new InputHandler(gameEngine));
     });
 
     BuildBoard();
-
 }
 
 Main();
+// ===================================================================
+// End - Main
+// ===================================================================
