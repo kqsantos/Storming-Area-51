@@ -299,13 +299,8 @@ MapDisplay.prototype.draw = function (ctx) {
 // ===================================================================
 function MinimapDisplay(game) {
     this.border = AM.getAsset("./img/background.png");
-    bgWidth = 1920;
-    bgHeight = 1080;
     this.minimapBorderWidth = 220;
     this.miniMapBorderHeight = 220;
-    this.keyXMax = (bgWidth / 20) - 45;
-    this.keyYMax = (bgHeight / 20) - 36;
-    this.btnDim = 80;
     Entity.call(this, game, 0, 0);
 }
 
@@ -329,7 +324,7 @@ MinimapDisplay.prototype.draw = function (ctx) {
         bgWidth, bgHeight,
         0,
         0,
-        bgWidth / 10, bgHeight / 10);
+        bgWidth * .10, bgHeight * .10);
 
     ctx.strokeRect(mX + (cameraOrigin.x * 2),
         mY + (cameraOrigin.y * 2),
@@ -346,10 +341,6 @@ MinimapDisplay.prototype.draw = function (ctx) {
 // Start - Control Display
 // ===================================================================
 function ControlDisplay(game) {
-    this.minimapBorderWidth = 220;
-    this.miniMapBorderHeight = 220;
-    this.keyXMax = (bgWidth / 20) - 45;
-    this.keyYMax = (bgHeight / 20) - 36;
     this.btnDim = 80;
     Entity.call(this, game, 0, 0);
 }
@@ -383,8 +374,8 @@ ControlDisplay.prototype.draw = function (ctx) {
 // Start - Input Handler
 // ===================================================================
 function InputHandler(game) {
-    this.keyXMax = (bgWidth / 20) - 45;
-    this.keyYMax = (bgHeight / 20) - 36;
+    this.keyXMax = (bgWidth / dim) - (gameEngine.surfaceWidth / dim);
+    this.keyYMax = (bgHeight / dim) - (gameEngine.surfaceHeight / dim);
     Entity.call(this, game, 0, 0);
 }
 
