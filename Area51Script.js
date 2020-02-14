@@ -143,22 +143,22 @@ function Region(name, bldg, owner, troopX, troopY, bldgX, bldgY, territory, neig
 // ===================================================================
 function BuildRegions() {
     let Regions = [
-        new Region('S - SW', false, 1, 40, 560, 40, 560, 'sand', [2, 4, 5], 0),
-        new Region('S - SE', false, 1, 210, 560, 210, 560, 'sand', [2, 4, 5], 0),
-        new Region('S - E', false, 1, 110, 460, 110, 460, 'sand', [2, 4, 5], 0),
-        new Region('S - NE', false, 1, 110, 290, 110, 290, 'sand', [2, 4, 5], 0),
-        new Region('S - NW', false, 1, 40, 290, 40, 290, 'sand', [2, 4, 5], 0),
-        new Region('D - S', false, 1, 40, 240, 40, 240, 'dirt', [2, 4, 5], 0),
-        new Region('D - NW', false, 1, 120, 70, 40, 70, 'dirt', [2, 4, 5], 0),
-        new Region('D - E', false, 1, 280, 70, 280, 70, 'dirt', [2, 4, 5], 0),
-        new Region('I - NW', false, 1, 390, 30, 390, 30, 'ice', [2, 4, 5], 0),
-        new Region('I - W', false, 1, 390, 120, 390, 120, 'ice', [2, 4, 5], 0),
-        new Region('I - SW', false, 1, 390, 210, 390, 210, 'ice', [2, 4, 5], 0),
-        new Region('I - Mid', false, 1, 610, 30, 610, 30, 'ice', [2, 4, 5], 0),
-        new Region('I - E', false, 1, 730, 30, 730, 30, 'ice', [2, 4, 5], 0),
-        new Region('G - N', false, 1, 460, 380, 460, 380, 'grass', [2, 4, 5], 0),
-        new Region('G - SE', false, 1, 690, 520, 690, 520, 'grass', [2, 4, 5], 0),
-        new Region('G - SW', false, 1, 460, 520, 460, 580, 'grass', [2, 4, 5], 0),
+        new Region('S - SW', false, 1, 40, 560, 40, 560, 'orange', [2, 3, 5], 0),
+        new Region('S - SE', false, 1, 210, 560, 210, 560, 'orange', [1, 3, 16], 0),
+        new Region('S - E', false, 1, 110, 460, 110, 460, 'orange', [1, 2, 4, 5], 0),
+        new Region('S - NE', false, 1, 110, 290, 110, 290, 'orange', [3, 5, 6, 7, 14], 0),
+        new Region('S - NW', false, 1, 40, 290, 40, 290, 'orange', [1, 3, 4, 6], 0),
+        new Region('D - S', false, 0, 40, 240, 40, 240, 'green', [4, 5, 7, 8], 0),
+        new Region('D - NW', false, 0, 120, 70, 40, 70, 'green', [4, 6, 8, 9, 10, 11], 0),
+        new Region('D - E', false, 0, 280, 70, 280, 70, 'green', [6, 7], 0),
+        new Region('I - NW', false, 0, 390, 30, 390, 30, 'grey', [7, 10, 12], 0),
+        new Region('I - W', false, 0, 390, 120, 390, 120, 'grey', [7, 9, 11, 12], 0),
+        new Region('I - SW', false, 0, 390, 210, 390, 210, 'grey', [7, 10, 14], 0),
+        new Region('I - Mid', false, 0, 610, 30, 610, 30, 'grey', [9, 10, 13], 0),
+        new Region('I - E', false, 0, 730, 30, 730, 30, 'grey', [12, 14], 0),
+        new Region('G - N', false, 1, 460, 380, 460, 380, 'yellow', [4, 11, 15, 16], 0),
+        new Region('G - SE', false, 1, 690, 520, 690, 520, 'yellow', [14], 0),
+        new Region('G - SW', false, 1, 460, 520, 460, 580, 'yellow', [2, 14], 0),
     ];
     return Regions;
 }
@@ -185,47 +185,87 @@ function BuildBoard() {
     //console.log(data);
     //const testData = [0,1,2,3]
 
-    for (var i = 0; i < 90; i++) {
-        for (var j = 0; j < 72; j++) {
-            let csvVal = data[72 * i + j];
+    for (var y = 0; y < 72; y++) {
+        for (var x = 0; x < 90; x++) {
+            let csvVal = data[72 * y + x];
 
             if (csvVal == 1 || csvVal == 2 || csvVal == 3 || csvVal == 4 || csvVal == 5) {
-                gameboard[i][j].land = true;
-                gameboard[i][j].region = csvVal;
-                gameboard[i][j].territory = 'sand';
+                gameboard[x][y].land = true;
+                gameboard[x][y].region = csvVal;
+                gameboard[x][y].territory = 'orange';
             } else if (csvVal == 6 || csvVal == 7 || csvVal == 8) {
-                gameboard[i][j].land = true;
-                gameboard[i][j].region = csvVal;
-                gameboard[i][j].territory = 'dirt';
+                gameboard[x][y].land = true;
+                gameboard[x][y].region = csvVal;
+                gameboard[x][y].territory = 'green';
             } else if (csvVal == 9 || csvVal == 10 || csvVal == 11 || csvVal == 12 || csvVal == 13) {
-                gameboard[i][j].land = true;
-                gameboard[i][j].region = csvVal;
-                gameboard[i][j].territory = 'ice';
+                gameboard[x][y].land = true;
+                gameboard[x][y].region = csvVal;
+                gameboard[x][y].territory = 'grey';
             } else if (csvVal == 14 || csvVal == 15 || csvVal == 16) {
-                gameboard[i][j].land = true;
-                gameboard[i][j].region = csvVal;
-                gameboard[i][j].territory = 'grass';
-            } else if (csvVal == 0 || csvVal == -1) {
-                gameboard[i][j].land = null;
-                gameboard[i][j].region = csvVal;
-                gameboard[i][j].territory = null;
+                gameboard[x][y].land = true;
+                gameboard[x][y].region = csvVal;
+                gameboard[x][y].territory = 'yellow';
+            } else if (csvVal == 0 || csvVal == -1 || csvVal == 160) {
+                gameboard[x][y].land = null;
+                gameboard[x][y].region = csvVal;
+                gameboard[x][y].territory = null;
             }
         }
     }
 
-    return gameboard;
-
     // for (var i = 0; i < 90; i++){
-    //     GAMEBOARD[i].forEach((element) => {
-    //         if (element != null) console.log(element.territory)
+    //     var str = '';
+    //     gameboard[i].forEach((element) => {
+    //         str += element.region + ' '; 
     //     });
+    //     console.log(str);
     // }
 
+    return gameboard;
 }
+
+function StartGame (regionArray){
+    regionArray.forEach((region) => region.troopCount += 4);
+    regionArray[0].enemyHero = true;
+    regionArray[12].friendlyHero = true;
+}
+
 // ===================================================================
 // End - Utility Functions
 // ===================================================================
 
+// ===================================================================
+// Start - Combat Functions
+// ===================================================================
+function fight(region1, region2) {
+    atkPow = region1.troopCount;
+    defPow = region2.troopCount;
+
+    while (defPow > 0 && atkPow > 0){
+        Math.random() > 0.5 ? atkPow-- : defPow--;
+    }
+
+    if(atkPow > defPow){
+        region2.owner = region1.owner;
+        region2.troopCount = atkPow;
+        region1.troopCount = 0;
+        return true; // Attacker won
+    } else {
+        region1.troopCount = 0;
+        return false; // Defender won
+    }
+}
+
+function move(sourceRegion, destination, troopCount){
+    if(sourceRegion.neighbors.contains(destination.number)){
+        sourceRegion.troopCount -= troopCount;
+        destination.troopCount += troopCount;
+    } 
+}
+
+// ===================================================================
+// End - Combat Functions
+// ===================================================================
 
 
 // ===================================================================
@@ -269,10 +309,62 @@ ResourceDisplay.prototype.draw = function (ctx) {
 
 
 // ===================================================================
+// Start - Troop Display
+// ===================================================================
+function TroopDisplay(game) {
+    this.border = AM.getAsset("./img/icon/alien.png");
+    Entity.call(this, game, 0, 0);
+}
+
+TroopDisplay.prototype = new Entity();
+TroopDisplay.prototype.constructor = TroopDisplay;
+
+TroopDisplay.prototype.update = function (ctx) {
+}
+
+TroopDisplay.prototype.draw = function (ctx) {
+    ctx.drawImage(this.border, cameraOrigin.x * 20, cameraOrigin.y * 20,
+        bgWidth, bgHeight,
+        0, 250,
+        bgWidth * 0.1, bgHeight * 0.1);
+}
+// ===================================================================
+// End - Troop Display
+// ===================================================================
+
+
+
+// ===================================================================
+// Start - Building Display
+// ===================================================================
+function BuildingDisplay(game) {
+    this.border = AM.getAsset("./img/icon/barracks.png");
+    Entity.call(this, game, 0, 0);
+}
+
+BuildingDisplay.prototype = new Entity();
+BuildingDisplay.prototype.constructor = BuildingDisplay;
+
+BuildingDisplay.prototype.update = function (ctx) {
+}
+
+BuildingDisplay.prototype.draw = function (ctx) {
+    ctx.drawImage(this.border, cameraOrigin.x * 20, cameraOrigin.y * 20,
+        bgWidth, bgHeight,
+        0, 100,
+        bgWidth * 0.1, bgHeight * 0.1);
+}
+// ===================================================================
+// End - Building Display
+// ===================================================================
+
+
+
+// ===================================================================
 // Start - Map Display
 // ===================================================================
 function MapDisplay(game) {
-    this.border = AM.getAsset("./img/background.png");
+    this.border = AM.getAsset("./img/map/New MAP.png");
     Entity.call(this, game, 0, 0);
 }
 
@@ -298,7 +390,7 @@ MapDisplay.prototype.draw = function (ctx) {
 // Start - Minimap Display
 // ===================================================================
 function MinimapDisplay(game) {
-    this.border = AM.getAsset("./img/background.png");
+    this.border = AM.getAsset("./img/map/New MAP.png");
     this.minimapBorderWidth = 220;
     this.miniMapBorderHeight = 220;
     Entity.call(this, game, 0, 0);
@@ -419,17 +511,17 @@ let regionArray = [];
 
 function createArray(origin) {
 
-    for (var i = 0; i < 45; i++) {
+    for (var i = 0; i < 90; i++) {
         regionArray.push([]);
-        for (var j = 0; j < 36; j++) {
+        for (var j = 0; j < 72; j++) {
             regionArray[i].push([]);
         }
     }
 
     // update the value of the array
 
-    for (var i = 0; i < 45; i++) {
-        for (var j = 0; j < 36; j++) {
+    for (var i = 0; i < 90; i++) {
+        for (var j = 0; j < 72; j++) {
             let xCor = origin.x + i;
             let yCor = origin.y + j;
             regionArray[i][j].name = GAMEBOARD[xCor][yCor].region.toString();
@@ -451,8 +543,8 @@ function createArray(origin) {
 // ===================================================================
 function getClickedRegion(regionArray, clickX, clickY) {
     var regionId;
-    for (var i = 0; i < 45; i++) {
-        for (var j = 0; j < 36; j++) {
+    for (var i = 0; i < 90; i++) {
+        for (var j = 0; j < 72; j++) {
             if (regionArray[i][j].x === clickX && regionArray[i][j].y === clickY) {
                 regionId = regionArray[i][j].name;
             }
@@ -476,22 +568,45 @@ function Main() {
     AM.queueDownload("./img/sidebar/money_icon.png");
 
     // Game Map Display
-    AM.queueDownload("./img/map/game map9072.png");
-    AM.queueDownload("./img/background.png");
+    AM.queueDownload("./img/map/New MAP.png");
+
+    // Combat Entities 
+    AM.queueDownload("./img/icon/alien.png");
+    AM.queueDownload("./img/icon/soldier.png");
+    AM.queueDownload("./img/icon/star.png");
+
+    //Building Entities
+    AM.queueDownload("./img/icon/barracks.png");
+    AM.queueDownload("./img/icon/silo.png");
+
 
     AM.downloadAll(function () {
 
         gameEngine.init(ctx);
         gameEngine.start();
-
+        
         gameEngine.addEntity(new MapDisplay(gameEngine));
         gameEngine.addEntity(new MinimapDisplay(gameEngine));
+
+        gameEngine.addEntity(new BuildingDisplay(gameEngine));
+        gameEngine.addEntity(new TroopDisplay(gameEngine));
+        
         gameEngine.addEntity(new ResourceDisplay(gameEngine));
         gameEngine.addEntity(new ControlDisplay(gameEngine));
         gameEngine.addEntity(new InputHandler(gameEngine));
+        
     });
 
+
+
+    regionArray = BuildRegions();
     BuildBoard();
+    StartGame(regionArray);
+
+    
+
+    console.log('This is a test');
+    fight(regionArray[12], regionArray[0]) ? console.log('you win') : console.log('you lose');
 }
 
 Main();
