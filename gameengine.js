@@ -94,20 +94,9 @@ GameEngine.prototype.startInput = function () {
 
         elem.addEventListener("keydown", function (e) {
             that.keyDown = e;
+            console.log("%c KeyDown info below this:", "background: #222; color: #bada55");
             console.log(e);
             console.log("Key Down Event - Char " + e.code + " Code " + e.keyCode);
-        }, false);
-    
-        elem.addEventListener("keypress", function (e) {
-            // if (e.code === "KeyD") that.d = true;
-            // that.chars[e.code] = true;
-            console.log(e);
-            console.log("Key Pressed Event - Char " + e.charCode + " Code " + e.keyCode);
-        }, false);
-    
-        elem.addEventListener("keyup", function (e) {
-            console.log(e);
-            console.log("Key Up Event - Char " + e.code + " Code " + e.keyCode);
         }, false);
 
     }
@@ -119,11 +108,6 @@ GameEngine.prototype.addEntity = function (entity) {
     console.log('added entity');
     this.entities.push(entity);
 }
-
-// GameEngine.prototype.addFactionEntity = function (entity) {
-//     console.log('added entity');
-//     this.factionEntities.push(entity);
-// }
 
 GameEngine.prototype.draw = function () {
     this.ctx.clearRect(0, 0, this.surfaceWidth, this.surfaceHeight);
@@ -174,13 +158,6 @@ function Entity(game, x, y) {
     this.removeFromWorld = false;
     this.clickTrigger = null;
 }
-
-// function FactionEntity(game, x, y) {
-//     this.game = game;
-//     this.x = x;
-//     this.y = y;
-//     this.removeFromWorld = false;
-// }
 
 Entity.prototype.update = function () {
 }

@@ -12,11 +12,19 @@ var dim = 20;
 
 var cameraOrigin = { x: 0, y: 0 };
 var myCells = [[], []]; // Tile grid
-var myRegions = []; // Contains IDs of tiles per region
-var myCanvasSize;
 
-var bgWidth = 1920;
-var bgHeight = 1080;
+var gameboard = BuildBoard();
+console.log("%c Gameboard below this:", "background: #222; color: #bada55");
+console.log(gameboard);
+var regions = BuildRegions();
+
+var regionArray = [];
+createArray(cameraOrigin); // Contains IDs of tiles per regions
+console.log("%c RegionArray below this:", "background: #222; color: #bada55");
+console.log(regionArray);
+
+var bgWidth = 2880;
+var bgHeight = 2304;
 // ===================================================================
 // End - Global Variables
 // ===================================================================
@@ -141,6 +149,60 @@ function Region(name, bldg, owner, troopX, troopY, bldgX, bldgY, territory, neig
 // ===================================================================
 // Start - Utility Functions
 // ===================================================================
+function createArray(origin) {
+    for (var i = 0; i < 64; i++) {
+        regionArray[i] = new Array(36);
+    }
+
+    // update the value of the array
+    for (var i = 0; i < 64; i++) {
+        for (var j = 0; j < 36; j++) {
+            let xCor = origin["x"] + i;
+            let yCor = origin["y"] + j;
+
+            if (gameboard[yCor][xCor] != null) {
+                regionArray[i][j] = {
+                    name: gameboard[xCor][yCor].region.toString(),
+                    x: xCor,
+                    y: yCor,
+                    w: dim,
+                    h: dim
+                };
+            } else {
+                regionArray[i][j] = null;
+            }
+
+        }
+    }
+}
+
+function getClickedRegion(regionArray, clickX, clickY) {
+    var regionId;
+    for (var i = 0; i < 64; i++) {
+        for (var j = 0; j < 36; j++) {
+            if (regionArray[i][j].x === clickX && regionArray[i][j].y === clickY) {
+                regionId = regionArray[i][j].name;
+            }
+        }
+    }
+    return regionId;
+}
+
+function checkForHover(rects, x, y) {
+    var isHovering = false;
+    for (var i = 0, len = rects.length; i < len; i++) {
+        var left = rects[i].x, right = rects[i].x + rects[i].w;
+        var top = rects[i].y, bottom = rects[i].y + rects[i].h;
+        if (right >= x
+            && left <= x
+            && bottom >= y
+            && top <= y) {
+            isHovering = rects[i];
+        }
+    }
+    return isHovering;
+}
+
 function BuildRegions() {
     let Regions = [
         new Region('S - SW', false, 1, 40, 560, 40, 560, 'sand', [2, 4, 5], 0),
@@ -162,6 +224,91 @@ function BuildRegions() {
     ];
     return Regions;
 }
+
+function CSVToArray( strData, strDelimiter ){
+    // Check to see if the delimiter is defined. If not,
+    // then default to comma.
+    strDelimiter = (strDelimiter || ",");
+
+    // Create a regular expression to parse the CSV values.
+    var objPattern = new RegExp(
+        (
+            // Delimiters.
+            "(\\" + strDelimiter + "|\\r?\\n|\\r|^)" +
+
+            // Quoted fields.
+            "(?:\"([^\"]*(?:\"\"[^\"]*)*)\"|" +
+
+            // Standard fields.
+            "([^\"\\" + strDelimiter + "\\r\\n]*))"
+        ),
+        "gi"
+        );
+
+
+    // Create an array to hold our data. Give the array
+    // a default empty first row.
+    var arrData = [[]];
+
+    // Create an array to hold our individual pattern
+    // matching groups.
+    var arrMatches = null;
+
+
+    // Keep looping over the regular expression matches
+    // until we can no longer find a match.
+    while (arrMatches = objPattern.exec( strData )){
+
+        // Get the delimiter that was found.
+        var strMatchedDelimiter = arrMatches[ 1 ];
+
+        // Check to see if the given delimiter has a length
+        // (is not the start of string) and if it matches
+        // field delimiter. If id does not, then we know
+        // that this delimiter is a row delimiter.
+        if (
+            strMatchedDelimiter.length &&
+            strMatchedDelimiter !== strDelimiter
+            ){
+
+            // Since we have reached a new row of data,
+            // add an empty row to our data array.
+            arrData.push( [] );
+
+        }
+
+        var strMatchedValue;
+
+        // Now that we have our delimiter out of the way,
+        // let's check to see which kind of value we
+        // captured (quoted or unquoted).
+        if (arrMatches[ 2 ]){
+
+            // We found a quoted value. When we capture
+            // this value, unescape any double quotes.
+            strMatchedValue = arrMatches[ 2 ].replace(
+                new RegExp( "\"\"", "g" ),
+                "\""
+                );
+
+        } else {
+
+            // We found a non-quoted value.
+            strMatchedValue = arrMatches[ 3 ];
+
+        }
+
+
+        // Now that we have our value string, let's add
+        // it to the data array.
+        arrData[ arrData.length - 1 ].push( strMatchedValue );
+    }
+
+    // Return the parsed data.
+    return( arrData );
+}
+
+
 
 /**
  * Builds a Gameboard that is 90x72. By calling an index of the gameboard, the user is able to return whether or not the
@@ -252,14 +399,10 @@ ResourceDisplay.prototype.draw = function (ctx) {
 
     // Draw the Food Icon and Count
     ctx.drawImage(this.foodIcon, this.x + 30, this.y + 10);
-    ctx.drawImage(this.foodIcon, this.x + 30, this.y + 10);
-    ctx.fillText(this.foodCount, this.x + 70, this.y + 35);
     ctx.fillText(this.foodCount, this.x + 70, this.y + 35);
 
     // Draw the Money Icon and Count
     ctx.drawImage(this.moneyIcon, this.x + 130, this.y + 10);
-    ctx.drawImage(this.moneyIcon, this.x + 130, this.y + 10);
-    ctx.fillText(this.moneyCount, this.x + 160, this.y + 35);
     ctx.fillText(this.moneyCount, this.x + 160, this.y + 35);
 }
 // ===================================================================
@@ -272,7 +415,8 @@ ResourceDisplay.prototype.draw = function (ctx) {
 // Start - Map Display
 // ===================================================================
 function MapDisplay(game) {
-    this.border = AM.getAsset("./img/background.png");
+    this.border = AM.getAsset("./map images/master.png");
+    // this.border = AM.getAsset("./img/background3.png");
     Entity.call(this, game, 0, 0);
 }
 
@@ -287,6 +431,19 @@ MapDisplay.prototype.draw = function (ctx) {
         bgWidth, bgHeight,
         0, 0,
         bgWidth, bgHeight);
+
+    // **Debugger** -- Displays Region ID
+    ctx.fillStyle = "black";
+    ctx.font = "12px Arial";
+    var xCal = 4;
+    var yCal = -5;
+    // ctx.fillText(regionArray[0][0].name, 20 * dim, 20 * dim);
+    for (var i = 0; i < 64; i++) {
+        for (var j = 0; j < 36; j++) {
+            ctx.fillText(regionArray[i][j].name, (i * dim)+xCal, ((j + 1) * dim)+yCal);
+        }
+    }
+
 }
 // ===================================================================
 // End - Map Display
@@ -298,9 +455,11 @@ MapDisplay.prototype.draw = function (ctx) {
 // Start - Minimap Display
 // ===================================================================
 function MinimapDisplay(game) {
-    this.border = AM.getAsset("./img/background.png");
-    this.minimapBorderWidth = 220;
-    this.miniMapBorderHeight = 220;
+    this.border = AM.getAsset("./map images/master.png");
+    // this.border = AM.getAsset("./img/background3.png");
+    this.minimapBorderWidth = 200;
+    this.miniMapBorderHeight = 200;
+    this.aspectRatio = .10;
     Entity.call(this, game, 0, 0);
 }
 
@@ -314,22 +473,28 @@ MinimapDisplay.prototype.draw = function (ctx) {
     ctx.fillStyle = "#9e9e9e";
     ctx.strokeStyle = "black";
 
-    ctx.strokeRect(0, 0, this.minimapWidth, this.miniMapHeight);
-    ctx.fillRect(0, 0, this.minimapWidth, this.miniMapHeight);
+    // Draws the border
+    ctx.strokeRect(0, 0, this.minimapBorderWidth, this.miniMapBorderHeight);
+    ctx.fillRect(0, 0, this.minimapBorderWidth, this.miniMapBorderHeight);
 
-    var mX = (this.minimapWidth / 2) - ((bgWidth / 8) / 2); // Start point of image in mini map
-    var mY = (this.miniMapHeight / 2) - ((bgHeight / 8) / 2); // Start point of image in mini map
+    var smWidth = bgWidth * this.aspectRatio; // Width of the shrunk map
+    var smHeight = bgHeight * this.aspectRatio; // Height of the shunk map
 
+    var mX = (this.minimapBorderWidth / 2) - (smWidth / 2); // Start point of image in mini map
+    var mY = (this.miniMapBorderHeight / 2) - (smHeight / 2); // Start point of image in mini map
+
+    // Draws the shrunk map
     ctx.drawImage(this.border, 0, 0,
         bgWidth, bgHeight,
-        0,
-        0,
-        bgWidth * .10, bgHeight * .10);
+        mX,
+        mY,
+        smWidth, smHeight);
 
+    // Draws the vision rectangle
     ctx.strokeRect(mX + (cameraOrigin.x * 2),
         mY + (cameraOrigin.y * 2),
-        (gameEngine.surfaceWidth - 380) / 8,
-        gameEngine.surfaceHeight / 8);
+        gameEngine.surfaceWidth * this.aspectRatio,
+        gameEngine.surfaceHeight * this.aspectRatio);
 }
 // ===================================================================
 // End - Minimap Display
@@ -387,81 +552,45 @@ InputHandler.prototype.update = function (ctx) {
     var key = gameEngine.keyDown;
     if (key != null) {
         if (key["code"] === "KeyW") {
-            if (cameraOrigin.y > 0)
+            if (cameraOrigin.y > 0) {
                 cameraOrigin.y--;
+                // createArray(cameraOrigin);
+                console.log("%c RegionArray below this:", "background: #222; color: #bada55");
+                console.log(regionArray);
+            }
+
         }
         else if (key["code"] === "KeyA") {
-            if (cameraOrigin.x > 0)
+            if (cameraOrigin.x > 0) {
                 cameraOrigin.x--;
+                // createArray(cameraOrigin);
+                console.log("%c RegionArray below this:", "background: #222; color: #bada55");
+                console.log(regionArray);
+            }
+
         }
         else if (key["code"] === "KeyS") {
-            if (cameraOrigin.y < this.keyYMax)
+            if (cameraOrigin.y < this.keyYMax) {
                 cameraOrigin.y++;
+                // createArray(cameraOrigin);
+                console.log("%c RegionArray below this:", "background: #222; color: #bada55");
+                console.log(regionArray);
+            }
+
         }
         else if (key["code"] === "KeyD") {
-            if (cameraOrigin.x < this.keyXMax)
+            if (cameraOrigin.x < this.keyXMax) {
                 cameraOrigin.x++;
+                // createArray(cameraOrigin);
+                console.log("%c RegionArray below this:", "background: #222; color: #bada55");
+                console.log(regionArray);
+            }
         }
         gameEngine.keyDown = null;
     }
 }
 // ===================================================================
 // End - Input Controller
-// ===================================================================
-
-
-
-// ===================================================================
-// Start - create region array
-// ===================================================================
-let regionArray = [];
-// line 54 of gameengine
-
-function createArray(origin) {
-
-    for (var i = 0; i < 45; i++) {
-        regionArray.push([]);
-        for (var j = 0; j < 36; j++) {
-            regionArray[i].push([]);
-        }
-    }
-
-    // update the value of the array
-
-    for (var i = 0; i < 45; i++) {
-        for (var j = 0; j < 36; j++) {
-            let xCor = origin.x + i;
-            let yCor = origin.y + j;
-            regionArray[i][j].name = GAMEBOARD[xCor][yCor].region.toString();
-            regionArray[i][j].x = xCor;
-            regionArray[i][j].y = yCor;
-            regionArray[i][j].w = dim;
-            regionArray[i][j].h = dim;
-        }
-    }
-}
-// ===================================================================
-// End - create region array
-// ===================================================================
-
-
-
-// ===================================================================
-// Start - get region id for clicked region
-// ===================================================================
-function getClickedRegion(regionArray, clickX, clickY) {
-    var regionId;
-    for (var i = 0; i < 45; i++) {
-        for (var j = 0; j < 36; j++) {
-            if (regionArray[i][j].x === clickX && regionArray[i][j].y === clickY) {
-                regionId = regionArray[i][j].name;
-            }
-        }
-    }
-    return regionId;
-}
-// ===================================================================
-// End - get region id for clicked region
 // ===================================================================
 
 
@@ -477,7 +606,8 @@ function Main() {
 
     // Game Map Display
     AM.queueDownload("./img/map/game map9072.png");
-    AM.queueDownload("./img/background.png");
+    AM.queueDownload("./map images/master.png");
+    AM.queueDownload("./img/background3.png");
 
     AM.downloadAll(function () {
 
