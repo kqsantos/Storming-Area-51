@@ -18,6 +18,9 @@ function GameEngine() {
     this.click = null;
     this.keyDown = null;
     this.cameraOrigin = null;
+    this.newGame = false;
+    this.zoomIn = false;
+    this.zoomOut= false;
 }
 
 GameEngine.prototype.init = function (ctx) {
@@ -42,22 +45,6 @@ GameEngine.prototype.startInput = function () {
     console.log('Starting input');
 
     var that = this;
-
-    function checkForHover(rects, x, y) {
-        var isHovering = false;
-        for (var i = 0, len = rects.length; i < len; i++) {
-            var left = rects[i].x, right = rects[i].x + rects[i].w;
-            var top = rects[i].y, bottom = rects[i].y + rects[i].h;
-            if (right >= x
-                && left <= x
-                && bottom >= y
-                && top <= y) {
-                isHovering = rects[i];
-            }
-        }
-        return isHovering;
-    }
-
     var elem = this.ctx.canvas;
 
     if (elem && elem.getContext) {
@@ -72,47 +59,30 @@ GameEngine.prototype.startInput = function () {
         // get context
 
         var context = elem.getContext('2d');
-        if (context) {
-
-            for (var i = 0, len = rects.length; i < len; i++) {
-                context.fillRect(rects[i].x, rects[i].y, rects[i].w, rects[i].h);
-            }
-
-        }
-
-        // elem.addEventListener('mousemove', function (e) {
-        //     var rect = checkForHover(rects, e.offsetX, e.offsetY);
-        //     console.log(rect);
-        //     if (rect.name === "endTurn") {
-        //         that.endTurnButtonHoverFlag = true;
-        //         console.log('Mouseover!: ' + rect.x + '/' + rect.y);
-        //     } else {
-        //         that.endTurnButtonHoverFlag = false;
-        //         console.log('no collision');
-        //     }
-        // }, false);
 
         // Animation Mouse Down Listener
         elem.addEventListener('click', function (e) {
-            that.click = { x: e.x, y: e.y };
+
+            that.click = { x: e.layerX, y: e.layerY };
+            // console.log(e);
         }, false);
 
         elem.addEventListener("keydown", function (e) {
             that.keyDown = e;
-            console.log(e);
-            console.log("Key Down Event - Char " + e.code + " Code " + e.keyCode);
+            // console.log("%c KeyDown info below this:", "background: #222; color: #bada55");
+            // console.log(e);
+            // console.log("Key Down Event - Char " + e.code + " Code " + e.keyCode);
         }, false);
-    
-        elem.addEventListener("keypress", function (e) {
-            // if (e.code === "KeyD") that.d = true;
-            // that.chars[e.code] = true;
-            console.log(e);
-            console.log("Key Pressed Event - Char " + e.charCode + " Code " + e.keyCode);
-        }, false);
-    
-        elem.addEventListener("keyup", function (e) {
-            console.log(e);
-            console.log("Key Up Event - Char " + e.code + " Code " + e.keyCode);
+
+        elem.addEventListener("wheel", function (e) {
+            if(e.deltaY < 0) {
+                that.zoomIn = true;
+                console.log("zoom in");
+            }
+            if(e.deltaY > 0) {
+                that.zoomOut = true;
+                console.log("zoom out");
+            }
         }, false);
 
     }
@@ -124,11 +94,6 @@ GameEngine.prototype.addEntity = function (entity) {
     console.log('added entity');
     this.entities.push(entity);
 }
-
-// GameEngine.prototype.addFactionEntity = function (entity) {
-//     console.log('added entity');
-//     this.factionEntities.push(entity);
-// }
 
 GameEngine.prototype.draw = function () {
     this.ctx.clearRect(0, 0, this.surfaceWidth, this.surfaceHeight);
@@ -145,7 +110,15 @@ GameEngine.prototype.update = function () {
     for (var i = 0; i < entitiesCount; i++) {
         var entity = this.entities[i];
 
-        entity.update();
+        if (!entity.removeFromWorld) {
+            entity.update();
+        }
+    }
+
+    for (var i = this.entities.length - 1; i >= 0; --i) {
+        if (this.entities[i].removeFromWorld) {
+            this.entities.splice(i, 1);
+        }
     }
 }
 
@@ -179,13 +152,6 @@ function Entity(game, x, y) {
     this.removeFromWorld = false;
     this.clickTrigger = null;
 }
-
-// function FactionEntity(game, x, y) {
-//     this.game = game;
-//     this.x = x;
-//     this.y = y;
-//     this.removeFromWorld = false;
-// }
 
 Entity.prototype.update = function () {
 }

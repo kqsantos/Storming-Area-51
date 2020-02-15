@@ -12,11 +12,27 @@ var dim = 20;
 
 var cameraOrigin = { x: 0, y: 0 };
 var myCells = [[], []]; // Tile grid
-var myRegions = []; // Contains IDs of tiles per region
-var myCanvasSize;
 
-var bgWidth = 1920;
-var bgHeight = 1080;
+var gameboard = BuildBoard();
+console.log("%c Gameboard below this:", "background: #222; color: #bada55");
+console.log(gameboard);
+var regions = BuildRegions();
+
+var regionArray = []; // This is the overlay used for the click event
+createArray(cameraOrigin);
+console.log("%c RegionArray below this:", "background: #222; color: #bada55");
+console.log(regionArray);
+
+var bgWidth = 2880;
+var bgHeight = 2304;
+
+var modbgWidth = bgWidth;
+var modbgHeight = bgHeight;
+
+var debug = true;
+var debugGrid = false;
+
+var selectedRegion = -1;
 // ===================================================================
 // End - Global Variables
 // ===================================================================
@@ -141,27 +157,101 @@ function Region(name, bldg, owner, troopX, troopY, bldgX, bldgY, territory, neig
 // ===================================================================
 // Start - Utility Functions
 // ===================================================================
+function createArray(origin) {
+    for (var i = 0; i < 64; i++) {
+        regionArray[i] = new Array(36);
+    }
+
+    // update the value of the array
+    for (var i = 0; i < 64; i++) {
+        for (var j = 0; j < 36; j++) {
+            let xCor = origin["x"] + i;
+            let yCor = origin["y"] + j;
+
+            if (gameboard[xCor][yCor] != null) {
+                regionArray[i][j] = {
+                    name: gameboard[xCor][yCor].region.toString(),
+                    x: xCor * dim,
+                    y: yCor * dim,
+                    w: dim,
+                    h: dim
+                };
+            } else {
+                regionArray[i][j] = null;
+            }
+
+        }
+    }
+}
+
+function getClickedRegion(rects, x, y) {
+    var regionId = null;
+    for (var i = 0, len = rects.length; i < len; i++) {
+        for (var j = 0, len2 = rects[i].length; j < len2; j++) {
+
+            var left = rects[i][j].x;
+            var right = rects[i][j].x + rects[i][j].w;
+            var top = rects[i][j].y;
+            var bottom = rects[i][j].y + rects[i][j].h;
+
+            if (right >= x
+                && left <= x
+                && bottom >= y
+                && top <= y) {
+                regionId = rects[i][j];
+            }
+
+        }
+    }
+    return regionId;
+}
+
+function getClickedItem(items, x, y) {
+    var output = null;
+    for (var i = 0, len = items.length; i < len; i++) {
+
+        var left = items[i].x;
+        var right = items[i].x + items[i].w;
+        var top = items[i].y;
+        var bottom = items[i].y + items[i].h;
+
+        if (right >= x
+            && left <= x
+            && bottom >= y
+            && top <= y) {
+            output = items[i];
+        }
+
+
+    }
+    return output;
+}
+
+
+
+
 function BuildRegions() {
     let Regions = [
-        new Region('S - SW', false, 1, 40, 560, 40, 560, 'sand', [2, 4, 5], 0),
-        new Region('S - SE', false, 1, 210, 560, 210, 560, 'sand', [2, 4, 5], 0),
-        new Region('S - E', false, 1, 110, 460, 110, 460, 'sand', [2, 4, 5], 0),
-        new Region('S - NE', false, 1, 110, 290, 110, 290, 'sand', [2, 4, 5], 0),
-        new Region('S - NW', false, 1, 40, 290, 40, 290, 'sand', [2, 4, 5], 0),
-        new Region('D - S', false, 1, 40, 240, 40, 240, 'dirt', [2, 4, 5], 0),
-        new Region('D - NW', false, 1, 120, 70, 40, 70, 'dirt', [2, 4, 5], 0),
-        new Region('D - E', false, 1, 280, 70, 280, 70, 'dirt', [2, 4, 5], 0),
-        new Region('I - NW', false, 1, 390, 30, 390, 30, 'ice', [2, 4, 5], 0),
-        new Region('I - W', false, 1, 390, 120, 390, 120, 'ice', [2, 4, 5], 0),
-        new Region('I - SW', false, 1, 390, 210, 390, 210, 'ice', [2, 4, 5], 0),
-        new Region('I - Mid', false, 1, 610, 30, 610, 30, 'ice', [2, 4, 5], 0),
-        new Region('I - E', false, 1, 730, 30, 730, 30, 'ice', [2, 4, 5], 0),
-        new Region('G - N', false, 1, 460, 380, 460, 380, 'grass', [2, 4, 5], 0),
-        new Region('G - SE', false, 1, 690, 520, 690, 520, 'grass', [2, 4, 5], 0),
-        new Region('G - SW', false, 1, 460, 520, 460, 580, 'grass', [2, 4, 5], 0),
+        new Region('S - SW', false, 1, 40, 560, 40, 560, 'orange', [2, 3, 5], 0),
+        new Region('S - SE', false, 1, 210, 560, 210, 560, 'orange', [1, 3, 16], 0),
+        new Region('S - E', false, 1, 110, 460, 110, 460, 'orange', [1, 2, 4, 5], 0),
+        new Region('S - NE', false, 1, 110, 290, 110, 290, 'orange', [3, 5, 6, 7, 14], 0),
+        new Region('S - NW', false, 1, 40, 290, 40, 290, 'orange', [1, 3, 4, 6], 0),
+        new Region('D - S', false, 0, 40, 240, 40, 240, 'green', [4, 5, 7, 8], 0),
+        new Region('D - NW', false, 0, 120, 70, 40, 70, 'green', [4, 6, 8, 9, 10, 11], 0),
+        new Region('D - E', false, 0, 280, 70, 280, 70, 'green', [6, 7], 0),
+        new Region('I - NW', false, 0, 390, 30, 390, 30, 'grey', [7, 10, 12], 0),
+        new Region('I - W', false, 0, 390, 120, 390, 120, 'grey', [7, 9, 11, 12], 0),
+        new Region('I - SW', false, 0, 390, 210, 390, 210, 'grey', [7, 10, 14], 0),
+        new Region('I - Mid', false, 0, 610, 30, 610, 30, 'grey', [9, 10, 13], 0),
+        new Region('I - E', false, 0, 730, 30, 730, 30, 'grey', [12, 14], 0),
+        new Region('G - N', false, 1, 460, 380, 460, 380, 'yellow', [4, 11, 15, 16], 0),
+        new Region('G - SE', false, 1, 690, 520, 690, 520, 'yellow', [14], 0),
+        new Region('G - SW', false, 1, 460, 520, 460, 580, 'yellow', [2, 14], 0),
     ];
     return Regions;
 }
+
 
 /**
  * Builds a Gameboard that is 90x72. By calling an index of the gameboard, the user is able to return whether or not the
@@ -185,47 +275,87 @@ function BuildBoard() {
     //console.log(data);
     //const testData = [0,1,2,3]
 
-    for (var i = 0; i < 90; i++) {
-        for (var j = 0; j < 72; j++) {
-            let csvVal = data[72 * i + j];
+    for (var y = 0; y < 72; y++) {
+        for (var x = 0; x < 90; x++) {
+            let csvVal = data[72 * y + x];
 
             if (csvVal == 1 || csvVal == 2 || csvVal == 3 || csvVal == 4 || csvVal == 5) {
-                gameboard[i][j].land = true;
-                gameboard[i][j].region = csvVal;
-                gameboard[i][j].territory = 'sand';
+                gameboard[x][y].land = true;
+                gameboard[x][y].region = csvVal;
+                gameboard[x][y].territory = 'orange';
             } else if (csvVal == 6 || csvVal == 7 || csvVal == 8) {
-                gameboard[i][j].land = true;
-                gameboard[i][j].region = csvVal;
-                gameboard[i][j].territory = 'dirt';
+                gameboard[x][y].land = true;
+                gameboard[x][y].region = csvVal;
+                gameboard[x][y].territory = 'green';
             } else if (csvVal == 9 || csvVal == 10 || csvVal == 11 || csvVal == 12 || csvVal == 13) {
-                gameboard[i][j].land = true;
-                gameboard[i][j].region = csvVal;
-                gameboard[i][j].territory = 'ice';
+                gameboard[x][y].land = true;
+                gameboard[x][y].region = csvVal;
+                gameboard[x][y].territory = 'grey';
             } else if (csvVal == 14 || csvVal == 15 || csvVal == 16) {
-                gameboard[i][j].land = true;
-                gameboard[i][j].region = csvVal;
-                gameboard[i][j].territory = 'grass';
-            } else if (csvVal == 0 || csvVal == -1) {
-                gameboard[i][j].land = null;
-                gameboard[i][j].region = csvVal;
-                gameboard[i][j].territory = null;
+                gameboard[x][y].land = true;
+                gameboard[x][y].region = csvVal;
+                gameboard[x][y].territory = 'yellow';
+            } else if (csvVal == 0 || csvVal == -1 || csvVal == 160) {
+                gameboard[x][y].land = null;
+                gameboard[x][y].region = csvVal;
+                gameboard[x][y].territory = null;
             }
         }
     }
 
-    return gameboard;
-
     // for (var i = 0; i < 90; i++){
-    //     GAMEBOARD[i].forEach((element) => {
-    //         if (element != null) console.log(element.territory)
+    //     var str = '';
+    //     gameboard[i].forEach((element) => {
+    //         str += element.region + ' '; 
     //     });
+    //     console.log(str);
     // }
 
+    return gameboard;
 }
+
+function StartGame (regionArray){
+    regionArray.forEach((region) => region.troopCount += 4);
+    regionArray[0].enemyHero = true;
+    regionArray[12].friendlyHero = true;
+}
+
 // ===================================================================
 // End - Utility Functions
 // ===================================================================
 
+// ===================================================================
+// Start - Combat Functions
+// ===================================================================
+function fight(region1, region2) {
+    atkPow = region1.troopCount;
+    defPow = region2.troopCount;
+
+    while (defPow > 0 && atkPow > 0){
+        Math.random() > 0.5 ? atkPow-- : defPow--;
+    }
+
+    if(atkPow > defPow){
+        region2.owner = region1.owner;
+        region2.troopCount = atkPow;
+        region1.troopCount = 0;
+        return true; // Attacker won
+    } else {
+        region1.troopCount = 0;
+        return false; // Defender won
+    }
+}
+
+function move(sourceRegion, destination, troopCount){
+    if(sourceRegion.neighbors.contains(destination.number)){
+        sourceRegion.troopCount -= troopCount;
+        destination.troopCount += troopCount;
+    } 
+}
+
+// ===================================================================
+// End - Combat Functions
+// ===================================================================
 
 
 // ===================================================================
@@ -252,14 +382,10 @@ ResourceDisplay.prototype.draw = function (ctx) {
 
     // Draw the Food Icon and Count
     ctx.drawImage(this.foodIcon, this.x + 30, this.y + 10);
-    ctx.drawImage(this.foodIcon, this.x + 30, this.y + 10);
-    ctx.fillText(this.foodCount, this.x + 70, this.y + 35);
     ctx.fillText(this.foodCount, this.x + 70, this.y + 35);
 
     // Draw the Money Icon and Count
     ctx.drawImage(this.moneyIcon, this.x + 130, this.y + 10);
-    ctx.drawImage(this.moneyIcon, this.x + 130, this.y + 10);
-    ctx.fillText(this.moneyCount, this.x + 160, this.y + 35);
     ctx.fillText(this.moneyCount, this.x + 160, this.y + 35);
 }
 // ===================================================================
@@ -269,10 +395,62 @@ ResourceDisplay.prototype.draw = function (ctx) {
 
 
 // ===================================================================
+// Start - Troop Display
+// ===================================================================
+function TroopDisplay(game) {
+    this.border = AM.getAsset("./img/icon/alien.png");
+    Entity.call(this, game, 0, 0);
+}
+
+TroopDisplay.prototype = new Entity();
+TroopDisplay.prototype.constructor = TroopDisplay;
+
+TroopDisplay.prototype.update = function (ctx) {
+}
+
+TroopDisplay.prototype.draw = function (ctx) {
+    ctx.drawImage(this.border, cameraOrigin.x * 20, cameraOrigin.y * 20,
+        bgWidth, bgHeight,
+        0, 250,
+        bgWidth * 0.1, bgHeight * 0.1);
+}
+// ===================================================================
+// End - Troop Display
+// ===================================================================
+
+
+
+// ===================================================================
+// Start - Building Display
+// ===================================================================
+function BuildingDisplay(game) {
+    this.border = AM.getAsset("./img/icon/barracks.png");
+    Entity.call(this, game, 0, 0);
+}
+
+BuildingDisplay.prototype = new Entity();
+BuildingDisplay.prototype.constructor = BuildingDisplay;
+
+BuildingDisplay.prototype.update = function (ctx) {
+}
+
+BuildingDisplay.prototype.draw = function (ctx) {
+    ctx.drawImage(this.border, cameraOrigin.x * 20, cameraOrigin.y * 20,
+        bgWidth, bgHeight,
+        0, 100,
+        bgWidth * 0.1, bgHeight * 0.1);
+}
+// ===================================================================
+// End - Building Display
+// ===================================================================
+
+
+
+// ===================================================================
 // Start - Map Display
 // ===================================================================
 function MapDisplay(game) {
-    this.border = AM.getAsset("./img/background.png");
+    this.border = AM.getAsset("./img/map/New MAP.png");
     Entity.call(this, game, 0, 0);
 }
 
@@ -283,10 +461,34 @@ MapDisplay.prototype.update = function (ctx) {
 }
 
 MapDisplay.prototype.draw = function (ctx) {
-    ctx.drawImage(this.border, cameraOrigin.x * 20, cameraOrigin.y * 20,
+    ctx.drawImage(this.border, cameraOrigin.x * dim, cameraOrigin.y * dim,
         bgWidth, bgHeight,
         0, 0,
-        bgWidth, bgHeight);
+        modbgWidth, modbgHeight);
+
+    // **Debug code** Displays Region ID on map
+    if (debug && debugGrid) {
+
+
+
+        var xCal = 4;
+        var yCal = -5;
+        // ctx.fillText(regionArray[0][0].name, 20 * dim, 20 * dim);
+        for (var i = 0; i < gameEngine.surfaceWidth / dim; i++) {
+            for (var j = 0; j < gameEngine.surfaceHeight / dim; j++) {
+                ctx.fillStyle = "black";
+                ctx.font = "12px Arial";
+                ctx.fillText(regionArray[i][j].name, (i * dim) + xCal + 1, ((j + 1) * dim) + yCal + 1);
+                ctx.fillStyle = "white";
+                ctx.font = "12px Arial";
+                ctx.fillText(regionArray[i][j].name, (i * dim) + xCal, ((j + 1) * dim) + yCal);
+                ctx.strokeStyle = "black";
+                ctx.strokeRect(i * dim, j * dim, dim, dim)
+            }
+        }
+    }
+
+
 }
 // ===================================================================
 // End - Map Display
@@ -298,14 +500,23 @@ MapDisplay.prototype.draw = function (ctx) {
 // Start - Minimap Display
 // ===================================================================
 function MinimapDisplay(game) {
-    this.border = AM.getAsset("./img/background.png");
-    bgWidth = 1920;
-    bgHeight = 1080;
+    this.border = AM.getAsset("./img/map/New MAP.png");
     this.minimapBorderWidth = 220;
     this.miniMapBorderHeight = 220;
-    this.keyXMax = (bgWidth / 20) - 45;
-    this.keyYMax = (bgHeight / 20) - 36;
-    this.btnDim = 80;
+
+    this.aspectRatio = Math.min(((this.minimapBorderWidth - 10) / bgWidth).toFixed(2),
+        ((this.miniMapBorderHeight - 10) / bgHeight).toFixed(2));
+
+    this.smWidth = (bgWidth * this.aspectRatio).toFixed(0); // Width of the shrunk map
+    this.smHeight = (bgHeight * this.aspectRatio).toFixed(0); // Height of the shunk map
+
+
+    this.originX = ((this.minimapBorderWidth / 2) - (this.smWidth / 2)); // Start point of image in mini map
+    this.originY = ((this.miniMapBorderHeight / 2) - (this.smHeight / 2)); // Start point of image in mini map
+
+    this.xMax = ((bgWidth / dim) - (gameEngine.surfaceWidth / dim)).toFixed(0);
+    this.yMax = ((bgHeight / dim) - (gameEngine.surfaceHeight / dim)).toFixed(0);
+
     Entity.call(this, game, 0, 0);
 }
 
@@ -313,28 +524,81 @@ MinimapDisplay.prototype = new Entity();
 MinimapDisplay.prototype.constructor = MinimapDisplay;
 
 MinimapDisplay.prototype.update = function (ctx) {
+    var click = gameEngine.click;
+    if (click != null &&
+        click.x >= this.originX &&
+        click.y >= this.originY &&
+        click.x <= this.smWidth &&
+        click.y <= this.smWidth) {
+        if (debug) {
+            console.log("%c Minimap click below this:", "background: #222; color: #bada55");
+        }
+
+        // Grabs the click on the minimap
+        var xClickOnMinimap = ((click.x - this.originX) / this.aspectRatio / dim).toFixed(0);
+        var yClickOnMinimap = ((click.y - this.originY) / this.aspectRatio / dim).toFixed(0);
+
+        if (debug) {
+            console.log("xClickOnMinimap --- " + xClickOnMinimap);
+            console.log("yClickOnMinimap --- " + yClickOnMinimap);
+        }
+
+        // Translates the minimap click to set the point in the map
+        var xTranslationToMap = (Number(xClickOnMinimap) - ((gameEngine.surfaceWidth * this.aspectRatio) / 2)).toFixed(0);
+        var yTranslationToMap = (Number(yClickOnMinimap) - ((gameEngine.surfaceHeight * this.aspectRatio) / 2)).toFixed(0);
+
+
+        // Takes care of clipping to edges of map
+        if (xTranslationToMap >= this.xMax) xTranslationToMap = this.xMax;
+        if (xTranslationToMap <= 0) xTranslationToMap = 0;
+        if (yTranslationToMap >= this.yMax) yTranslationToMap = this.yMax;
+        if (yTranslationToMap <= 0) yTranslationToMap = 0;
+
+        cameraOrigin["x"] = xTranslationToMap;
+        cameraOrigin["y"] = yTranslationToMap;
+        // createArray(cameraOrigin);
+        console.log(cameraOrigin);
+
+
+        if (debug) {
+            console.log("translation x --- " + xTranslationToMap);
+            console.log("translation y --- " + yTranslationToMap);
+            console.log("x max --- " + this.xMax);
+            console.log("y max --- " + this.yMax);
+            console.log("camera origin x --- " + cameraOrigin["x"]);
+            console.log("camera origin y --- " + cameraOrigin["y"]);
+        }
+
+
+        gameEngine.click = null;
+    } else if (click != null &&
+        click.x <= this.minimapBorderWidth &&
+        click.y <= this.miniMapBorderHeight) {
+        gameEngine.click = null; // Ignores click if click outside of shrunk map
+    }
 }
 
 MinimapDisplay.prototype.draw = function (ctx) {
     ctx.fillStyle = "#9e9e9e";
-    ctx.strokeStyle = "black";
+    ctx.strokeStyle = "white";
 
-    ctx.strokeRect(0, 0, this.minimapWidth, this.miniMapHeight);
-    ctx.fillRect(0, 0, this.minimapWidth, this.miniMapHeight);
+    // Draws the border
+    ctx.strokeRect(0, 0, this.minimapBorderWidth, this.miniMapBorderHeight);
+    ctx.fillRect(0, 0, this.minimapBorderWidth, this.miniMapBorderHeight);
 
-    var mX = (this.minimapWidth / 2) - ((bgWidth / 8) / 2); // Start point of image in mini map
-    var mY = (this.miniMapHeight / 2) - ((bgHeight / 8) / 2); // Start point of image in mini map
-
+    // Draws the shrunk map
     ctx.drawImage(this.border, 0, 0,
         bgWidth, bgHeight,
-        0,
-        0,
-        bgWidth / 10, bgHeight / 10);
+        this.originX,
+        this.originY,
+        this.smWidth, this.smHeight);
 
-    ctx.strokeRect(mX + (cameraOrigin.x * 2),
-        mY + (cameraOrigin.y * 2),
-        (gameEngine.surfaceWidth - 380) / 8,
-        gameEngine.surfaceHeight / 8);
+    // Draws the vision rectangle
+    ctx.lineWidth = 2;
+    ctx.strokeRect(this.originX + (cameraOrigin.x * (dim * this.aspectRatio)),
+        this.originY + (cameraOrigin.y * (dim * this.aspectRatio)),
+        gameEngine.surfaceWidth * this.aspectRatio,
+        gameEngine.surfaceHeight * this.aspectRatio);
 }
 // ===================================================================
 // End - Minimap Display
@@ -354,6 +618,7 @@ function ControlDisplay(game) {
     this.troopFlag = false;
     this.buildingFlag = false;
     this.endTurnFlag = false;
+
     this.btnDim = 80;
     Entity.call(this, game, 0, 0);
 }
@@ -444,8 +709,8 @@ ControlDisplay.prototype.draw = function (ctx) {
 // Start - Input Handler
 // ===================================================================
 function InputHandler(game) {
-    this.keyXMax = (bgWidth / 20) - 45;
-    this.keyYMax = (bgHeight / 20) - 36;
+    this.keyXMax = (bgWidth / dim) - (gameEngine.surfaceWidth / dim);
+    this.keyYMax = (bgHeight / dim) - (gameEngine.surfaceHeight / dim);
     Entity.call(this, game, 0, 0);
 }
 
@@ -457,23 +722,69 @@ InputHandler.prototype.update = function (ctx) {
     var key = gameEngine.keyDown;
     if (key != null) {
         if (key["code"] === "KeyW") {
-            if (cameraOrigin.y > 0)
+            if (cameraOrigin.y > 0) {
                 cameraOrigin.y--;
+                // createArray(cameraOrigin);
+                console.log("%c RegionArray below this:", "background: #222; color: #bada55");
+                console.log(regionArray);
+            }
+
         }
         else if (key["code"] === "KeyA") {
-            if (cameraOrigin.x > 0)
+            if (cameraOrigin.x > 0) {
                 cameraOrigin.x--;
+                // createArray(cameraOrigin);
+                console.log("%c RegionArray below this:", "background: #222; color: #bada55");
+                console.log(regionArray);
+            }
+
         }
         else if (key["code"] === "KeyS") {
-            if (cameraOrigin.y < this.keyYMax)
+            if (cameraOrigin.y < this.keyYMax) {
                 cameraOrigin.y++;
+                // createArray(cameraOrigin);
+                console.log("%c RegionArray below this:", "background: #222; color: #bada55");
+                console.log(regionArray);
+            }
+
         }
         else if (key["code"] === "KeyD") {
-            if (cameraOrigin.x < this.keyXMax)
+            if (cameraOrigin.x < this.keyXMax) {
                 cameraOrigin.x++;
+                // createArray(cameraOrigin);
+                console.log("%c RegionArray below this:", "background: #222; color: #bada55");
+                console.log(regionArray);
+            }
         }
+        console.log(cameraOrigin);
         gameEngine.keyDown = null;
     }
+
+    // Control clicks on the map
+    var click = gameEngine.click;
+    if (click != null) {
+
+        var regionClicked = getClickedRegion(regionArray, click.x, click.y);
+        console.log(click);
+        console.log(regionClicked);
+
+        gameEngine.click = null;
+    }
+
+    // Control wheel events
+    if (gameEngine.zoomIn) {
+        modbgWidth *= 1.02;
+        modbgHeight *= 1.02;
+        dim *= 1.02;
+        gameEngine.zoomIn = false;
+    }
+    if (gameEngine.zoomOut) {
+        modbgWidth /= 1.02;
+        modbgHeight /= 1.02;
+        dim /= 1.02;
+        gameEngine.zoomOut = false;
+    }
+    
 }
 // ===================================================================
 // End - Input Controller
@@ -482,56 +793,109 @@ InputHandler.prototype.update = function (ctx) {
 
 
 // ===================================================================
-// Start - create region array
+// Start - Audio Handler
 // ===================================================================
-let regionArray = [];
-// line 54 of gameengine
+function AudioHandler(game) {
+    var audio = new Audio("./sound/bg_music.mp3");
+    audio.play();
+    Entity.call(this, game, 0, 0);
+}
 
-function createArray(origin) {
+AudioHandler.prototype = new Entity();
+AudioHandler.prototype.constructor = AudioHandler;
 
-    for (var i = 0; i < 45; i++) {
-        regionArray.push([]);
-        for (var j = 0; j < 36; j++) {
-            regionArray[i].push([]);
-        }
-    }
+AudioHandler.prototype.update = function (ctx) {
+}
 
-    // update the value of the array
 
-    for (var i = 0; i < 45; i++) {
-        for (var j = 0; j < 36; j++) {
-            let xCor = origin.x + i;
-            let yCor = origin.y + j;
-            regionArray[i][j].name = GAMEBOARD[xCor][yCor].region.toString();
-            regionArray[i][j].x = xCor;
-            regionArray[i][j].y = yCor;
-            regionArray[i][j].w = dim;
-            regionArray[i][j].h = dim;
-        }
-    }
+AudioHandler.prototype.draw = function (ctx) {
 }
 // ===================================================================
-// End - create region array
+// End - Audio Handler
 // ===================================================================
 
 
 
 // ===================================================================
-// Start - get region id for clicked region
+// Start - Audio Handler
 // ===================================================================
-function getClickedRegion(regionArray, clickX, clickY) {
-    var regionId;
-    for (var i = 0; i < 45; i++) {
-        for (var j = 0; j < 36; j++) {
-            if (regionArray[i][j].x === clickX && regionArray[i][j].y === clickY) {
-                regionId = regionArray[i][j].name;
-            }
+
+function WelcomeScreen(game) {
+    // Welcome Screen Background
+    this.animation = new Animation(AM.getAsset("./img/welcome_screen.png"), 1280, 720, 7680, .08, 6, true, 1);
+    this.ctx = game.ctx;
+
+    // New Game Button Paramters
+    this.newGameButton = AM.getAsset("./img/button_new-game.png");
+    this.ngbWidth = 270;
+    this.ngbHeight = 72;
+    this.ngbX = (gameEngine.surfaceWidth / 2) - (270 / 2); //This is to center the button
+    this.ngbY = 500; //Y-coordinate of button
+
+    // Hitboxes for the buttons
+    this.hitBoxes = [{ name: "newGame", x: this.ngbX, y: this.ngbY, w: this.ngbWidth, h: this.ngbHeight }];
+
+    this.audio = new Audio("./sound/welcome_music.mp3");
+    this.audio.autoplay = true;
+    this.audio.play();
+
+
+    Entity.call(this, game, 0, 0);
+}
+
+WelcomeScreen.prototype = new Entity();
+WelcomeScreen.prototype.constructor = WelcomeScreen;
+
+WelcomeScreen.prototype.update = function (ctx) {
+
+    if (gameEngine.click != null) {
+
+        var hit = getClickedItem(this.hitBoxes, gameEngine.click.x, gameEngine.click.y);
+
+        if (debug) {
+            console.log(gameEngine.click);
+            console.log(this.hitBoxes);
+            console.log(hit);
         }
+
+        if (hit != null && hit.name === "newGame") {
+            gameEngine.newGame = true;
+        }
+
+        gameEngine.click = null;
     }
-    return regionId;
+    if (gameEngine.newGame) {
+        this.removeFromWorld = true;
+        gameEngine.addEntity(new MapDisplay(gameEngine));
+        gameEngine.addEntity(new MinimapDisplay(gameEngine));
+        gameEngine.addEntity(new ResourceDisplay(gameEngine));
+        gameEngine.addEntity(new ControlDisplay(gameEngine));
+      
+        gameEngine.addEntity(new MapDisplay(gameEngine));
+        gameEngine.addEntity(new MinimapDisplay(gameEngine));
+
+        gameEngine.addEntity(new BuildingDisplay(gameEngine));
+        gameEngine.addEntity(new TroopDisplay(gameEngine));
+        
+        gameEngine.addEntity(new ResourceDisplay(gameEngine));
+        gameEngine.addEntity(new ControlDisplay(gameEngine));
+        gameEngine.addEntity(new InputHandler(gameEngine));
+
+        gameEngine.addEntity(new WelcomeScreen(gameEngine));
+      
+      
+      
+        gameEngine.addEntity(new InputHandler(gameEngine));
+        gameEngine.addEntity(new AudioHandler(gameEngine));
+    }
+}
+
+WelcomeScreen.prototype.draw = function (ctx) {
+    this.animation.drawFrame(this.game.clockTick, this.ctx, this.x, this.y);
+    ctx.drawImage(this.newGameButton, this.ngbX, this.ngbY, this.ngbWidth, this.ngbHeight);
 }
 // ===================================================================
-// End - get region id for clicked region
+// End - Audio Handler
 // ===================================================================
 
 
@@ -546,22 +910,46 @@ function Main() {
     AM.queueDownload("./img/sidebar/money_icon.png");
 
     // Game Map Display
+    AM.queueDownload("./img/map/New MAP.png");
+
+    // Combat Entities 
+    AM.queueDownload("./img/icon/alien.png");
+    AM.queueDownload("./img/icon/soldier.png");
+    AM.queueDownload("./img/icon/star.png");
+
+    //Building Entities
+    AM.queueDownload("./img/icon/barracks.png");
+    AM.queueDownload("./img/icon/silo.png");
+
     AM.queueDownload("./img/map/game map9072.png");
-    AM.queueDownload("./img/background.png");
+    AM.queueDownload("./map images/master.png");
+    AM.queueDownload("./img/background3.png");
+
+
+    // Welcome Screen
+    AM.queueDownload("./img/welcome_screen.png");
+    AM.queueDownload("./img/button_new-game.png");
 
     AM.downloadAll(function () {
 
         gameEngine.init(ctx);
         gameEngine.start();
 
-        gameEngine.addEntity(new MapDisplay(gameEngine));
-        gameEngine.addEntity(new MinimapDisplay(gameEngine));
-        gameEngine.addEntity(new ResourceDisplay(gameEngine));
-        gameEngine.addEntity(new ControlDisplay(gameEngine));
-        gameEngine.addEntity(new InputHandler(gameEngine));
+        
+
+
     });
 
+
+
+    regionArray = BuildRegions();
     BuildBoard();
+    StartGame(regionArray);
+
+    
+
+    console.log('This is a test');
+    fight(regionArray[12], regionArray[0]) ? console.log('you win') : console.log('you lose');
 }
 
 Main();
