@@ -18,6 +18,9 @@ function GameEngine() {
     this.click = null;
     this.keyDown = null;
     this.cameraOrigin = null;
+    this.newGame = false;
+    this.zoomIn = false;
+    this.zoomOut= false;
 }
 
 GameEngine.prototype.init = function (ctx) {
@@ -55,9 +58,20 @@ GameEngine.prototype.startInput = function () {
 
         elem.addEventListener("keydown", function (e) {
             that.keyDown = e;
-            console.log("%c KeyDown info below this:", "background: #222; color: #bada55");
-            console.log(e);
-            console.log("Key Down Event - Char " + e.code + " Code " + e.keyCode);
+            // console.log("%c KeyDown info below this:", "background: #222; color: #bada55");
+            // console.log(e);
+            // console.log("Key Down Event - Char " + e.code + " Code " + e.keyCode);
+        }, false);
+
+        elem.addEventListener("wheel", function (e) {
+            if(e.deltaY < 0) {
+                that.zoomIn = true;
+                console.log("zoom in");
+            }
+            if(e.deltaY > 0) {
+                that.zoomOut = true;
+                console.log("zoom out");
+            }
         }, false);
 
     }
@@ -85,7 +99,15 @@ GameEngine.prototype.update = function () {
     for (var i = 0; i < entitiesCount; i++) {
         var entity = this.entities[i];
 
-        entity.update();
+        if (!entity.removeFromWorld) {
+            entity.update();
+        }
+    }
+
+    for (var i = this.entities.length - 1; i >= 0; --i) {
+        if (this.entities[i].removeFromWorld) {
+            this.entities.splice(i, 1);
+        }
     }
 }
 

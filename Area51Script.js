@@ -183,7 +183,6 @@ function createArray(origin) {
 
 function getClickedRegion(rects, x, y) {
     var regionId = null;
-
     for (var i = 0, len = rects.length; i < len; i++) {
         for (var j = 0, len2 = rects[i].length; j < len2; j++) {
 
@@ -201,11 +200,30 @@ function getClickedRegion(rects, x, y) {
 
         }
     }
-
-
-
     return regionId;
 }
+
+function getClickedItem(items, x, y) {
+    var output = null;
+    for (var i = 0, len = items.length; i < len; i++) {
+
+        var left = items[i].x;
+        var right = items[i].x + items[i].w;
+        var top = items[i].y;
+        var bottom = items[i].y + items[i].h;
+
+        if (right >= x
+            && left <= x
+            && bottom >= y
+            && top <= y) {
+            output = items[i];
+        }
+
+
+    }
+    return output;
+}
+
 
 
 
@@ -443,6 +461,8 @@ MinimapDisplay.prototype.update = function (ctx) {
 
         cameraOrigin["x"] = xTranslationToMap;
         cameraOrigin["y"] = yTranslationToMap;
+        // createArray(cameraOrigin);
+        console.log(cameraOrigin);
 
 
         if (debug) {
@@ -575,6 +595,7 @@ InputHandler.prototype.update = function (ctx) {
                 console.log(regionArray);
             }
         }
+        console.log(cameraOrigin);
         gameEngine.keyDown = null;
     }
 
@@ -596,6 +617,97 @@ InputHandler.prototype.update = function (ctx) {
 
 
 // ===================================================================
+// Start - Audio Handler
+// ===================================================================
+function AudioHandler(game) {
+    var audio = new Audio("./sound/bg_music.mp3");
+    audio.play();
+    Entity.call(this, game, 0, 0);
+}
+
+AudioHandler.prototype = new Entity();
+AudioHandler.prototype.constructor = AudioHandler;
+
+AudioHandler.prototype.update = function (ctx) {
+}
+
+AudioHandler.prototype.draw = function (ctx) {
+}
+// ===================================================================
+// End - Audio Handler
+// ===================================================================
+
+
+
+// ===================================================================
+// Start - Audio Handler
+// ===================================================================
+function WelcomeScreen(game) {
+    // Welcome Screen Background
+    this.animation = new Animation(AM.getAsset("./img/welcome_screen.png"), 1280, 720, 7680, .08, 6, true, 1);
+    this.ctx = game.ctx;
+
+    // New Game Button Paramters
+    this.newGameButton = AM.getAsset("./img/button_new-game.png");
+    this.ngbWidth = 270;
+    this.ngbHeight = 72;
+    this.ngbX = (gameEngine.surfaceWidth / 2) - (270 / 2); //This is to center the button
+    this.ngbY = 500; //Y-coordinate of button
+
+    // Hitboxes for the buttons
+    this.hitBoxes = [{ name: "newGame", x: this.ngbX, y: this.ngbY, w: this.ngbWidth, h: this.ngbHeight }];
+
+    this.audio = new Audio("./sound/welcome_music.mp3");
+    this.audio.autoplay = true;
+    this.audio.play();
+
+
+    Entity.call(this, game, 0, 0);
+}
+
+WelcomeScreen.prototype = new Entity();
+WelcomeScreen.prototype.constructor = WelcomeScreen;
+
+WelcomeScreen.prototype.update = function (ctx) {
+
+    if (gameEngine.click != null) {
+
+        var hit = getClickedItem(this.hitBoxes, gameEngine.click.x, gameEngine.click.y);
+
+        if(debug) {
+            console.log(gameEngine.click);
+            console.log(this.hitBoxes);
+            console.log(hit);
+        }
+
+        if(hit != null && hit.name === "newGame") {
+            gameEngine.newGame = true;
+        }
+        
+        gameEngine.click = null;
+    }
+    if (gameEngine.newGame) {
+        this.removeFromWorld = true;
+        gameEngine.addEntity(new MapDisplay(gameEngine));
+        gameEngine.addEntity(new MinimapDisplay(gameEngine));
+        gameEngine.addEntity(new ResourceDisplay(gameEngine));
+        gameEngine.addEntity(new ControlDisplay(gameEngine));
+        gameEngine.addEntity(new InputHandler(gameEngine));
+        gameEngine.addEntity(new AudioHandler(gameEngine));
+    }
+}
+
+WelcomeScreen.prototype.draw = function (ctx) {
+    this.animation.drawFrame(this.game.clockTick, this.ctx, this.x, this.y);
+    ctx.drawImage(this.newGameButton, this.ngbX, this.ngbY, this.ngbWidth, this.ngbHeight);
+}
+// ===================================================================
+// End - Audio Handler
+// ===================================================================
+
+
+
+// ===================================================================
 // Start - Main
 // ===================================================================
 function Main() {
@@ -609,16 +721,18 @@ function Main() {
     AM.queueDownload("./map images/master.png");
     AM.queueDownload("./img/background3.png");
 
+
+    // Welcome Screen
+    AM.queueDownload("./img/welcome_screen.png");
+    AM.queueDownload("./img/button_new-game.png");
+
     AM.downloadAll(function () {
 
         gameEngine.init(ctx);
         gameEngine.start();
 
-        gameEngine.addEntity(new MapDisplay(gameEngine));
-        gameEngine.addEntity(new MinimapDisplay(gameEngine));
-        gameEngine.addEntity(new ResourceDisplay(gameEngine));
-        gameEngine.addEntity(new ControlDisplay(gameEngine));
-        gameEngine.addEntity(new InputHandler(gameEngine));
+        gameEngine.addEntity(new WelcomeScreen(gameEngine));
+
     });
 
     BuildBoard();
