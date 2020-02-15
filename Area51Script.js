@@ -26,6 +26,9 @@ console.log(regionArray);
 var bgWidth = 2880;
 var bgHeight = 2304;
 
+var modbgWidth = bgWidth;
+var modbgHeight = bgHeight;
+
 var debug = true;
 var debugGrid = false;
 
@@ -369,7 +372,7 @@ MapDisplay.prototype.draw = function (ctx) {
     ctx.drawImage(this.border, cameraOrigin.x * dim, cameraOrigin.y * dim,
         bgWidth, bgHeight,
         0, 0,
-        bgWidth, bgHeight);
+        modbgWidth, modbgHeight);
 
     // **Debug code** Displays Region ID on map
     if (debug && debugGrid) {
@@ -609,6 +612,21 @@ InputHandler.prototype.update = function (ctx) {
 
         gameEngine.click = null;
     }
+
+    // Control wheel events
+    if (gameEngine.zoomIn) {
+        modbgWidth *= 1.02;
+        modbgHeight *= 1.02;
+        dim *= 1.02;
+        gameEngine.zoomIn = false;
+    }
+    if (gameEngine.zoomOut) {
+        modbgWidth /= 1.02;
+        modbgHeight /= 1.02;
+        dim /= 1.02;
+        gameEngine.zoomOut = false;
+    }
+    
 }
 // ===================================================================
 // End - Input Controller
@@ -674,16 +692,16 @@ WelcomeScreen.prototype.update = function (ctx) {
 
         var hit = getClickedItem(this.hitBoxes, gameEngine.click.x, gameEngine.click.y);
 
-        if(debug) {
+        if (debug) {
             console.log(gameEngine.click);
             console.log(this.hitBoxes);
             console.log(hit);
         }
 
-        if(hit != null && hit.name === "newGame") {
+        if (hit != null && hit.name === "newGame") {
             gameEngine.newGame = true;
         }
-        
+
         gameEngine.click = null;
     }
     if (gameEngine.newGame) {
