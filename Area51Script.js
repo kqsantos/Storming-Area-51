@@ -6,12 +6,10 @@ var canvas = document.getElementById('gameWorld');
 var ctx = canvas.getContext('2d');
 
 var gameEngine = new GameEngine();
-var player;
-var enemy;
-var dim = 20;
+var players = [];
+var dim = 20; //Cell size
 
-var cameraOrigin = { x: 0, y: 0 };
-var myCells = [[], []]; // Tile grid
+var cameraOrigin = { x: 0, y: 0 }; //Camera in top left pixel of screen
 
 var gameboard = BuildBoard();
 console.log("%c Gameboard below this:", "background: #222; color: #bada55");
@@ -147,6 +145,8 @@ function Region(name, bldg, owner, troopX, troopY, bldgX, bldgY, territory, neig
         this.territory = territory,
         this.neighbors = neighbors,
         this.troopCount = troopCount
+
+        //Change to array of troop objects
 }
 // ===================================================================
 // End - Map Entities
@@ -156,7 +156,12 @@ function Region(name, bldg, owner, troopX, troopY, bldgX, bldgY, territory, neig
 
 // ===================================================================
 // Start - Utility Functions
-// ===================================================================
+// ===================================================================\
+
+/**
+ * Creates array of region IDs on screen
+ * @param {*} origin 
+ */
 function createArray(origin) {
     for (var i = 0; i < 64; i++) {
         regionArray[i] = new Array(36);
@@ -183,7 +188,12 @@ function createArray(origin) {
         }
     }
 }
-
+/**
+ * Creates rectangles and returns selected box
+ * @param {*} rects array of hit boxes
+ * @param {*} x x position of mouse click
+ * @param {*} y y position of mouse click
+ */
 function getClickedRegion(rects, x, y) {
     var regionId = null;
     for (var i = 0, len = rects.length; i < len; i++) {
@@ -315,9 +325,9 @@ function BuildBoard() {
 }
 
 function StartGame (regionArray){
-    regionArray.forEach((region) => region.troopCount += 4);
-    regionArray[0].enemyHero = true;
-    regionArray[12].friendlyHero = true;
+    this.regionArray.forEach((region) => region.troopCount += 4);
+    this.regionArray[0].enemyHero = true;
+    this.regionArray[12].friendlyHero = true;
 }
 
 // ===================================================================
@@ -346,6 +356,8 @@ function fight(region1, region2) {
     }
 }
 
+//Merge attack and move @ Ryan
+
 function move(sourceRegion, destination, troopCount){
     if(sourceRegion.neighbors.contains(destination.number)){
         sourceRegion.troopCount -= troopCount;
@@ -365,8 +377,6 @@ function ResourceDisplay(game) {
     this.border = AM.getAsset("./img/sidebar/resource_display.png");
     this.foodIcon = AM.getAsset("./img/sidebar/food_icon.png")
     this.moneyIcon = AM.getAsset("./img/sidebar/money_icon.png")
-    this.foodCount = 0;
-    this.moneyCount = 0;
     Entity.call(this, game, 900, 0);
 }
 
@@ -405,7 +415,7 @@ function TroopDisplay(game) {
 TroopDisplay.prototype = new Entity();
 TroopDisplay.prototype.constructor = TroopDisplay;
 
-TroopDisplay.prototype.update = function (ctx) {
+TroopDisplay.prototype.update = function (ctx) { //update the owner
 }
 
 TroopDisplay.prototype.draw = function (ctx) {
@@ -501,8 +511,8 @@ MapDisplay.prototype.draw = function (ctx) {
 // ===================================================================
 function MinimapDisplay(game) {
     this.border = AM.getAsset("./img/map/New MAP.png");
-    this.minimapBorderWidth = 220;
-    this.miniMapBorderHeight = 220;
+    this.minimapBorderWidth = 180;
+    this.miniMapBorderHeight = 160;
 
     this.aspectRatio = Math.min(((this.minimapBorderWidth - 10) / bgWidth).toFixed(2),
         ((this.miniMapBorderHeight - 10) / bgHeight).toFixed(2));
@@ -579,7 +589,7 @@ MinimapDisplay.prototype.update = function (ctx) {
 }
 
 MinimapDisplay.prototype.draw = function (ctx) {
-    ctx.fillStyle = "#9e9e9e";
+    ctx.fillStyle = "black";
     ctx.strokeStyle = "white";
 
     // Draws the border
@@ -867,19 +877,13 @@ WelcomeScreen.prototype.update = function (ctx) {
     if (gameEngine.newGame) {
         this.removeFromWorld = true;
         gameEngine.addEntity(new MapDisplay(gameEngine));
-        gameEngine.addEntity(new MinimapDisplay(gameEngine));
-        gameEngine.addEntity(new ResourceDisplay(gameEngine));
-        gameEngine.addEntity(new ControlDisplay(gameEngine));
-      
-        gameEngine.addEntity(new MapDisplay(gameEngine));
-        gameEngine.addEntity(new MinimapDisplay(gameEngine));
-
         gameEngine.addEntity(new BuildingDisplay(gameEngine));
         gameEngine.addEntity(new TroopDisplay(gameEngine));
-        
+        gameEngine.addEntity(new MinimapDisplay(gameEngine));
         gameEngine.addEntity(new ResourceDisplay(gameEngine));
         gameEngine.addEntity(new ControlDisplay(gameEngine));
-        gameEngine.addEntity(new InputHandler(gameEngine));
+
+
 
         gameEngine.addEntity(new InputHandler(gameEngine));
         gameEngine.addEntity(new AudioHandler(gameEngine));
@@ -949,4 +953,4 @@ function Main() {
 Main();
 // ===================================================================
 // End - Main
-// ===================================================================
+// ==================================================================
