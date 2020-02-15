@@ -599,7 +599,7 @@ InputHandler.prototype.update = function (ctx) {
         gameEngine.keyDown = null;
     }
 
-    // Control for WASD map movement
+    // Control clicks on the map
     var click = gameEngine.click;
     if (click != null) {
 
