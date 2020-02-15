@@ -18,13 +18,17 @@ console.log("%c Gameboard below this:", "background: #222; color: #bada55");
 console.log(gameboard);
 var regions = BuildRegions();
 
-var regionArray = [];
-createArray(cameraOrigin); // Contains IDs of tiles per regions
+var regionArray = []; // This is the overlay used for the click event
+createArray(cameraOrigin);
 console.log("%c RegionArray below this:", "background: #222; color: #bada55");
 console.log(regionArray);
 
 var bgWidth = 2880;
 var bgHeight = 2304;
+
+var debug = false;
+
+var selectedRegion = -1;
 // ===================================================================
 // End - Global Variables
 // ===================================================================
@@ -160,11 +164,11 @@ function createArray(origin) {
             let xCor = origin["x"] + i;
             let yCor = origin["y"] + j;
 
-            if (gameboard[yCor][xCor] != null) {
+            if (gameboard[xCor][yCor] != null) {
                 regionArray[i][j] = {
                     name: gameboard[xCor][yCor].region.toString(),
-                    x: xCor,
-                    y: yCor,
+                    x: xCor * dim,
+                    y: yCor * dim,
                     w: dim,
                     h: dim
                 };
@@ -176,32 +180,33 @@ function createArray(origin) {
     }
 }
 
-function getClickedRegion(regionArray, clickX, clickY) {
-    var regionId;
-    for (var i = 0; i < 64; i++) {
-        for (var j = 0; j < 36; j++) {
-            if (regionArray[i][j].x === clickX && regionArray[i][j].y === clickY) {
-                regionId = regionArray[i][j].name;
+function getClickedRegion(rects, x, y) {
+    var regionId = null;
+
+    for (var i = 0, len = rects.length; i < len; i++) {
+        for (var j = 0, len2 = rects[i].length; j < len2; j++) {
+
+            var left = rects[i][j].x;
+            var right = rects[i][j].x + rects[i][j].w;
+            var top = rects[i][j].y;
+            var bottom = rects[i][j].y + rects[i][j].h;
+
+            if (right >= x
+                && left <= x
+                && bottom >= y
+                && top <= y) {
+                regionId = rects[i][j];
             }
+
         }
     }
+
+
+
     return regionId;
 }
 
-function checkForHover(rects, x, y) {
-    var isHovering = false;
-    for (var i = 0, len = rects.length; i < len; i++) {
-        var left = rects[i].x, right = rects[i].x + rects[i].w;
-        var top = rects[i].y, bottom = rects[i].y + rects[i].h;
-        if (right >= x
-            && left <= x
-            && bottom >= y
-            && top <= y) {
-            isHovering = rects[i];
-        }
-    }
-    return isHovering;
-}
+
 
 function BuildRegions() {
     let Regions = [
@@ -224,90 +229,6 @@ function BuildRegions() {
     ];
     return Regions;
 }
-
-function CSVToArray( strData, strDelimiter ){
-    // Check to see if the delimiter is defined. If not,
-    // then default to comma.
-    strDelimiter = (strDelimiter || ",");
-
-    // Create a regular expression to parse the CSV values.
-    var objPattern = new RegExp(
-        (
-            // Delimiters.
-            "(\\" + strDelimiter + "|\\r?\\n|\\r|^)" +
-
-            // Quoted fields.
-            "(?:\"([^\"]*(?:\"\"[^\"]*)*)\"|" +
-
-            // Standard fields.
-            "([^\"\\" + strDelimiter + "\\r\\n]*))"
-        ),
-        "gi"
-        );
-
-
-    // Create an array to hold our data. Give the array
-    // a default empty first row.
-    var arrData = [[]];
-
-    // Create an array to hold our individual pattern
-    // matching groups.
-    var arrMatches = null;
-
-
-    // Keep looping over the regular expression matches
-    // until we can no longer find a match.
-    while (arrMatches = objPattern.exec( strData )){
-
-        // Get the delimiter that was found.
-        var strMatchedDelimiter = arrMatches[ 1 ];
-
-        // Check to see if the given delimiter has a length
-        // (is not the start of string) and if it matches
-        // field delimiter. If id does not, then we know
-        // that this delimiter is a row delimiter.
-        if (
-            strMatchedDelimiter.length &&
-            strMatchedDelimiter !== strDelimiter
-            ){
-
-            // Since we have reached a new row of data,
-            // add an empty row to our data array.
-            arrData.push( [] );
-
-        }
-
-        var strMatchedValue;
-
-        // Now that we have our delimiter out of the way,
-        // let's check to see which kind of value we
-        // captured (quoted or unquoted).
-        if (arrMatches[ 2 ]){
-
-            // We found a quoted value. When we capture
-            // this value, unescape any double quotes.
-            strMatchedValue = arrMatches[ 2 ].replace(
-                new RegExp( "\"\"", "g" ),
-                "\""
-                );
-
-        } else {
-
-            // We found a non-quoted value.
-            strMatchedValue = arrMatches[ 3 ];
-
-        }
-
-
-        // Now that we have our value string, let's add
-        // it to the data array.
-        arrData[ arrData.length - 1 ].push( strMatchedValue );
-    }
-
-    // Return the parsed data.
-    return( arrData );
-}
-
 
 
 /**
@@ -416,7 +337,6 @@ ResourceDisplay.prototype.draw = function (ctx) {
 // ===================================================================
 function MapDisplay(game) {
     this.border = AM.getAsset("./map images/master.png");
-    // this.border = AM.getAsset("./img/background3.png");
     Entity.call(this, game, 0, 0);
 }
 
@@ -427,22 +347,33 @@ MapDisplay.prototype.update = function (ctx) {
 }
 
 MapDisplay.prototype.draw = function (ctx) {
-    ctx.drawImage(this.border, cameraOrigin.x * 20, cameraOrigin.y * 20,
+    ctx.drawImage(this.border, cameraOrigin.x * dim, cameraOrigin.y * dim,
         bgWidth, bgHeight,
         0, 0,
         bgWidth, bgHeight);
 
-    // **Debugger** -- Displays Region ID
-    ctx.fillStyle = "black";
-    ctx.font = "12px Arial";
-    var xCal = 4;
-    var yCal = -5;
-    // ctx.fillText(regionArray[0][0].name, 20 * dim, 20 * dim);
-    for (var i = 0; i < 64; i++) {
-        for (var j = 0; j < 36; j++) {
-            ctx.fillText(regionArray[i][j].name, (i * dim)+xCal, ((j + 1) * dim)+yCal);
+    // **Debug code** Displays Region ID on map
+    if (debug) {
+
+
+
+        var xCal = 4;
+        var yCal = -5;
+        // ctx.fillText(regionArray[0][0].name, 20 * dim, 20 * dim);
+        for (var i = 0; i < gameEngine.surfaceWidth / dim; i++) {
+            for (var j = 0; j < gameEngine.surfaceHeight / dim; j++) {
+                ctx.fillStyle = "black";
+                ctx.font = "12px Arial";
+                ctx.fillText(regionArray[i][j].name, (i * dim) + xCal + 1, ((j + 1) * dim) + yCal + 1);
+                ctx.fillStyle = "white";
+                ctx.font = "12px Arial";
+                ctx.fillText(regionArray[i][j].name, (i * dim) + xCal, ((j + 1) * dim) + yCal);
+                ctx.strokeStyle = "black";
+                ctx.strokeRect(i * dim, j * dim, dim, dim)
+            }
         }
     }
+
 
 }
 // ===================================================================
@@ -456,10 +387,25 @@ MapDisplay.prototype.draw = function (ctx) {
 // ===================================================================
 function MinimapDisplay(game) {
     this.border = AM.getAsset("./map images/master.png");
-    // this.border = AM.getAsset("./img/background3.png");
-    this.minimapBorderWidth = 200;
-    this.miniMapBorderHeight = 200;
-    this.aspectRatio = .10;
+    this.minimapBorderWidth = 220;
+    this.miniMapBorderHeight = 220;
+
+    this.aspectRatio = Math.min(((this.minimapBorderWidth - 10) / bgWidth).toFixed(2),
+        ((this.miniMapBorderHeight - 10) / bgHeight).toFixed(2));
+
+    this.smWidth = (bgWidth * this.aspectRatio).toFixed(0); // Width of the shrunk map
+    this.smHeight = (bgHeight * this.aspectRatio).toFixed(0); // Height of the shunk map
+
+
+    this.originX = ((this.minimapBorderWidth / 2) - (this.smWidth / 2)); // Start point of image in mini map
+    this.originY = ((this.miniMapBorderHeight / 2) - (this.smHeight / 2)); // Start point of image in mini map
+
+    this.xMax = (bgWidth / dim) - (gameEngine.surfaceWidth / dim);
+    this.yMax = (bgHeight / dim) - (gameEngine.surfaceHeight / dim);
+
+    this.xCal = 15;
+    this.yCal = 3;
+
     Entity.call(this, game, 0, 0);
 }
 
@@ -467,32 +413,93 @@ MinimapDisplay.prototype = new Entity();
 MinimapDisplay.prototype.constructor = MinimapDisplay;
 
 MinimapDisplay.prototype.update = function (ctx) {
+    var click = gameEngine.click;
+    if (click != null &&
+        click.x >= this.originX &&
+        click.y >= this.originY &&
+        click.x <= this.smWidth &&
+        click.y <= this.smWidth) {
+        if (debug) {
+            console.log("%c Minimap click below this:", "background: #222; color: #bada55"); s
+        }
+
+        // Grabs the click on the minimap
+        var xClickOnMinimap = ((click.x - this.originX) / this.aspectRatio / dim).toFixed(0);
+        var yClickOnMinimap = ((click.y - this.originY) / this.aspectRatio / dim).toFixed(0);
+
+        if (debug) {
+            console.log("xClickOnMinimap --- " + xClickOnMinimap);
+            console.log("yClickOnMinimap --- " + yClickOnMinimap);
+        }
+
+        // Translates the minimap click to set the point in the map
+        var xTranslationToMap = (Number(xClickOnMinimap) - ((gameEngine.surfaceWidth * this.aspectRatio) / 2)).toFixed(0);
+        var yTranslationToMap = (Number(yClickOnMinimap) - ((gameEngine.surfaceHeight * this.aspectRatio) / 2)).toFixed(0);
+        
+
+        // Takes care of clipping to edges of map
+        var clipFlag = false;
+        if (xTranslationToMap > this.xMax) {
+            xTranslationToMap = this.xMax;
+            clipFlag = true;
+        }
+        if (xTranslationToMap < 0) {
+            xTranslationToMap = 0;
+            clipFlag = true;
+        }
+        if (yTranslationToMap > this.yMax) {
+            yTranslationToMap = this.yMax;
+            clipFlag = true;
+        }
+        if (yTranslationToMap < 0) {
+            yTranslationToMap = 0;
+            clipFlag = true;
+        }
+
+        // Changes the cameraOrigin depending on clipping
+        if (!clipFlag) {
+            cameraOrigin["x"] = Number(xTranslationToMap) + this.xCal;
+            cameraOrigin["y"] = Number(yTranslationToMap) + this.yCal;
+        } else {
+            cameraOrigin["x"] = xTranslationToMap;
+            cameraOrigin["y"] = yTranslationToMap;
+            clipFlag = false;
+        }
+
+
+        if (debug) {
+            console.log("camera origin x --- " + cameraOrigin["x"]);
+            console.log("camera origin y --- " + cameraOrigin["y"]);
+        }
+
+
+        gameEngine.click = null;
+    } else if (click != null &&
+        click.x <= this.minimapBorderWidth &&
+        click.y <= this.miniMapBorderHeight) {
+        gameEngine.click = null; // Ignores click if click outside of shrunk map
+    }
 }
 
 MinimapDisplay.prototype.draw = function (ctx) {
     ctx.fillStyle = "#9e9e9e";
-    ctx.strokeStyle = "black";
+    ctx.strokeStyle = "white";
 
     // Draws the border
     ctx.strokeRect(0, 0, this.minimapBorderWidth, this.miniMapBorderHeight);
     ctx.fillRect(0, 0, this.minimapBorderWidth, this.miniMapBorderHeight);
 
-    var smWidth = bgWidth * this.aspectRatio; // Width of the shrunk map
-    var smHeight = bgHeight * this.aspectRatio; // Height of the shunk map
-
-    var mX = (this.minimapBorderWidth / 2) - (smWidth / 2); // Start point of image in mini map
-    var mY = (this.miniMapBorderHeight / 2) - (smHeight / 2); // Start point of image in mini map
-
     // Draws the shrunk map
     ctx.drawImage(this.border, 0, 0,
         bgWidth, bgHeight,
-        mX,
-        mY,
-        smWidth, smHeight);
+        this.originX,
+        this.originY,
+        this.smWidth, this.smHeight);
 
     // Draws the vision rectangle
-    ctx.strokeRect(mX + (cameraOrigin.x * 2),
-        mY + (cameraOrigin.y * 2),
+    ctx.lineWidth = 2;
+    ctx.strokeRect(this.originX + (cameraOrigin.x * (dim * this.aspectRatio)),
+        this.originY + (cameraOrigin.y * (dim * this.aspectRatio)),
         gameEngine.surfaceWidth * this.aspectRatio,
         gameEngine.surfaceHeight * this.aspectRatio);
 }
@@ -587,6 +594,17 @@ InputHandler.prototype.update = function (ctx) {
             }
         }
         gameEngine.keyDown = null;
+    }
+
+    // Control for WASD map movement
+    var click = gameEngine.click;
+    if (click != null) {
+
+        var regionClicked = getClickedRegion(regionArray, click.x, click.y);
+        console.log(click);
+        console.log(regionClicked);
+
+        gameEngine.click = null;
     }
 }
 // ===================================================================

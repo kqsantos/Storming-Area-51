@@ -42,54 +42,15 @@ GameEngine.prototype.startInput = function () {
     console.log('Starting input');
 
     var that = this;
-
-    function checkForHover(rects, x, y) {
-        var isHovering = false;
-        for (var i = 0, len = rects.length; i < len; i++) {
-            var left = rects[i].x, right = rects[i].x + rects[i].w;
-            var top = rects[i].y, bottom = rects[i].y + rects[i].h;
-            if (right >= x
-                && left <= x
-                && bottom >= y
-                && top <= y) {
-                isHovering = rects[i];
-            }
-        }
-        return isHovering;
-    }
-
     var elem = this.ctx.canvas;
 
     if (elem && elem.getContext) {
-        // list of rectangles to render
-        var rects = [{ name: "endTurn", x: 1018, y: 678, w: 136, h: 35 },
-        { name: "buildTroop", x: 75, y: 0, w: 50, h: 50 }];
-        // get context
-
         var context = elem.getContext('2d');
-        if (context) {
-
-            for (var i = 0, len = rects.length; i < len; i++) {
-                context.fillRect(rects[i].x, rects[i].y, rects[i].w, rects[i].h);
-            }
-
-        }
-
-        // elem.addEventListener('mousemove', function (e) {
-        //     var rect = checkForHover(rects, e.offsetX, e.offsetY);
-        //     console.log(rect);
-        //     if (rect.name === "endTurn") {
-        //         that.endTurnButtonHoverFlag = true;
-        //         console.log('Mouseover!: ' + rect.x + '/' + rect.y);
-        //     } else {
-        //         that.endTurnButtonHoverFlag = false;
-        //         console.log('no collision');
-        //     }
-        // }, false);
 
         // Animation Mouse Down Listener
         elem.addEventListener('click', function (e) {
-            this.click = { x: e.x, y: e.y };
+            that.click = { x: e.layerX, y: e.layerY };
+            // console.log(e);
         }, false);
 
         elem.addEventListener("keydown", function (e) {
