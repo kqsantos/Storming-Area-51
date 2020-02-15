@@ -26,7 +26,8 @@ console.log(regionArray);
 var bgWidth = 2880;
 var bgHeight = 2304;
 
-var debug = false;
+var debug = true;
+var debugGrid = false;
 
 var selectedRegion = -1;
 // ===================================================================
@@ -353,7 +354,7 @@ MapDisplay.prototype.draw = function (ctx) {
         bgWidth, bgHeight);
 
     // **Debug code** Displays Region ID on map
-    if (debug) {
+    if (debug && debugGrid) {
 
 
 
@@ -400,11 +401,8 @@ function MinimapDisplay(game) {
     this.originX = ((this.minimapBorderWidth / 2) - (this.smWidth / 2)); // Start point of image in mini map
     this.originY = ((this.miniMapBorderHeight / 2) - (this.smHeight / 2)); // Start point of image in mini map
 
-    this.xMax = (bgWidth / dim) - (gameEngine.surfaceWidth / dim);
-    this.yMax = (bgHeight / dim) - (gameEngine.surfaceHeight / dim);
-
-    this.xCal = 15;
-    this.yCal = 3;
+    this.xMax = ((bgWidth / dim) - (gameEngine.surfaceWidth / dim)).toFixed(0);
+    this.yMax = ((bgHeight / dim) - (gameEngine.surfaceHeight / dim)).toFixed(0);
 
     Entity.call(this, game, 0, 0);
 }
@@ -420,7 +418,7 @@ MinimapDisplay.prototype.update = function (ctx) {
         click.x <= this.smWidth &&
         click.y <= this.smWidth) {
         if (debug) {
-            console.log("%c Minimap click below this:", "background: #222; color: #bada55"); s
+            console.log("%c Minimap click below this:", "background: #222; color: #bada55");
         }
 
         // Grabs the click on the minimap
@@ -435,39 +433,23 @@ MinimapDisplay.prototype.update = function (ctx) {
         // Translates the minimap click to set the point in the map
         var xTranslationToMap = (Number(xClickOnMinimap) - ((gameEngine.surfaceWidth * this.aspectRatio) / 2)).toFixed(0);
         var yTranslationToMap = (Number(yClickOnMinimap) - ((gameEngine.surfaceHeight * this.aspectRatio) / 2)).toFixed(0);
-        
+
 
         // Takes care of clipping to edges of map
-        var clipFlag = false;
-        if (xTranslationToMap > this.xMax) {
-            xTranslationToMap = this.xMax;
-            clipFlag = true;
-        }
-        if (xTranslationToMap < 0) {
-            xTranslationToMap = 0;
-            clipFlag = true;
-        }
-        if (yTranslationToMap > this.yMax) {
-            yTranslationToMap = this.yMax;
-            clipFlag = true;
-        }
-        if (yTranslationToMap < 0) {
-            yTranslationToMap = 0;
-            clipFlag = true;
-        }
+        if (xTranslationToMap >= this.xMax) xTranslationToMap = this.xMax;
+        if (xTranslationToMap <= 0) xTranslationToMap = 0;
+        if (yTranslationToMap >= this.yMax) yTranslationToMap = this.yMax;
+        if (yTranslationToMap <= 0) yTranslationToMap = 0;
 
-        // Changes the cameraOrigin depending on clipping
-        if (!clipFlag) {
-            cameraOrigin["x"] = Number(xTranslationToMap) + this.xCal;
-            cameraOrigin["y"] = Number(yTranslationToMap) + this.yCal;
-        } else {
-            cameraOrigin["x"] = xTranslationToMap;
-            cameraOrigin["y"] = yTranslationToMap;
-            clipFlag = false;
-        }
+        cameraOrigin["x"] = xTranslationToMap;
+        cameraOrigin["y"] = yTranslationToMap;
 
 
         if (debug) {
+            console.log("translation x --- " + xTranslationToMap);
+            console.log("translation y --- " + yTranslationToMap);
+            console.log("x max --- " + this.xMax);
+            console.log("y max --- " + this.yMax);
             console.log("camera origin x --- " + cameraOrigin["x"]);
             console.log("camera origin y --- " + cameraOrigin["y"]);
         }
