@@ -64,6 +64,11 @@ GameEngine.prototype.startInput = function () {
         // list of rectangles to render
         var rects = [{ name: "endTurn", x: 1018, y: 678, w: 136, h: 35 },
         { name: "buildTroop", x: 75, y: 0, w: 50, h: 50 }];
+
+        var rects2 = [{ name: "action", x: 960, y: 640, w: 80, h: 80 },
+        { name: "troop", x: 1040, y: 640, w: 80, h: 80 },
+        {name: "building", x: 1120, y: 640, w: 80, h: 80},
+        {name: "endTurn", x: 1200, y:640, w: 80, h: 80}];
         // get context
 
         var context = elem.getContext('2d');
@@ -89,7 +94,7 @@ GameEngine.prototype.startInput = function () {
 
         // Animation Mouse Down Listener
         elem.addEventListener('click', function (e) {
-            this.click = { x: e.x, y: e.y };
+            that.click = { x: e.x, y: e.y };
         }, false);
 
         elem.addEventListener("keydown", function (e) {

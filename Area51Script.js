@@ -346,10 +346,14 @@ MinimapDisplay.prototype.draw = function (ctx) {
 // Start - Control Display
 // ===================================================================
 function ControlDisplay(game) {
-    this.minimapBorderWidth = 220;
-    this.miniMapBorderHeight = 220;
-    this.keyXMax = (bgWidth / 20) - 45;
-    this.keyYMax = (bgHeight / 20) - 36;
+    var menu = [{ name: "action", x: 960, y: 640, w: 80, h: 80 },
+        { name: "troop", x: 1040, y: 640, w: 80, h: 80 },
+        {name: "building", x: 1120, y: 640, w: 80, h: 80},
+        {name: "endTurn", x: 1200, y:640, w: 80, h: 80}];
+    this.actionFlag = false;
+    this.troopFlag = false;
+    this.buildingFlag = false;
+    this.endTurnFlag = false;
     this.btnDim = 80;
     Entity.call(this, game, 0, 0);
 }
@@ -357,7 +361,22 @@ function ControlDisplay(game) {
 ControlDisplay.prototype = new Entity();
 ControlDisplay.prototype.constructor = ControlDisplay;
 
+// max x=1438; x changes by the size of the map display
+// use .clearRect(x,y,w,h)
 ControlDisplay.prototype.update = function (ctx) {
+    var click = gameEngine.click;
+    if(click !== null){
+        if(click[x] > 959 && click[y] > 639 && click[x] < 1040 && click[y] < 720){
+            this.actionFlag = true;
+            
+        } else if(click[x] > 1039 && click[y] > 639 && click[x] < 1120 && click[y] < 720){
+            this.troopFlag = true;
+        } else if(click[x] > 1119 && click[y] > 639 && click[x] < 1200 && click[y] < 720){
+            this.buildingFlag = true;
+        } else if(click[x] > 1999 && click[y] > 639 && click[x] < 1280 && click[y] < 720){
+            this.endTurnFlag = true;
+        }
+    }
 }
 
 ControlDisplay.prototype.draw = function (ctx) {
@@ -372,6 +391,48 @@ ControlDisplay.prototype.draw = function (ctx) {
     ctx.strokeRect(gameEngine.surfaceWidth - this.btnDim * 3, gameEngine.surfaceHeight - this.btnDim, this.btnDim, this.btnDim);
     ctx.fillRect(gameEngine.surfaceWidth - this.btnDim * 4, gameEngine.surfaceHeight - this.btnDim, this.btnDim, this.btnDim);
     ctx.strokeRect(gameEngine.surfaceWidth - this.btnDim * 4, gameEngine.surfaceHeight - this.btnDim, this.btnDim, this.btnDim);
+
+    if(this.actionFlag){
+        if(this.troopFlag){
+            ctx.clearRect();
+            this.troopFlag = false;
+        } if(this.buildingFlag){
+            ctx.clearRect();
+            this.buildingFlag = false;
+        }
+        ctx.fillRect(gameEngine.surfaceWidth - this.btnDim*4, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
+        ctx.strokeRect(gameEngine.surfaceWidth - this.btnDim*4, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
+        ctx.fillRect(gameEngine.surfaceWidth - this.btnDim*5, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
+        ctx.strokeRect(gameEngine.surfaceWidth - this.btnDim*5, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
+    } else if(this.troopFlag){
+        if(this.actionFlag){
+            // clear rect for action
+            ctx.clearRect();
+            this.actionFlag = false;
+        } if(this.buildingFlag){
+            // clear rect for building
+            ctx.clearRect();
+            this.buildingFlag = false;
+        }
+        ctx.fillRect(gameEngine.surfaceWidth - this.btnDim, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
+        ctx.strokeRect(gameEngine.surfaceWidth - this.btnDim, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
+        ctx.fillRect(gameEngine.surfaceWidth - this.btnDim, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
+        ctx.strokeRect(gameEngine.surfaceWidth - this.btnDim, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
+    } else if(this.buildingFlag){
+        if(this.actionFlag){
+            // clear rect for action
+            ctx.clearRect();
+            this.actionFlag = false;
+        } if(this.troopFlag){
+            // clear rect for building
+            ctx.clearRect();
+            this.troopFlag = false;
+        }
+        ctx.fillRect(gameEngine.surfaceWidth - this.btnDim, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
+        ctx.strokeRect(gameEngine.surfaceWidth - this.btnDim, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
+        ctx.fillRect(gameEngine.surfaceWidth - this.btnDim, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
+        ctx.strokeRect(gameEngine.surfaceWidth - this.btnDim, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
+    } 
 }
 // ===================================================================
 // End - Control Display
