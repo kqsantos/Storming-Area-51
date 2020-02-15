@@ -881,10 +881,6 @@ WelcomeScreen.prototype.update = function (ctx) {
         gameEngine.addEntity(new ControlDisplay(gameEngine));
         gameEngine.addEntity(new InputHandler(gameEngine));
 
-        gameEngine.addEntity(new WelcomeScreen(gameEngine));
-      
-      
-      
         gameEngine.addEntity(new InputHandler(gameEngine));
         gameEngine.addEntity(new AudioHandler(gameEngine));
     }
@@ -934,10 +930,8 @@ function Main() {
 
         gameEngine.init(ctx);
         gameEngine.start();
-
         
-
-
+        gameEngine.addEntity(new WelcomeScreen(gameEngine));
     });
 
 
