@@ -641,14 +641,14 @@ ControlDisplay.prototype.constructor = ControlDisplay;
 ControlDisplay.prototype.update = function (ctx) {
     var click = gameEngine.click;
     if(click !== null){
-        if(click[x] > 959 && click[y] > 639 && click[x] < 1040 && click[y] < 720){
+        if(click.x > 959 && click.y > 639 && click.x < 1040 && click.y < 720){
             this.actionFlag = true;
             
-        } else if(click[x] > 1039 && click[y] > 639 && click[x] < 1120 && click[y] < 720){
+        } else if(click.x > 1039 && click.y > 639 && click.x < 1120 && click.y < 720){
             this.troopFlag = true;
-        } else if(click[x] > 1119 && click[y] > 639 && click[x] < 1200 && click[y] < 720){
+        } else if(click.x > 1119 && click.y > 639 && click.x < 1200 && click.y < 720){
             this.buildingFlag = true;
-        } else if(click[x] > 1999 && click[y] > 639 && click[x] < 1280 && click[y] < 720){
+        } else if(click.x > 1999 && click.y > 639 && click.x < 1280 && click.y < 720){
             this.endTurnFlag = true;
         }
     }
@@ -667,46 +667,58 @@ ControlDisplay.prototype.draw = function (ctx) {
     ctx.fillRect(gameEngine.surfaceWidth - this.btnDim * 4, gameEngine.surfaceHeight - this.btnDim, this.btnDim, this.btnDim);
     ctx.strokeRect(gameEngine.surfaceWidth - this.btnDim * 4, gameEngine.surfaceHeight - this.btnDim, this.btnDim, this.btnDim);
 
+    console.log("ac"+this.actionFlag)
+    console.log("tr"+this.troopFlag);
+    console.log("bu"+this.buildingFlag)
     if(this.actionFlag){
         if(this.troopFlag){
-            ctx.clearRect();
+            ctx.clearRect(gameEngine.surfaceWidth - this.btnDim*3, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
+            ctx.clearRect(gameEngine.surfaceWidth - this.btnDim*4, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
             this.troopFlag = false;
         } if(this.buildingFlag){
-            ctx.clearRect();
+            ctx.clearRect(gameEngine.surfaceWidth - this.btnDim*2, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
+            ctx.clearRect(gameEngine.surfaceWidth - this.btnDim*3, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
             this.buildingFlag = false;
         }
         ctx.fillRect(gameEngine.surfaceWidth - this.btnDim*4, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
         ctx.strokeRect(gameEngine.surfaceWidth - this.btnDim*4, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
         ctx.fillRect(gameEngine.surfaceWidth - this.btnDim*5, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
         ctx.strokeRect(gameEngine.surfaceWidth - this.btnDim*5, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
-    } else if(this.troopFlag){
+    } if(this.troopFlag){
+        
         if(this.actionFlag){
             // clear rect for action
-            ctx.clearRect();
+            ctx.clearRect(gameEngine.surfaceWidth - this.btnDim*4, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
+            ctx.clearRect(gameEngine.surfaceWidth - this.btnDim*5, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
+
             this.actionFlag = false;
         } if(this.buildingFlag){
             // clear rect for building
-            ctx.clearRect();
+            ctx.clearRect(gameEngine.surfaceWidth - this.btnDim*2, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
+            ctx.clearRect(gameEngine.surfaceWidth - this.btnDim*3, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
             this.buildingFlag = false;
         }
-        ctx.fillRect(gameEngine.surfaceWidth - this.btnDim, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
-        ctx.strokeRect(gameEngine.surfaceWidth - this.btnDim, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
-        ctx.fillRect(gameEngine.surfaceWidth - this.btnDim, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
-        ctx.strokeRect(gameEngine.surfaceWidth - this.btnDim, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
-    } else if(this.buildingFlag){
+        ctx.fillRect(gameEngine.surfaceWidth - this.btnDim*3, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
+        ctx.strokeRect(gameEngine.surfaceWidth - this.btnDim*3, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
+        ctx.fillRect(gameEngine.surfaceWidth - this.btnDim*4, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
+        ctx.strokeRect(gameEngine.surfaceWidth - this.btnDim*4, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
+    } if(this.buildingFlag){
         if(this.actionFlag){
             // clear rect for action
-            ctx.clearRect();
+            ctx.clearRect(gameEngine.surfaceWidth - this.btnDim*4, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
+            ctx.clearRect(gameEngine.surfaceWidth - this.btnDim*5, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
             this.actionFlag = false;
         } if(this.troopFlag){
             // clear rect for building
-            ctx.clearRect();
+            ctx.clearRect(gameEngine.surfaceWidth - this.btnDim*3, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
+            ctx.clearRect(gameEngine.surfaceWidth - this.btnDim*4, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
+
             this.troopFlag = false;
         }
-        ctx.fillRect(gameEngine.surfaceWidth - this.btnDim, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
-        ctx.strokeRect(gameEngine.surfaceWidth - this.btnDim, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
-        ctx.fillRect(gameEngine.surfaceWidth - this.btnDim, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
-        ctx.strokeRect(gameEngine.surfaceWidth - this.btnDim, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
+        ctx.fillRect(gameEngine.surfaceWidth - this.btnDim*2, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
+        ctx.strokeRect(gameEngine.surfaceWidth - this.btnDim*2, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
+        ctx.fillRect(gameEngine.surfaceWidth - this.btnDim*3, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
+        ctx.strokeRect(gameEngine.surfaceWidth - this.btnDim*3, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
     } 
 }
 // ===================================================================
