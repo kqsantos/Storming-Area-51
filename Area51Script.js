@@ -6,6 +6,8 @@ var canvas = document.getElementById('gameWorld');
 var ctx = canvas.getContext('2d');
 
 var gameEngine = new GameEngine();
+gameEngine.init(ctx);
+gameEngine.start();
 var players = [];
 var dim = 20; //Cell size
 
@@ -21,8 +23,8 @@ createArray(cameraOrigin);
 console.log("%c RegionArray below this:", "background: #222; color: #bada55");
 console.log(regionArray);
 
-var bgWidth = 2880;
-var bgHeight = 2304;
+var bgWidth = 1800;
+var bgHeight = 1440;
 
 var modbgWidth = bgWidth;
 var modbgHeight = bgHeight;
@@ -146,7 +148,7 @@ function Region(name, bldg, owner, troopX, troopY, bldgX, bldgY, territory, neig
         this.neighbors = neighbors,
         this.troopCount = troopCount
 
-        //Change to array of troop objects
+    //Change to array of troop objects
 }
 // ===================================================================
 // End - Map Entities
@@ -163,15 +165,14 @@ function Region(name, bldg, owner, troopX, troopY, bldgX, bldgY, territory, neig
  * @param {*} origin 
  */
 function createArray(origin) {
-    for (var i = 0; i < 64; i++) {
-        regionArray[i] = new Array(36);
+    for (var i = 0; i < gameEngine.surfaceWidth / dim; i++) {
+        regionArray[i] = new Array(gameEngine.surfaceHeight / dim);
     }
-
     // update the value of the array
-    for (var i = 0; i < 64; i++) {
-        for (var j = 0; j < 36; j++) {
-            let xCor = origin["x"] + i;
-            let yCor = origin["y"] + j;
+    for (var i = 0; i < gameEngine.surfaceWidth / dim; i++) {
+        for (var j = 0; j < gameEngine.surfaceHeight / dim; j++) {
+            let xCor = origin.x + i;
+            let yCor = origin.y+ j;
 
             if (gameboard[xCor][yCor] != null) {
                 regionArray[i][j] = {
@@ -324,7 +325,7 @@ function BuildBoard() {
     return gameboard;
 }
 
-function StartGame (regionArray){
+function StartGame(regionArray) {
     this.regionArray.forEach((region) => region.troopCount += 4);
     this.regionArray[0].enemyHero = true;
     this.regionArray[12].friendlyHero = true;
@@ -341,11 +342,11 @@ function fight(region1, region2) {
     atkPow = region1.troopCount;
     defPow = region2.troopCount;
 
-    while (defPow > 0 && atkPow > 0){
+    while (defPow > 0 && atkPow > 0) {
         Math.random() > 0.5 ? atkPow-- : defPow--;
     }
 
-    if(atkPow > defPow){
+    if (atkPow > defPow) {
         region2.owner = region1.owner;
         region2.troopCount = atkPow;
         region1.troopCount = 0;
@@ -358,11 +359,11 @@ function fight(region1, region2) {
 
 //Merge attack and move @ Ryan
 
-function move(sourceRegion, destination, troopCount){
-    if(sourceRegion.neighbors.contains(destination.number)){
+function move(sourceRegion, destination, troopCount) {
+    if (sourceRegion.neighbors.contains(destination.number)) {
         sourceRegion.troopCount -= troopCount;
         destination.troopCount += troopCount;
-    } 
+    }
 }
 
 // ===================================================================
@@ -483,15 +484,19 @@ MapDisplay.prototype.draw = function (ctx) {
 
         var xCal = 4;
         var yCal = -5;
-        // ctx.fillText(regionArray[0][0].name, 20 * dim, 20 * dim);
         for (var i = 0; i < gameEngine.surfaceWidth / dim; i++) {
             for (var j = 0; j < gameEngine.surfaceHeight / dim; j++) {
+                // add sahdows to numbers
                 ctx.fillStyle = "black";
                 ctx.font = "12px Arial";
                 ctx.fillText(regionArray[i][j].name, (i * dim) + xCal + 1, ((j + 1) * dim) + yCal + 1);
+
+                //displays numbers
                 ctx.fillStyle = "white";
                 ctx.font = "12px Arial";
                 ctx.fillText(regionArray[i][j].name, (i * dim) + xCal, ((j + 1) * dim) + yCal);
+
+                // displays rectangles
                 ctx.strokeStyle = "black";
                 ctx.strokeRect(i * dim, j * dim, dim, dim)
             }
@@ -621,16 +626,28 @@ MinimapDisplay.prototype.draw = function (ctx) {
 // Start - Control Display
 // ===================================================================
 function ControlDisplay(game) {
-    var menu = [{ name: "action", x: 960, y: 640, w: 80, h: 80 },
-        { name: "troop", x: 1040, y: 640, w: 80, h: 80 },
-        {name: "building", x: 1120, y: 640, w: 80, h: 80},
-        {name: "endTurn", x: 1200, y:640, w: 80, h: 80}];
+    this.btnDim = 80;
+    var w = gameEngine.surfaceWidth;
+    var h = gameEngine.surfaceHeight;
+    this.aBtn = { x: w - this.btnDim * 4, y: h - this.btnDim };
+    this.tBtn = { x: w - this.btnDim * 3, y: h - this.btnDim };
+    this.bBtn = { x: w - this.btnDim * 2, y: h - this.btnDim };
+    this.eTBtn = { x: w - this.btnDim * 1, y: h - this.btnDim };
+
+    this.a_moveBtn = { x: w - this.btnDim * 4, y: h - this.btnDim * 2 };
+    this.t_infBtn = { x: w - this.btnDim * 3, y: h - this.btnDim * 2 };
+    this.b_farmBtn = { x: w - this.btnDim * 2, y: h - this.btnDim * 2 };
+    this.b_barBtn = { x: w - this.btnDim * 3, y: h - this.btnDim * 2 };
+
+    this.menu = [{ name: "action", x: this.aBtn.x, y: this.aBtn.y, w: this.btnDim, h: this.btnDim },
+    { name: "troop", x: this.tBtn.x, y: this.tBtn.y, w: this.btnDim, h: this.btnDim },
+    { name: "building", x: this.bBtn.x, y: this.bBtn.y, w: this.btnDim, h: this.btnDim },
+    { name: "endTurn", x: this.eTBtn.x, y: this.eTBtn.y, w: this.btnDim, h: this.btnDim }];
+
     this.actionFlag = false;
     this.troopFlag = false;
     this.buildingFlag = false;
-    this.endTurnFlag = false;
 
-    this.btnDim = 80;
     Entity.call(this, game, 0, 0);
 }
 
@@ -641,85 +658,110 @@ ControlDisplay.prototype.constructor = ControlDisplay;
 // use .clearRect(x,y,w,h)
 ControlDisplay.prototype.update = function (ctx) {
     var click = gameEngine.click;
-    if(click !== null){
-        if(click.x > 959 && click.y > 639 && click.x < 1040 && click.y < 720){
-            this.actionFlag = true;
-        } else if(click.x > 1039 && click.y > 639 && click.x < 1120 && click.y < 720){
-            this.troopFlag = true;
-        } else if(click.x > 1119 && click.y > 639 && click.x < 1200 && click.y < 720){
-            this.buildingFlag = true;
-        } else if(click.x > 1999 && click.y > 639 && click.x < 1280 && click.y < 720){
-            this.endTurnFlag = true;
+    var that = this;
+
+    if (click !== null) {
+
+        var x = getClickedItem(this.menu, click.x, click.y);
+        if (x !== null) {
+            if (x.name === "action") {
+                toggleAllOff();
+                this.actionFlag = true;
+                click = null;
+            } else if (x.name === "troop") {
+                toggleAllOff();
+                this.troopFlag = true;
+                click = null;
+            } else if (x.name === "building") {
+                toggleAllOff();
+                this.buildingFlag = true;
+                click = null;
+            } else {
+                toggleAllOff();
+            }
+        } else {
+            toggleAllOff();
         }
+
+
+
     }
+
+    function toggleAllOff() {
+        that.actionFlag = false;
+        that.troopFlag = false;
+        that.buildingFlag = false;
+    }
+
+
+
 }
 
 ControlDisplay.prototype.draw = function (ctx) {
     ctx.fillStyle = "#9e9e9e";
     ctx.strokeStyle = "black";
 
-    ctx.fillRect(gameEngine.surfaceWidth - this.btnDim, gameEngine.surfaceHeight - this.btnDim, this.btnDim, this.btnDim);
-    ctx.strokeRect(gameEngine.surfaceWidth - this.btnDim, gameEngine.surfaceHeight - this.btnDim, this.btnDim, this.btnDim);
-    ctx.fillRect(gameEngine.surfaceWidth - this.btnDim * 2, gameEngine.surfaceHeight - this.btnDim, this.btnDim, this.btnDim);
-    ctx.strokeRect(gameEngine.surfaceWidth - this.btnDim * 2, gameEngine.surfaceHeight - this.btnDim, this.btnDim, this.btnDim);
-    ctx.fillRect(gameEngine.surfaceWidth - this.btnDim * 3, gameEngine.surfaceHeight - this.btnDim, this.btnDim, this.btnDim);
-    ctx.strokeRect(gameEngine.surfaceWidth - this.btnDim * 3, gameEngine.surfaceHeight - this.btnDim, this.btnDim, this.btnDim);
-    ctx.fillRect(gameEngine.surfaceWidth - this.btnDim * 4, gameEngine.surfaceHeight - this.btnDim, this.btnDim, this.btnDim);
-    ctx.strokeRect(gameEngine.surfaceWidth - this.btnDim * 4, gameEngine.surfaceHeight - this.btnDim, this.btnDim, this.btnDim);
+    function toggleAllOff() {
+        this.actionFlag = false;
+        this.troopFlag = false;
+        this.buildingFlag = false;
+    }
 
-    console.log("ac"+this.actionFlag)
-    console.log("tr"+this.troopFlag);
-    console.log("bu"+this.buildingFlag)
-    if(this.actionFlag){
-        if(this.troopFlag){
-            ctx.clearRect(gameEngine.surfaceWidth - this.btnDim*3, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
-            ctx.clearRect(gameEngine.surfaceWidth - this.btnDim*4, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
-            this.troopFlag = false;
-        } if(this.buildingFlag){
-            ctx.clearRect(gameEngine.surfaceWidth - this.btnDim*2, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
-            ctx.clearRect(gameEngine.surfaceWidth - this.btnDim*3, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
-            this.buildingFlag = false;
-        }
-        ctx.fillRect(gameEngine.surfaceWidth - this.btnDim*4, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
-        ctx.strokeRect(gameEngine.surfaceWidth - this.btnDim*4, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
-        ctx.fillRect(gameEngine.surfaceWidth - this.btnDim*5, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
-        ctx.strokeRect(gameEngine.surfaceWidth - this.btnDim*5, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
-    } if(this.troopFlag){
-        
-        if(this.actionFlag){
-            // clear rect for action
-            ctx.clearRect(gameEngine.surfaceWidth - this.btnDim*4, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
-            ctx.clearRect(gameEngine.surfaceWidth - this.btnDim*5, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
+    // Displays four mega menus
+    ctx.fillRect(this.eTBtn.x, this.eTBtn.y, this.btnDim, this.btnDim);
+    ctx.strokeRect(this.eTBtn.x, this.eTBtn.y, this.btnDim, this.btnDim);
+    ctx.fillRect(this.bBtn.x, this.bBtn.y, this.btnDim, this.btnDim);
+    ctx.strokeRect(this.bBtn.x, this.bBtn.y, this.btnDim, this.btnDim);
+    ctx.fillRect(this.tBtn.x, this.tBtn.y, this.btnDim, this.btnDim);
+    ctx.strokeRect(this.tBtn.x, this.tBtn.y, this.btnDim, this.btnDim);
+    ctx.fillRect(this.aBtn.x, this.aBtn.y, this.btnDim, this.btnDim);
+    ctx.strokeRect(this.aBtn.x, this.aBtn.y, this.btnDim, this.btnDim);
 
-            this.actionFlag = false;
-        } if(this.buildingFlag){
-            // clear rect for building
-            ctx.clearRect(gameEngine.surfaceWidth - this.btnDim*2, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
-            ctx.clearRect(gameEngine.surfaceWidth - this.btnDim*3, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
-            this.buildingFlag = false;
-        }
-        ctx.fillRect(gameEngine.surfaceWidth - this.btnDim*3, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
-        ctx.strokeRect(gameEngine.surfaceWidth - this.btnDim*3, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
-        ctx.fillRect(gameEngine.surfaceWidth - this.btnDim*4, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
-        ctx.strokeRect(gameEngine.surfaceWidth - this.btnDim*4, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
-    } if(this.buildingFlag){
-        if(this.actionFlag){
-            // clear rect for action
-            ctx.clearRect(gameEngine.surfaceWidth - this.btnDim*4, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
-            ctx.clearRect(gameEngine.surfaceWidth - this.btnDim*5, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
-            this.actionFlag = false;
-        } if(this.troopFlag){
-            // clear rect for building
-            ctx.clearRect(gameEngine.surfaceWidth - this.btnDim*3, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
-            ctx.clearRect(gameEngine.surfaceWidth - this.btnDim*4, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
 
-            this.troopFlag = false;
+
+    if (this.actionFlag) {
+        // toggleAllOff();
+        ctx.fillRect(this.a_moveBtn.x, this.a_moveBtn.y, this.btnDim, this.btnDim);
+        ctx.strokeRect(this.a_moveBtn.x, this.a_moveBtn.y, this.btnDim, this.btnDim);
+        // ctx.fillRect(gameEngine.surfaceWidth - this.btnDim * 5, gameEngine.surfaceHeight - this.btnDim * 2, this.btnDim, this.btnDim);
+        // ctx.strokeRect(gameEngine.surfaceWidth - this.btnDim * 5, gameEngine.surfaceHeight - this.btnDim * 2, this.btnDim, this.btnDim);
+        // this.actionFlag = true;
+        if (debug) {
+            console.log("ac" + this.actionFlag);
+            console.log("tr" + this.troopFlag);
+            console.log("bu" + this.buildingFlag);
         }
-        ctx.fillRect(gameEngine.surfaceWidth - this.btnDim*2, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
-        ctx.strokeRect(gameEngine.surfaceWidth - this.btnDim*2, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
-        ctx.fillRect(gameEngine.surfaceWidth - this.btnDim*3, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
-        ctx.strokeRect(gameEngine.surfaceWidth - this.btnDim*3, gameEngine.surfaceHeight - this.btnDim*2, this.btnDim, this.btnDim);
-    } 
+    }
+
+
+    if (this.troopFlag) {
+        // toggleAllOff();
+        ctx.fillRect(this.t_infBtn.x, this.t_infBtn.y, this.btnDim, this.btnDim);
+        ctx.strokeRect(this.t_infBtn.x, this.t_infBtn.y, this.btnDim, this.btnDim);
+        // ctx.fillRect(gameEngine.surfaceWidth - this.btnDim * 4, gameEngine.surfaceHeight - this.btnDim * 2, this.btnDim, this.btnDim);
+        // ctx.strokeRect(gameEngine.surfaceWidth - this.btnDim * 4, gameEngine.surfaceHeight - this.btnDim * 2, this.btnDim, this.btnDim);
+        // this.troopFlag = true;
+        if (debug) {
+            console.log("ac" + this.actionFlag);
+            console.log("tr" + this.troopFlag);
+            console.log("bu" + this.buildingFlag);
+        }
+    }
+
+
+    if (this.buildingFlag) {
+        // toggleAllOff();
+        ctx.fillRect(this.b_farmBtn.x, this.b_farmBtn.y, this.btnDim, this.btnDim);
+        ctx.strokeRect(this.b_farmBtn.x, this.b_farmBtn.y, this.btnDim, this.btnDim);
+        ctx.fillRect(this.b_barBtn.x, this.b_barBtn.y, this.btnDim, this.btnDim);
+        ctx.strokeRect(this.b_barBtn.x, this.b_barBtn.y, this.btnDim, this.btnDim);
+        // this.buildingFlag = true;
+        if (debug) {
+            console.log("ac" + this.actionFlag);
+            console.log("tr" + this.troopFlag);
+            console.log("bu" + this.buildingFlag);
+        }
+    }
 }
 // ===================================================================
 // End - Control Display
@@ -746,7 +788,7 @@ InputHandler.prototype.update = function (ctx) {
         if (key["code"] === "KeyW") {
             if (cameraOrigin.y > 0) {
                 cameraOrigin.y--;
-                // createArray(cameraOrigin);
+                createArray(cameraOrigin);
                 console.log("%c RegionArray below this:", "background: #222; color: #bada55");
                 console.log(regionArray);
             }
@@ -755,7 +797,7 @@ InputHandler.prototype.update = function (ctx) {
         else if (key["code"] === "KeyA") {
             if (cameraOrigin.x > 0) {
                 cameraOrigin.x--;
-                // createArray(cameraOrigin);
+                createArray(cameraOrigin);
                 console.log("%c RegionArray below this:", "background: #222; color: #bada55");
                 console.log(regionArray);
             }
@@ -764,7 +806,7 @@ InputHandler.prototype.update = function (ctx) {
         else if (key["code"] === "KeyS") {
             if (cameraOrigin.y < this.keyYMax) {
                 cameraOrigin.y++;
-                // createArray(cameraOrigin);
+                createArray(cameraOrigin);
                 console.log("%c RegionArray below this:", "background: #222; color: #bada55");
                 console.log(regionArray);
             }
@@ -773,7 +815,7 @@ InputHandler.prototype.update = function (ctx) {
         else if (key["code"] === "KeyD") {
             if (cameraOrigin.x < this.keyXMax) {
                 cameraOrigin.x++;
-                // createArray(cameraOrigin);
+                createArray(cameraOrigin);
                 console.log("%c RegionArray below this:", "background: #222; color: #bada55");
                 console.log(regionArray);
             }
@@ -806,7 +848,7 @@ InputHandler.prototype.update = function (ctx) {
         dim /= 1.02;
         gameEngine.zoomOut = false;
     }
-    
+
 }
 // ===================================================================
 // End - Input Controller
@@ -889,11 +931,13 @@ WelcomeScreen.prototype.update = function (ctx) {
     if (gameEngine.newGame) {
         this.removeFromWorld = true;
         gameEngine.addEntity(new MapDisplay(gameEngine));
-        gameEngine.addEntity(new BuildingDisplay(gameEngine));
-        gameEngine.addEntity(new TroopDisplay(gameEngine));
-        gameEngine.addEntity(new MinimapDisplay(gameEngine));
-        gameEngine.addEntity(new ResourceDisplay(gameEngine));
-        gameEngine.addEntity(new ControlDisplay(gameEngine));
+
+        // gameEngine.addEntity(new BuildingDisplay(gameEngine));
+        // gameEngine.addEntity(new TroopDisplay(gameEngine));
+
+        // gameEngine.addEntity(new MinimapDisplay(gameEngine));
+        // gameEngine.addEntity(new ResourceDisplay(gameEngine));
+        // gameEngine.addEntity(new ControlDisplay(gameEngine));
 
 
 
@@ -943,23 +987,19 @@ function Main() {
     AM.queueDownload("./img/button_new-game.png");
 
     AM.downloadAll(function () {
-
-        gameEngine.init(ctx);
-        gameEngine.start();
-        
         gameEngine.addEntity(new WelcomeScreen(gameEngine));
     });
 
 
 
-    regionArray = BuildRegions();
-    BuildBoard();
-    StartGame(regionArray);
+    // regionArray = BuildRegions();
+    // BuildBoard();
+    // StartGame(regionArray);
 
-    
 
-    console.log('This is a test');
-    fight(regionArray[12], regionArray[0]) ? console.log('you win') : console.log('you lose');
+
+    // console.log('This is a test');
+    // fight(regionArray[12], regionArray[0]) ? console.log('you win') : console.log('you lose');
 }
 
 Main();
