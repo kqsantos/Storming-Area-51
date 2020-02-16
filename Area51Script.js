@@ -177,8 +177,8 @@ function createArray(origin) {
             if (gameboard[xCor][yCor] != null) {
                 regionArray[i][j] = {
                     name: gameboard[xCor][yCor].region.toString(),
-                    x: xCor * dim,
-                    y: yCor * dim,
+                    x: i * dim,
+                    y: j * dim,
                     w: dim,
                     h: dim
                 };
@@ -789,8 +789,10 @@ InputHandler.prototype.update = function (ctx) {
             if (cameraOrigin.y > 0) {
                 cameraOrigin.y--;
                 createArray(cameraOrigin);
-                console.log("%c RegionArray below this:", "background: #222; color: #bada55");
-                console.log(regionArray);
+                if(debug) {
+                    console.log("%c RegionArray below this:", "background: #222; color: #bada55");
+                    console.log(regionArray);
+                }
             }
 
         }
@@ -798,8 +800,10 @@ InputHandler.prototype.update = function (ctx) {
             if (cameraOrigin.x > 0) {
                 cameraOrigin.x--;
                 createArray(cameraOrigin);
-                console.log("%c RegionArray below this:", "background: #222; color: #bada55");
-                console.log(regionArray);
+                if(debug) {
+                    console.log("%c RegionArray below this:", "background: #222; color: #bada55");
+                    console.log(regionArray);
+                }
             }
 
         }
@@ -807,8 +811,10 @@ InputHandler.prototype.update = function (ctx) {
             if (cameraOrigin.y < this.keyYMax) {
                 cameraOrigin.y++;
                 createArray(cameraOrigin);
-                console.log("%c RegionArray below this:", "background: #222; color: #bada55");
-                console.log(regionArray);
+                if(debug) {
+                    console.log("%c RegionArray below this:", "background: #222; color: #bada55");
+                    console.log(regionArray);
+                }
             }
 
         }
@@ -816,8 +822,11 @@ InputHandler.prototype.update = function (ctx) {
             if (cameraOrigin.x < this.keyXMax) {
                 cameraOrigin.x++;
                 createArray(cameraOrigin);
-                console.log("%c RegionArray below this:", "background: #222; color: #bada55");
-                console.log(regionArray);
+                if(debug) {
+                    console.log("%c RegionArray below this:", "background: #222; color: #bada55");
+                    console.log(regionArray);
+                }
+
             }
         }
         console.log(cameraOrigin);
@@ -829,6 +838,7 @@ InputHandler.prototype.update = function (ctx) {
     if (click != null) {
 
         var regionClicked = getClickedRegion(regionArray, click.x, click.y);
+        console.log("%c Region clicked below this:", "background: #222; color: #bada55");
         console.log(click);
         console.log(regionClicked);
 
