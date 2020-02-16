@@ -30,7 +30,7 @@ var modbgWidth = bgWidth;
 var modbgHeight = bgHeight;
 
 var debug = true;
-var debugGrid = false;
+var debugGrid = true;
 
 var selectedRegion = -1;
 // ===================================================================
@@ -450,7 +450,7 @@ BuildingDisplay.prototype.draw = function (ctx) {
 // Start - Map Display
 // ===================================================================
 function MapDisplay(game) {
-    this.border = AM.getAsset("./img/map/New MAP.png");
+    this.border = AM.getAsset("./img/map/newMap2.png");
     Entity.call(this, game, 0, 0);
 }
 
@@ -500,7 +500,7 @@ MapDisplay.prototype.draw = function (ctx) {
 // Start - Minimap Display
 // ===================================================================
 function MinimapDisplay(game) {
-    this.border = AM.getAsset("./img/map/New MAP.png");
+    this.border = AM.getAsset("./img/map/newMap2.png");
     this.minimapBorderWidth = 220;
     this.miniMapBorderHeight = 220;
 
@@ -633,7 +633,6 @@ ControlDisplay.prototype.update = function (ctx) {
     if(click !== null){
         if(click[x] > 959 && click[y] > 639 && click[x] < 1040 && click[y] < 720){
             this.actionFlag = true;
-            
         } else if(click[x] > 1039 && click[y] > 639 && click[x] < 1120 && click[y] < 720){
             this.troopFlag = true;
         } else if(click[x] > 1119 && click[y] > 639 && click[x] < 1200 && click[y] < 720){
@@ -906,7 +905,7 @@ function Main() {
     AM.queueDownload("./img/sidebar/money_icon.png");
 
     // Game Map Display
-    AM.queueDownload("./img/map/New MAP.png");
+    AM.queueDownload("./img/map/newMap2.png");
 
     // Combat Entities 
     AM.queueDownload("./img/icon/alien.png");
