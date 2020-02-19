@@ -112,30 +112,23 @@ function Troop(name, atk, def, cost, move) {
  * Creates a building in the game.
  * 
  * @param {String} name name of the building (name must be unique)
- * @param {int} atk attack value of the building
- * @param {int} def defense value of the building
  * @param {int} cost cost value of the building
  */
-function Building(name, atk, def, cost) {
+function Building(name, cost) {
     this.name = name,
-        this.atk = atk,
-        this.def = def,
-        this.cost = cost
+    this.cost = cost
 }
 
 /**
- * Creates a region in the game.
  * 
- * @param {String} name name of the region (Name must be unique)
- * @param {Boolean} bldg true if barracks is present else false
- * @param {int} owner 1 = not owned, 0 = player owned, 1 = enemy owned
- * @param {int} troopCoord X coordinate of unit
- * @param {int} troops Y coordinate of unit
- * @param {int} bldgCoord X coordinnate of bldg
- * @param {int} bldgs Y coordinate of bldg
- * @param {int} territory ID of territory
- * @param {Stringp[]} neighbors Array of region names which neighbors (1 move cost) this region
- * @param {*} troopCount number of troops in a region, 0 if no troops
+ * @param {*} id Region identification number
+ * @param {*} owner 1 for Player 2 owned. 0 for Player 1 owned.
+ * @param {*} bldgXY [x,y] animation location
+ * @param {*} troopXY [x,y] animation location
+ * @param {*} cap true/false
+ * @param {*} capXY [x,y] animation location
+ * @param {*} territory Territory for the region
+ * @param {*} neighbors array of neighbor IDs
  */
 function Region(id, owner, bldgXY, troopXY, cap, capXY, territory, neighbors) {
     this.id = id,
@@ -148,6 +141,13 @@ function Region(id, owner, bldgXY, troopXY, cap, capXY, territory, neighbors) {
     this.capXY = capXY,
     this.territory = territory,
     this.neighbors = neighbors
+
+}
+
+function Player () {
+    this.moneyCount = 0,
+    this.ownedRegions = []
+    
 }
 // ===================================================================
 // End - Map Entities
@@ -534,38 +534,51 @@ function BuildBoard() {
 // ===================================================================
 
 // ===================================================================
-// Start - Combat Functions
+// Start - Menu Functions
 // ===================================================================
-function fight(region1, region2) {
-    atkPow = region1.troopCount;
-    defPow = region2.troopCount;
-
-    while (defPow > 0 && atkPow > 0) {
-        Math.random() > 0.5 ? atkPow-- : defPow--;
-    }
-
-    if (atkPow > defPow) {
-        region2.owner = region1.owner;
-        region2.troopCount = atkPow;
-        region1.troopCount = 0;
-        return true; // Attacker won
+function moveFight(source, destination) {
+    if (destination.owner === source.owner || destination.troops === []){
+        while (source.troops.length() > 0) destination.troops.push(source.troops.pop()); // Pushes troops from one destination to the next.
     } else {
-        region1.troopCount = 0;
-        return false; // Defender won
+        source.cap ? atkPow = source.troops.length()*2 : atkPow = source.troops.length();
+        destination.cap ? defPow = destination.troops.length()*2 : defPow = destination.troops.length();
+
+        while (defPow > 0 && atkPow > 0){
+            if(Math.random() > 0.5){
+                atkPow--
+                if(!source.cap || (source.cap && atkPow % 2 == 1)) source.troops.pop();
+            } else {
+                defPow--;
+            }
+        }
+
+        if(atkPow > defPow){
+            destination.owner = source.owner;
+            region1.troops = [];
+            return true; // Attacker won
+        } else {
+            region1.troops = [];
+            return false; // Defender won
+        }
     }
 }
 
-//Merge attack and move @ Ryan
+function buildBldg (type, region, player){
+    if (type == 'farm' || type == 'barracks') {
+        region.bldg.push(new Building(type , 1));
+        player.moneyCount--;
+    }
+}
 
-function move(sourceRegion, destination, troopCount) {
-    if (sourceRegion.neighbors.contains(destination.number)) {
-        sourceRegion.troopCount -= troopCount;
-        destination.troopCount += troopCount;
+function buildTroop (type, region, player){
+    if (type == 'captain' || type == 'soldier') {
+        region.troops.push(new Troop(type , 1));
+        player.moneyCount--;
     }
 }
 
 // ===================================================================
-// End - Combat Functions
+// End - Menu Functions
 // ===================================================================
 
 
