@@ -9,8 +9,9 @@ var gameEngine = new GameEngine();
 gameEngine.init(ctx);
 gameEngine.start();
 var players = [];
-var dim = 20; //Cell size
+var dim = 12; //Cell size
 
+var prevCameraOrigin = { x: 0, y: 0 };
 var cameraOrigin = { x: 0, y: 0 }; //Camera in top left pixel of screen
 
 var gameboard = BuildBoard();
@@ -19,18 +20,18 @@ console.log(gameboard);
 var regions = BuildRegions();
 
 var regionArray = []; // This is the overlay used for the click event
-createArray(cameraOrigin);
+// createArray(cameraOrigin);
 console.log("%c RegionArray below this:", "background: #222; color: #bada55");
 console.log(regionArray);
 
-var bgWidth = 1800;
-var bgHeight = 1440;
+var bgWidth = 2496;
+var bgHeight = 2496;
 
 var modbgWidth = bgWidth;
 var modbgHeight = bgHeight;
 
 var debug = true;
-var debugGrid = true;
+var debugGrid = false;
 
 var selectedRegion = -1;
 // ===================================================================
@@ -128,27 +129,24 @@ function Building(name, atk, def, cost) {
  * @param {String} name name of the region (Name must be unique)
  * @param {Boolean} bldg true if barracks is present else false
  * @param {int} owner 1 = not owned, 0 = player owned, 1 = enemy owned
- * @param {int} troopX X coordinate of unit
- * @param {int} troopY Y coordinate of unit
- * @param {int} bldgX X coordinnate of bldg
- * @param {int} bldgY Y coordinate of bldg
+ * @param {int} troopCoord X coordinate of unit
+ * @param {int} troops Y coordinate of unit
+ * @param {int} bldgCoord X coordinnate of bldg
+ * @param {int} bldgs Y coordinate of bldg
  * @param {int} territory ID of territory
  * @param {Stringp[]} neighbors Array of region names which neighbors (1 move cost) this region
  * @param {*} troopCount number of troops in a region, 0 if no troops
  */
-function Region(name, bldg, owner, troopX, troopY, bldgX, bldgY, territory, neighbors, troopCount) {
-    this.name = name,
-        this.bldg = bldg,
+function Region(id, owner, troopCoord, troops, bldgCoord, bldgs, territory, neighbors, troopCount) {
+    this.id = id,
         this.owner = owner,
-        this.troopX = troopX,
-        this.troopY = troopY,
-        this.bldgX = bldgX,
-        this.bldgY = bldgY,
+        this.troopCoord = troopCoord,
+        this.troops = troops,
+        this.bldgX = bldgCoord,
+        this.bldgY = bldgs,
         this.territory = territory,
         this.neighbors = neighbors,
         this.troopCount = troopCount
-
-    //Change to array of troop objects
 }
 // ===================================================================
 // End - Map Entities
@@ -164,6 +162,17 @@ function Region(name, bldg, owner, troopX, troopY, bldgX, bldgY, territory, neig
  * Creates array of region IDs on screen
  * @param {*} origin 
  */
+function changeCameraOrigin(x, y) {
+    prevCameraOrigin.x = cameraOrigin.x;
+    prevCameraOrigin.y = cameraOrigin.y;
+    cameraOrigin.x = x;
+    cameraOrigin.y = y;
+}
+
+/**
+ * Creates array of region IDs on screen
+ * @param {*} origin 
+ */
 function createArray(origin) {
     for (var i = 0; i < gameEngine.surfaceWidth / dim; i++) {
         regionArray[i] = new Array(gameEngine.surfaceHeight / dim);
@@ -172,7 +181,7 @@ function createArray(origin) {
     for (var i = 0; i < gameEngine.surfaceWidth / dim; i++) {
         for (var j = 0; j < gameEngine.surfaceHeight / dim; j++) {
             let xCor = origin.x + i;
-            let yCor = origin.y+ j;
+            let yCor = origin.y + j;
 
             if (gameboard[xCor][yCor] != null) {
                 regionArray[i][j] = {
@@ -260,6 +269,8 @@ function BuildRegions() {
         new Region('G - SE', false, 1, 690, 520, 690, 520, 'yellow', [14], 0),
         new Region('G - SW', false, 1, 460, 520, 460, 580, 'yellow', [2, 14], 0),
     ];
+
+
     return Regions;
 }
 
@@ -406,53 +417,117 @@ ResourceDisplay.prototype.draw = function (ctx) {
 
 
 // ===================================================================
-// Start - Troop Display
+// Start - Soldier
 // ===================================================================
-function TroopDisplay(game) {
-    this.border = AM.getAsset("./img/icon/alien.png");
-    Entity.call(this, game, 0, 0);
+function Alien(game, x, y) {
+    this.animation = new Animation(AM.getAsset("./img/sprites/alien_animated.png"), 38, 40, 116, 0.2, 3, true, 1);
+    this.standing = AM.getAsset("./img/sprites/alien_standing.png");
+    this.selected = false;
+    this.x = x;
+    this.y = y;
+    Entity.call(this, game, this.x, this.y);
 }
 
-TroopDisplay.prototype = new Entity();
-TroopDisplay.prototype.constructor = TroopDisplay;
+Alien.prototype = new Alien();
+Alien.prototype.constructor = Soldier;
 
-TroopDisplay.prototype.update = function (ctx) { //update the owner
+Alien.prototype.update = function (ctx) { //update the owner
+    // this.x = prevCameraOrigin.x - cameraOrigin.x + this.x;
+    // this.y = prevCameraOrigin.y - cameraOrigin.y + this.y;
 }
 
-TroopDisplay.prototype.draw = function (ctx) {
-    ctx.drawImage(this.border, cameraOrigin.x * 20, cameraOrigin.y * 20,
-        bgWidth, bgHeight,
-        0, 250,
-        bgWidth * 0.1, bgHeight * 0.1);
+Alien.prototype.draw = function (ctx) {
+    if (this.selected) {
+        this.animation.drawFrame(this.game.clockTick, ctx, this.x - (cameraOrigin.x * dim), this.y - (cameraOrigin.y * dim));
+    } else {
+        ctx.drawImage(this.standing, this.x - (cameraOrigin.x * dim), this.y - (cameraOrigin.y * dim));
+    }
+
 }
 // ===================================================================
-// End - Troop Display
+// End - Soldier
 // ===================================================================
 
 
 
+
 // ===================================================================
-// Start - Building Display
+// Start - Soldier
 // ===================================================================
-function BuildingDisplay(game) {
-    this.border = AM.getAsset("./img/icon/barracks.png");
-    Entity.call(this, game, 0, 0);
+function Soldier(game, x, y) {
+    this.animation = new Animation(AM.getAsset("./img/sprites/soldier_animated.png"), 29, 40, 145, .2, 5, true, 1);
+    this.standing = AM.getAsset("./img/sprites/soldier_standing.png");
+    this.selected = false;
+    this.x = x;
+    this.y = y;
+    Entity.call(this, game, this.x, this.y);
 }
 
-BuildingDisplay.prototype = new Entity();
-BuildingDisplay.prototype.constructor = BuildingDisplay;
+Soldier.prototype = new Entity();
+Soldier.prototype.constructor = Soldier;
 
-BuildingDisplay.prototype.update = function (ctx) {
+Soldier.prototype.update = function (ctx) { //update the owner
 }
 
-BuildingDisplay.prototype.draw = function (ctx) {
-    ctx.drawImage(this.border, cameraOrigin.x * 20, cameraOrigin.y * 20,
-        bgWidth, bgHeight,
-        0, 100,
-        bgWidth * 0.1, bgHeight * 0.1);
+Soldier.prototype.draw = function (ctx) {
+    if (this.selected) {
+        this.animation.drawFrame(this.game.clockTick, ctx, this.x - (cameraOrigin.x * dim), this.y - (cameraOrigin.y * dim));
+    } else {
+        ctx.drawImage(this.standing, this.x - (cameraOrigin.x * dim), this.y - (cameraOrigin.y * dim));
+    }
 }
 // ===================================================================
-// End - Building Display
+// End - Soldier
+// ===================================================================
+
+
+
+// ===================================================================
+// Start - Barracks
+// ===================================================================
+function Barracks(game, x, y) {
+    this.image = AM.getAsset("./img/sprites/barracks_blue.png");
+    this.x = x;
+    this.y = y;
+    Entity.call(this, game, this.x, this.y);
+}
+
+Barracks.prototype = new Entity();
+Barracks.prototype.constructor = Barracks;
+
+Barracks.prototype.update = function (ctx) {
+}
+
+Barracks.prototype.draw = function (ctx) {
+    ctx.drawImage(this.image, this.x - (cameraOrigin.x * dim), this.y - (cameraOrigin.y * dim));
+}
+// ===================================================================
+// End - Barracks
+// ===================================================================
+
+
+
+// ===================================================================
+// Start - Farm
+// ===================================================================
+function Farm(game, x, y) {
+    this.image = AM.getAsset("./img/sprites/farm_blue.png");
+    this.x = x;
+    this.y = y;
+    Entity.call(this, game, this.x, this.y);
+}
+
+Farm.prototype = new Entity();
+Farm.prototype.constructor = Farm;
+
+Farm.prototype.update = function (ctx) {
+}
+
+Farm.prototype.draw = function (ctx) {
+    ctx.drawImage(this.image, this.x - (cameraOrigin.x * dim), this.y - (cameraOrigin.y * dim));
+}
+// ===================================================================
+// End - Farm
 // ===================================================================
 
 
@@ -461,7 +536,7 @@ BuildingDisplay.prototype.draw = function (ctx) {
 // Start - Map Display
 // ===================================================================
 function MapDisplay(game) {
-    this.border = AM.getAsset("./img/map/newMap2.png");
+    this.border = AM.getAsset("./img/map/map_master4.png");
     Entity.call(this, game, 0, 0);
 }
 
@@ -515,23 +590,33 @@ MapDisplay.prototype.draw = function (ctx) {
 // Start - Minimap Display
 // ===================================================================
 function MinimapDisplay(game) {
-    this.border = AM.getAsset("./img/map/newMap2.png");
-    this.minimapBorderWidth = 220;
-    this.miniMapBorderHeight = 220;
+    this.border = AM.getAsset("./img/map/map_master4.png");
+    this.minimapBorderWidth = 204;
+    this.miniMapBorderHeight = 204;
 
 
-    this.aspectRatio = Math.min(((this.minimapBorderWidth - 10) / bgWidth).toFixed(2),
-        ((this.miniMapBorderHeight - 10) / bgHeight).toFixed(2));
+    this.aspectRatio = Math.min(((this.minimapBorderWidth - 10) / bgWidth),
+        ((this.miniMapBorderHeight - 10) / bgHeight));
 
-    this.smWidth = (bgWidth * this.aspectRatio).toFixed(0); // Width of the shrunk map
-    this.smHeight = (bgHeight * this.aspectRatio).toFixed(0); // Height of the shunk map
+    this.smWidth = (bgWidth * Number(this.aspectRatio)).toFixed(0); // Width of the shrunk map
+    this.smHeight = (bgHeight * Number(this.aspectRatio)).toFixed(0); // Height of the shunk map
+    console.log("bgWidth " + bgWidth)
+    console.log("bgHeight " + bgHeight)
+    console.log("w " + this.smWidth)
+    console.log("h " + this.smHeight)
 
 
-    this.originX = ((this.minimapBorderWidth / 2) - (this.smWidth / 2)); // Start point of image in mini map
-    this.originY = ((this.miniMapBorderHeight / 2) - (this.smHeight / 2)); // Start point of image in mini map
+    this.originX = ((this.minimapBorderWidth / 2) - (this.smWidth / 2)).toFixed(0); // Start point of image in mini map
+    this.originY = ((this.miniMapBorderHeight / 2) - (this.smHeight / 2)).toFixed(0); // Start point of image in mini map
+    console.log("origX " + this.originX)
+    console.log("origY " + this.originY)
 
     this.xMax = ((bgWidth / dim) - (gameEngine.surfaceWidth / dim)).toFixed(0);
     this.yMax = ((bgHeight / dim) - (gameEngine.surfaceHeight / dim)).toFixed(0);
+    console.log("bgWidth " + bgWidth)
+    console.log("bgHeight " + bgHeight)
+    console.log("xMax " + this.xMax)
+    console.log("yMax " + this.yMax)
 
     Entity.call(this, game, 0, 0);
 }
@@ -560,18 +645,39 @@ MinimapDisplay.prototype.update = function (ctx) {
         }
 
         // Translates the minimap click to set the point in the map
-        var xTranslationToMap = (Number(xClickOnMinimap) - ((gameEngine.surfaceWidth * this.aspectRatio) / 2)).toFixed(0);
-        var yTranslationToMap = (Number(yClickOnMinimap) - ((gameEngine.surfaceHeight * this.aspectRatio) / 2)).toFixed(0);
-
+        var xTranslationToMap = (Number(xClickOnMinimap) - ((Number(gameEngine.surfaceWidth) * Number(this.aspectRatio)) / 2)).toFixed(0);
+        var yTranslationToMap = (Number(yClickOnMinimap) - ((Number(gameEngine.surfaceHeight) * Number(this.aspectRatio)) / 2)).toFixed(0);
+        console.log("translation x --- " + xTranslationToMap);
+        console.log("translation y --- " + yTranslationToMap);
 
         // Takes care of clipping to edges of map
-        if (xTranslationToMap >= this.xMax) xTranslationToMap = this.xMax;
-        if (xTranslationToMap <= 0) xTranslationToMap = 0;
-        if (yTranslationToMap >= this.yMax) yTranslationToMap = this.yMax;
-        if (yTranslationToMap <= 0) yTranslationToMap = 0;
+        if (Number(xTranslationToMap) >= Number(this.xMax)) {
+            xTranslationToMap = this.xMax;
+            if (debug) {
+                console.log("triggered 1");
+            }
 
-        cameraOrigin["x"] = xTranslationToMap;
-        cameraOrigin["y"] = yTranslationToMap;
+        }
+        if (Number(xTranslationToMap) <= 0) {
+            xTranslationToMap = 0;
+            if (debug) {
+                console.log("triggered 2");
+            }
+        }
+        if (Number(yTranslationToMap) >= Number(this.yMax)) {
+            yTranslationToMap = this.yMax;
+            if (debug) {
+                console.log("triggered 3");
+            }
+        }
+        if (Number(yTranslationToMap) <= 0) {
+            yTranslationToMap = 0;
+            if (debug) {
+                console.log("triggered 4");
+            }
+        }
+
+        changeCameraOrigin(xTranslationToMap, yTranslationToMap);
         // createArray(cameraOrigin);
         console.log(cameraOrigin);
 
@@ -611,10 +717,10 @@ MinimapDisplay.prototype.draw = function (ctx) {
 
     // Draws the vision rectangle
     ctx.lineWidth = 2;
-    ctx.strokeRect(this.originX + (cameraOrigin.x * (dim * this.aspectRatio)),
-        this.originY + (cameraOrigin.y * (dim * this.aspectRatio)),
-        gameEngine.surfaceWidth * this.aspectRatio,
-        gameEngine.surfaceHeight * this.aspectRatio);
+    ctx.strokeRect(Number(this.originX) + Number((cameraOrigin.x * (dim * this.aspectRatio))),
+        Number(this.originY) + Number((cameraOrigin.y * (dim * this.aspectRatio))),
+        Number(gameEngine.surfaceWidth) * Number(this.aspectRatio),
+        Number(gameEngine.surfaceHeight) * Number(this.aspectRatio));
 }
 // ===================================================================
 // End - Minimap Display
@@ -682,9 +788,6 @@ ControlDisplay.prototype.update = function (ctx) {
         } else {
             toggleAllOff();
         }
-
-
-
     }
 
     function toggleAllOff() {
@@ -773,8 +876,9 @@ ControlDisplay.prototype.draw = function (ctx) {
 // Start - Input Handler
 // ===================================================================
 function InputHandler(game) {
-    this.keyXMax = (bgWidth / dim) - (gameEngine.surfaceWidth / dim);
-    this.keyYMax = (bgHeight / dim) - (gameEngine.surfaceHeight / dim);
+    this.keyXMax = ((bgWidth / dim) - (gameEngine.surfaceWidth / dim)).toFixed(0);
+    this.keyYMax = ((bgHeight / dim) - (gameEngine.surfaceHeight / dim)).toFixed(0);
+    this.sensitivity = 5;
     Entity.call(this, game, 0, 0);
 }
 
@@ -786,52 +890,67 @@ InputHandler.prototype.update = function (ctx) {
     var key = gameEngine.keyDown;
     if (key != null) {
         if (key["code"] === "KeyW") {
-            if (cameraOrigin.y > 0) {
-                cameraOrigin.y--;
-                createArray(cameraOrigin);
-                if(debug) {
+            if (Number(cameraOrigin.y) - Number(this.sensitivity) > 0) {
+                changeCameraOrigin(cameraOrigin.x, Number(cameraOrigin.y) - Number(this.sensitivity));
+                // cameraOrigin.y--;
+                // createArray(cameraOrigin);
+                if (debug) {
                     console.log("%c RegionArray below this:", "background: #222; color: #bada55");
                     console.log(regionArray);
                 }
+            } else {
+                changeCameraOrigin(cameraOrigin.x, 0);
             }
 
         }
         else if (key["code"] === "KeyA") {
-            if (cameraOrigin.x > 0) {
-                cameraOrigin.x--;
-                createArray(cameraOrigin);
-                if(debug) {
+            if (Number(cameraOrigin.x) - Number(this.sensitivity) > 0) {
+                changeCameraOrigin(Number(cameraOrigin.x) - Number(this.sensitivity), cameraOrigin.y);
+                // cameraOrigin.x--;
+                // createArray(cameraOrigin);
+                if (debug) {
                     console.log("%c RegionArray below this:", "background: #222; color: #bada55");
                     console.log(regionArray);
                 }
+            } else {
+                changeCameraOrigin(0, cameraOrigin.y);
             }
-
         }
         else if (key["code"] === "KeyS") {
-            if (cameraOrigin.y < this.keyYMax) {
-                cameraOrigin.y++;
-                createArray(cameraOrigin);
-                if(debug) {
+            if (Number(cameraOrigin.y) + Number(this.sensitivity) < this.keyYMax) {
+                changeCameraOrigin(cameraOrigin.x, Number(cameraOrigin.y) + Number(this.sensitivity));
+                // createArray(cameraOrigin);
+                if (debug) {
                     console.log("%c RegionArray below this:", "background: #222; color: #bada55");
                     console.log(regionArray);
                 }
+            } else {
+                changeCameraOrigin(cameraOrigin.x, this.keyYMax);
             }
+
 
         }
         else if (key["code"] === "KeyD") {
-            if (cameraOrigin.x < this.keyXMax) {
-                cameraOrigin.x++;
-                createArray(cameraOrigin);
-                if(debug) {
+            if (Number(cameraOrigin.x) + Number(this.sensitivity) < Number(this.keyXMax)) {
+                changeCameraOrigin(Number(cameraOrigin.x) + Number(this.sensitivity), cameraOrigin.y);
+                // createArray(cameraOrigin);
+                if (debug) {
+
                     console.log("%c RegionArray below this:", "background: #222; color: #bada55");
                     console.log(regionArray);
                 }
 
+            } else {
+                changeCameraOrigin(this.keyXMax, cameraOrigin.y);
             }
         }
+        console.log(key["code"])
         console.log(cameraOrigin);
         gameEngine.keyDown = null;
+
     }
+
+
 
     // Control clicks on the map
     var click = gameEngine.click;
@@ -846,20 +965,21 @@ InputHandler.prototype.update = function (ctx) {
     }
 
     // Control wheel events
-    if (gameEngine.zoomIn) {
-        modbgWidth *= 1.02;
-        modbgHeight *= 1.02;
-        dim *= 1.02;
-        gameEngine.zoomIn = false;
-    }
-    if (gameEngine.zoomOut) {
-        modbgWidth /= 1.02;
-        modbgHeight /= 1.02;
-        dim /= 1.02;
-        gameEngine.zoomOut = false;
-    }
+    // if (gameEngine.zoomIn) {
+    //     modbgWidth *= 1.02;
+    //     modbgHeight *= 1.02;
+    //     dim *= 1.02;
+    //     gameEngine.zoomIn = false;
+    // }
+    // if (gameEngine.zoomOut) {
+    //     modbgWidth /= 1.02;
+    //     modbgHeight /= 1.02;
+    //     dim /= 1.02;
+    //     gameEngine.zoomOut = false;
+    // }
 
 }
+
 // ===================================================================
 // End - Input Controller
 // ===================================================================
@@ -891,7 +1011,7 @@ AudioHandler.prototype.draw = function (ctx) {
 
 
 // ===================================================================
-// Start - Audio Handler
+// Start - Welcome Screen
 // ===================================================================
 
 function WelcomeScreen(game) {
@@ -942,14 +1062,231 @@ WelcomeScreen.prototype.update = function (ctx) {
         this.removeFromWorld = true;
         gameEngine.addEntity(new MapDisplay(gameEngine));
 
-        // gameEngine.addEntity(new BuildingDisplay(gameEngine));
-        // gameEngine.addEntity(new TroopDisplay(gameEngine));
+        //Plains
+        //15
+        gameEngine.addEntity(new Barracks(gameEngine, 150, 260));
+        gameEngine.addEntity(new Farm(gameEngine, 250, 185));
+        gameEngine.addEntity(new Soldier(gameEngine, 460, 270));
 
-        // gameEngine.addEntity(new MinimapDisplay(gameEngine));
-        // gameEngine.addEntity(new ResourceDisplay(gameEngine));
-        // gameEngine.addEntity(new ControlDisplay(gameEngine));
+        //16
+        gameEngine.addEntity(new Barracks(gameEngine, 470, 345));
+        gameEngine.addEntity(new Farm(gameEngine, 445, 425));
+        gameEngine.addEntity(new Soldier(gameEngine, 345, 450));
+
+        //19
+        gameEngine.addEntity(new Barracks(gameEngine, 285, 665));
+        gameEngine.addEntity(new Farm(gameEngine, 245, 750));
+        gameEngine.addEntity(new Soldier(gameEngine, 235, 690));
+
+        //17
+        gameEngine.addEntity(new Barracks(gameEngine, 610, 205));
+        gameEngine.addEntity(new Farm(gameEngine, 610, 355));
+        gameEngine.addEntity(new Soldier(gameEngine, 680, 440));
+
+        //14
+        gameEngine.addEntity(new Barracks(gameEngine, 300 + (dim * 0), 200 + (dim * 68)));
+        gameEngine.addEntity(new Farm(gameEngine, 230 + (dim * 0), 450 + (dim * 54)));
+        gameEngine.addEntity(new Soldier(gameEngine, 220 + (dim * 0), 295 + (dim * 55)));
+
+        //13
+        gameEngine.addEntity(new Barracks(gameEngine, 275 + (dim * 19), 330 + (dim * 61)));
+        gameEngine.addEntity(new Farm(gameEngine, 275 + (dim * 19), 415 + (dim * 61)));
+        gameEngine.addEntity(new Soldier(gameEngine, 305 + (dim * 19), 290 + (dim * 61)));
+
+        //18
+        gameEngine.addEntity(new Barracks(gameEngine, 310 + (dim * 20), 265 + (dim * 22)));
+        gameEngine.addEntity(new Farm(gameEngine, 480 + (dim * 20), 265 + (dim * 22)));
+        gameEngine.addEntity(new Soldier(gameEngine, 445 + (dim * 20), 335 + (dim * 22)));
+
+        //12
+        gameEngine.addEntity(new Barracks(gameEngine, 540 + (dim * 22), 200 + (dim * 54)));
+        gameEngine.addEntity(new Farm(gameEngine, 530 + (dim * 22), 450 + (dim * 54)));
+        gameEngine.addEntity(new Soldier(gameEngine, 605 + (dim * 22), 290 + (dim * 54)));
+
+        //10
+        gameEngine.addEntity(new Barracks(gameEngine, 520 + (dim * 50), 265 + (dim * 29)));
+        gameEngine.addEntity(new Farm(gameEngine, 410 + (dim * 50), 445 + (dim * 29)));
+        gameEngine.addEntity(new Soldier(gameEngine, 525 + (dim * 50), 380 + (dim * 29)));
+
+        //11
+        gameEngine.addEntity(new Barracks(gameEngine, 300 + (dim * 59), 455 + (dim * 46)));
+        gameEngine.addEntity(new Farm(gameEngine, 455 + (dim * 59), 560 + (dim * 46)));
+        gameEngine.addEntity(new Soldier(gameEngine, 605 + (dim * 59), 515 + (dim * 46)));
 
 
+        //Tundra
+        //45
+        gameEngine.addEntity(new Barracks(gameEngine, 635 + (dim * 37), 60 + (dim * 3)));
+        gameEngine.addEntity(new Farm(gameEngine, 660 + (dim * 37), 140 + (dim * 3)));
+        gameEngine.addEntity(new Soldier(gameEngine, 555 + (dim * 37), 140 + (dim * 3)));
+
+        //46
+        gameEngine.addEntity(new Barracks(gameEngine, 390 + (dim * 61), 465 + (dim * 0)));
+        gameEngine.addEntity(new Farm(gameEngine, 210 + (dim * 61), 440 + (dim * 0)));
+        gameEngine.addEntity(new Soldier(gameEngine, 350 + (dim * 61), 360 + (dim * 0)));
+
+        //47
+        gameEngine.addEntity(new Barracks(gameEngine, 640 + (dim * 61), 410 + (dim * 0)));
+        gameEngine.addEntity(new Farm(gameEngine, 575 + (dim * 61), 115 + (dim * 0)));
+        gameEngine.addEntity(new Soldier(gameEngine, 590 + (dim * 61), 280 + (dim * 0)));
+
+        //48
+        gameEngine.addEntity(new Barracks(gameEngine, 310 + (dim * 101), 320 + (dim * 0)));
+        gameEngine.addEntity(new Farm(gameEngine, 310 + (dim * 101), 580 + (dim * 0)));
+        gameEngine.addEntity(new Soldier(gameEngine, 460 + (dim * 101), 315 + (dim * 0)));
+
+        //49
+        gameEngine.addEntity(new Barracks(gameEngine, 965 + (dim * 101), 420 + (dim * 0)));
+        gameEngine.addEntity(new Farm(gameEngine, 965 + (dim * 101), 300 + (dim * 0)));
+        gameEngine.addEntity(new Soldier(gameEngine, 1100 + (dim * 101), 230 + (dim * 0)));
+
+        //43
+        gameEngine.addEntity(new Barracks(gameEngine, 735 + (dim * 101), 100 + (dim * 0)));
+        gameEngine.addEntity(new Farm(gameEngine, 750 + (dim * 101), 310 + (dim * 0)));
+        gameEngine.addEntity(new Soldier(gameEngine, 800 + (dim * 101), 220 + (dim * 0)));
+
+        //44
+        gameEngine.addEntity(new Barracks(gameEngine, 590 + (dim * 101), 410 + (dim * 21)));
+        gameEngine.addEntity(new Farm(gameEngine, 665 + (dim * 101), 335 + (dim * 21)));
+        gameEngine.addEntity(new Soldier(gameEngine, 580 + (dim * 101), 300 + (dim * 21)));
+
+        //42
+        gameEngine.addEntity(new Barracks(gameEngine, 975 + (dim * 101), 240 + (dim * 38)));
+        gameEngine.addEntity(new Farm(gameEngine, 1085 + (dim * 101), 250 + (dim * 38)));
+        gameEngine.addEntity(new Soldier(gameEngine, 940 + (dim * 101), 245 + (dim * 38)));
+
+        //50
+        gameEngine.addEntity(new Barracks(gameEngine, 450 + (dim * 101), 380 + (dim * 42)));
+        gameEngine.addEntity(new Farm(gameEngine, 335 + (dim * 101), 275 + (dim * 42)));
+        gameEngine.addEntity(new Soldier(gameEngine, 530 + (dim * 101), 310 + (dim * 42)));
+
+        //40
+        gameEngine.addEntity(new Barracks(gameEngine, 680 + (dim * 101), 140 + (dim * 61)));
+        gameEngine.addEntity(new Farm(gameEngine, 570 + (dim * 101), 480 + (dim * 61)));
+        gameEngine.addEntity(new Soldier(gameEngine, 525 + (dim * 101), 410 + (dim * 61)));
+
+        //41
+        gameEngine.addEntity(new Barracks(gameEngine, 880 + (dim * 101), 285 + (dim * 55)));
+        gameEngine.addEntity(new Farm(gameEngine, 1010 + (dim * 101), 475 + (dim * 55)));
+        gameEngine.addEntity(new Soldier(gameEngine, 1055 + (dim * 101), 163 + (dim * 55)));
+
+        //Sand
+        //35
+        gameEngine.addEntity(new Barracks(gameEngine, 295 + (dim * 1), 280 + (dim * 87)));
+        gameEngine.addEntity(new Farm(gameEngine, 310 + (dim * 1), 480 + (dim * 87)));
+        gameEngine.addEntity(new Soldier(gameEngine, 300 + (dim * 1), 385 + (dim * 87)));
+
+        //36
+        gameEngine.addEntity(new Barracks(gameEngine, 500 + (dim * 1), 290 + (dim * 87)));
+        gameEngine.addEntity(new Farm(gameEngine, 670 + (dim * 1), 290 + (dim * 87)));
+        gameEngine.addEntity(new Soldier(gameEngine, 715 + (dim * 1), 220 + (dim * 87)));
+
+        //37
+        gameEngine.addEntity(new Barracks(gameEngine, 720 + (dim * 1), 480 + (dim * 87)));
+        gameEngine.addEntity(new Farm(gameEngine, 535 + (dim * 1), 480 + (dim * 87)));
+        gameEngine.addEntity(new Soldier(gameEngine, 730 + (dim * 1), 415 + (dim * 87)));
+
+        //34
+        gameEngine.addEntity(new Barracks(gameEngine, 570 + (dim * 41), 75 + (dim * 113)));
+        gameEngine.addEntity(new Farm(gameEngine, 500 + (dim * 41), 270 + (dim * 113)));
+        gameEngine.addEntity(new Soldier(gameEngine, 675 + (dim * 41), 175 + (dim * 113)));
+
+        //39
+        gameEngine.addEntity(new Barracks(gameEngine, 440 + (dim * 41), 420 + (dim * 113)));
+        gameEngine.addEntity(new Farm(gameEngine, 420 + (dim * 41), 570 + (dim * 113)));
+        gameEngine.addEntity(new Soldier(gameEngine, 600 + (dim * 41), 515 + (dim * 113)));
+
+        //33
+        gameEngine.addEntity(new Barracks(gameEngine, 140 + (dim * 0), 360 + (dim * 123)));
+        gameEngine.addEntity(new Farm(gameEngine, 135 + (dim * 0), 480 + (dim * 123)));
+        gameEngine.addEntity(new Soldier(gameEngine, 190 + (dim * 0), 220 + (dim * 123)));
+
+        //38
+        gameEngine.addEntity(new Barracks(gameEngine, 320 + (dim * 0), 180 + (dim * 123)));
+        gameEngine.addEntity(new Farm(gameEngine, 540 + (dim * 0), 360 + (dim * 123)));
+        gameEngine.addEntity(new Soldier(gameEngine, 515 + (dim * 0), 290 + (dim * 123)));
+
+        //32
+        gameEngine.addEntity(new Barracks(gameEngine, 295 + (dim * 0), 495 + (dim * 123)));
+        gameEngine.addEntity(new Farm(gameEngine, 430 + (dim * 0), 565 + (dim * 123)));
+        gameEngine.addEntity(new Soldier(gameEngine, 595 + (dim * 0), 490 + (dim * 123)));
+
+        //31
+        gameEngine.addEntity(new Barracks(gameEngine, 170 + (dim * 0), 385 + (dim * 148)));
+        gameEngine.addEntity(new Farm(gameEngine, 315 + (dim * 0), 390 + (dim * 148)));
+        gameEngine.addEntity(new Soldier(gameEngine, 275 + (dim * 0), 555 + (dim * 148)));
+
+        //30
+        gameEngine.addEntity(new Barracks(gameEngine, 590 + (dim * 0), 385 + (dim * 148)));
+        gameEngine.addEntity(new Farm(gameEngine, 590 + (dim * 0), 495 + (dim * 148)));
+        gameEngine.addEntity(new Soldier(gameEngine, 510 + (dim * 0), 465 + (dim * 148)));
+
+        //29
+        gameEngine.addEntity(new Barracks(gameEngine, 760 + (dim * 0), 310 + (dim * 148)));
+        gameEngine.addEntity(new Farm(gameEngine, 770 + (dim * 0), 500 + (dim * 148)));
+        gameEngine.addEntity(new Soldier(gameEngine, 925 + (dim * 0), 430 + (dim * 148)));
+
+        //Grassland
+        //60
+        gameEngine.addEntity(new Barracks(gameEngine, 235 + (dim * 101), 435 + (dim * 81)));
+        gameEngine.addEntity(new Farm(gameEngine, 350 + (dim * 101), 430 + (dim * 81)));
+        gameEngine.addEntity(new Soldier(gameEngine, 410 + (dim * 101), 300 + (dim * 81)));
+
+        //61
+        gameEngine.addEntity(new Barracks(gameEngine, 965 + (dim * 101), 440 + (dim * 81)));
+        gameEngine.addEntity(new Farm(gameEngine, 845 + (dim * 101), 315 + (dim * 81)));
+        gameEngine.addEntity(new Soldier(gameEngine, 1140 + (dim * 101), 345 + (dim * 81)));
+
+        //65
+        gameEngine.addEntity(new Barracks(gameEngine, 260 + (dim * 83), 140 + (dim * 117)));
+        gameEngine.addEntity(new Farm(gameEngine, 255 + (dim * 83), 225 + (dim * 117)));
+        gameEngine.addEntity(new Soldier(gameEngine, 425 + (dim * 83), 175 + (dim * 117)));
+
+        //64
+        gameEngine.addEntity(new Barracks(gameEngine, 770 + (dim * 83), 200 + (dim * 117)));
+        gameEngine.addEntity(new Farm(gameEngine, 645 + (dim * 83), 230 + (dim * 117)));
+        gameEngine.addEntity(new Soldier(gameEngine, 875 + (dim * 83), 185 + (dim * 117)));
+
+        //66
+        gameEngine.addEntity(new Barracks(gameEngine, 450 + (dim * 83), 340 + (dim * 117)));
+        gameEngine.addEntity(new Farm(gameEngine, 470 + (dim * 83), 430 + (dim * 117)));
+        gameEngine.addEntity(new Soldier(gameEngine, 625 + (dim * 83), 385 + (dim * 117)));
+
+        //62
+        gameEngine.addEntity(new Barracks(gameEngine, 815 + (dim * 101), 70 + (dim * 123)));
+        gameEngine.addEntity(new Farm(gameEngine, 925 + (dim * 101), 165 + (dim * 123)));
+        gameEngine.addEntity(new Soldier(gameEngine, 1100 + (dim * 101), 115 + (dim * 123)));
+
+        //63
+        gameEngine.addEntity(new Barracks(gameEngine, 895 + (dim * 101), 455 + (dim * 123)));
+        gameEngine.addEntity(new Farm(gameEngine, 560 + (dim * 101), 345 + (dim * 123)));
+        gameEngine.addEntity(new Soldier(gameEngine, 850 + (dim * 101), 370 + (dim * 123)));
+
+        //67
+        gameEngine.addEntity(new Barracks(gameEngine, 125 + (dim * 97), 285 + (dim * 148)));
+        gameEngine.addEntity(new Farm(gameEngine, 300 + (dim * 97), 290 + (dim * 148)));
+        gameEngine.addEntity(new Soldier(gameEngine, 95 + (dim * 97), 145 + (dim * 148)));
+
+        //68
+        gameEngine.addEntity(new Barracks(gameEngine, 590 + (dim * 97), 350 + (dim * 148)));
+        gameEngine.addEntity(new Farm(gameEngine, 700 + (dim * 97), 425 + (dim * 148)));
+        gameEngine.addEntity(new Soldier(gameEngine, 575 + (dim * 97), 490 + (dim * 148)));
+
+        //69
+        gameEngine.addEntity(new Barracks(gameEngine, 1105 + (dim * 97), 420 + (dim * 148)));
+        gameEngine.addEntity(new Farm(gameEngine, 1000 + (dim * 97), 500 + (dim * 148)));
+        gameEngine.addEntity(new Soldier(gameEngine, 1045 + (dim * 97), 340 + (dim * 148)));
+
+
+
+
+
+
+        // gameEngine.addEntity(new Alien(gameEngine, 300, 250));
+
+        gameEngine.addEntity(new MinimapDisplay(gameEngine));
+        gameEngine.addEntity(new ResourceDisplay(gameEngine));
+        gameEngine.addEntity(new ControlDisplay(gameEngine));
 
         gameEngine.addEntity(new InputHandler(gameEngine));
         gameEngine.addEntity(new AudioHandler(gameEngine));
@@ -961,7 +1298,7 @@ WelcomeScreen.prototype.draw = function (ctx) {
     ctx.drawImage(this.newGameButton, this.ngbX, this.ngbY, this.ngbWidth, this.ngbHeight);
 }
 // ===================================================================
-// End - Audio Handler
+// End - Welcome SCreen
 // ===================================================================
 
 
@@ -976,16 +1313,19 @@ function Main() {
     AM.queueDownload("./img/sidebar/money_icon.png");
 
     // Game Map Display
-    AM.queueDownload("./img/map/newMap2.png");
+    AM.queueDownload("./img/map/map_master4.png");
 
     // Combat Entities 
-    AM.queueDownload("./img/icon/alien.png");
-    AM.queueDownload("./img/icon/soldier.png");
-    AM.queueDownload("./img/icon/star.png");
+    AM.queueDownload("./img/sprites/alien_animated.png");
+    AM.queueDownload("./img/sprites/alien_standing.png");
+    AM.queueDownload("./img/sprites/soldier_standing.png");
+    AM.queueDownload("./img/sprites/soldier_animated.png");
+    AM.queueDownload("./img/sprites/barracks_blue.png");
+    AM.queueDownload("./img/sprites/farm_blue.png");
 
     //Building Entities
-    AM.queueDownload("./img/icon/barracks.png");
-    AM.queueDownload("./img/icon/silo.png");
+    AM.queueDownload("./img/sprites/barracks.png");
+    AM.queueDownload("./img/sprites/farm.png");
 
     AM.queueDownload("./img/map/game map9072.png");
     AM.queueDownload("./map images/master.png");
