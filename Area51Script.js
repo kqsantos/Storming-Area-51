@@ -932,7 +932,29 @@ MinimapDisplay.prototype.draw = function (ctx) {
 // Start - Control Display
 // ===================================================================
 function ControlDisplay(game) {
+
     this.btnDim = 80;
+    this.buttonIcon = AM.getAsset("./img/control/button.png")
+
+    this.actionIconOn = AM.getAsset("./img/control/action_on.png")
+    this.actionIconOff = AM.getAsset("./img/control/action_off.png")
+    this.fightIcon = AM.getAsset("./img/control/fight.png")
+    this.moveIcon = AM.getAsset("./img/control/move.png")
+
+    this.buildIconOn = AM.getAsset("./img/control/build_on.png")
+    this.buildIconOff = AM.getAsset("./img/control/build_off.png")
+    this.barracksIcon = AM.getAsset("./img/control/barracks_on.png")
+    this.siloIcon = AM.getAsset("./img/control/silo2.png")
+
+    this.troopIconOn = AM.getAsset("./img/control/build_troop_on.png")
+    this.troopIconOff = AM.getAsset("./img/control/build_troop_off.png")
+    this.soldierIcon = AM.getAsset("./img/control/soldier5.png")
+
+    this.endTurnIconOn = AM.getAsset("./img/control/end_turn_on.png")
+    this.endTurnIconOff = AM.getAsset("./img/control/end_turn_off.png")
+
+    this.isActivate = true;
+
     var w = gameEngine.surfaceWidth;
     var h = gameEngine.surfaceHeight;
     this.aBtn = { x: w - this.btnDim * 4, y: h - this.btnDim };
@@ -954,6 +976,11 @@ function ControlDisplay(game) {
     this.troopFlag = false;
     this.buildingFlag = false;
 
+    this.actionActivate = false;
+    this.troopActivate = false;
+    this.buildingActivate = false;
+    this.endTurnActivate = false;
+
     Entity.call(this, game, 0, 0);
 }
 
@@ -961,33 +988,38 @@ ControlDisplay.prototype = new Entity();
 ControlDisplay.prototype.constructor = ControlDisplay;
 
 // max x=1438; x changes by the size of the map display
-// use .clearRect(x,y,w,h)
 ControlDisplay.prototype.update = function (ctx) {
     var click = gameEngine.click;
     var that = this;
 
-    if (click !== null) {
-
-        var x = getClickedItem(this.menu, click.x, click.y);
-        if (x !== null) {
-            if (x.name === "action") {
-                toggleAllOff();
-                this.actionFlag = true;
-                click = null;
-            } else if (x.name === "troop") {
-                toggleAllOff();
-                this.troopFlag = true;
-                click = null;
-            } else if (x.name === "building") {
-                toggleAllOff();
-                this.buildingFlag = true;
-                click = null;
+    if (this.isActivate) {
+        toggleAllOn();
+        if (click !== null) {
+            var x = getClickedItem(this.menu, click.x, click.y);
+            if (x !== null) {
+                if (x.name === "action") {
+                    toggleAllOff();
+                    this.actionFlag = true;
+                    click = null;
+                }
+                if (x.name === "troop") {
+                    toggleAllOff();
+                    this.troopFlag = true;
+                    click = null;
+                }
+                if (x.name === "building") {
+                    toggleAllOff();
+                    this.buildingFlag = true;
+                    click = null;
+                }
+                if (x.name === "endTurn") {
+                    toggleAllOff();
+                }
             } else {
                 toggleAllOff();
             }
-        } else {
-            toggleAllOff();
         }
+
     }
 
     function toggleAllOff() {
@@ -996,6 +1028,12 @@ ControlDisplay.prototype.update = function (ctx) {
         that.buildingFlag = false;
     }
 
+    function toggleAllOn() {
+        that.actionActivate = true;
+        that.troopActivate = true;
+        that.buildingActivate = true;
+        that.endTurnActivate = true;
+    }
 
 
 }
@@ -1004,31 +1042,30 @@ ControlDisplay.prototype.draw = function (ctx) {
     ctx.fillStyle = "#9e9e9e";
     ctx.strokeStyle = "black";
 
-    function toggleAllOff() {
-        this.actionFlag = false;
-        this.troopFlag = false;
-        this.buildingFlag = false;
+    // Displays four mega menus
+    ctx.drawImage(this.buttonIcon, this.aBtn.x, this.aBtn.y, this.btnDim, this.btnDim);
+    ctx.drawImage(this.buttonIcon, this.tBtn.x, this.tBtn.y, this.btnDim, this.btnDim);
+    ctx.drawImage(this.buttonIcon, this.bBtn.x, this.bBtn.y, this.btnDim, this.btnDim);
+    ctx.drawImage(this.buttonIcon, this.eTBtn.x, this.eTBtn.y, this.btnDim, this.btnDim);
+
+    if (this.actionActivate || this.buildingActivate || this.troopActivate || this.endTurnActivate) {
+        ctx.drawImage(this.actionIconOn, this.aBtn.x + 10, this.aBtn.y + 10, this.btnDim - 20, this.btnDim - 20);
+        ctx.drawImage(this.troopIconOn, this.tBtn.x + 10, this.tBtn.y + 10, this.btnDim - 20, this.btnDim - 20);
+        ctx.drawImage(this.buildIconOn, this.bBtn.x + 10, this.bBtn.y + 10, this.btnDim - 20, this.btnDim - 20);
+        ctx.drawImage(this.endTurnIconOn, this.eTBtn.x + 10, this.eTBtn.y + 10, this.btnDim - 20, this.btnDim - 20);
+    } else {
+        ctx.drawImage(this.actionIconOff, this.aBtn.x + 10, this.aBtn.y + 10, this.btnDim - 20, this.btnDim - 20);
+        ctx.drawImage(this.troopIconOff, this.tBtn.x + 10, this.tBtn.y + 10, this.btnDim - 20, this.btnDim - 20);
+        ctx.drawImage(this.buildIconOff, this.bBtn.x + 10, this.bBtn.y + 10, this.btnDim - 20, this.btnDim - 20);
+        ctx.drawImage(this.endTurnIconOff, this.eTBtn.x + 10, this.eTBtn.y + 10, this.btnDim - 20, this.btnDim - 20);
     }
 
-    // Displays four mega menus
-    ctx.fillRect(this.eTBtn.x, this.eTBtn.y, this.btnDim, this.btnDim);
-    ctx.strokeRect(this.eTBtn.x, this.eTBtn.y, this.btnDim, this.btnDim);
-    ctx.fillRect(this.bBtn.x, this.bBtn.y, this.btnDim, this.btnDim);
-    ctx.strokeRect(this.bBtn.x, this.bBtn.y, this.btnDim, this.btnDim);
-    ctx.fillRect(this.tBtn.x, this.tBtn.y, this.btnDim, this.btnDim);
-    ctx.strokeRect(this.tBtn.x, this.tBtn.y, this.btnDim, this.btnDim);
-    ctx.fillRect(this.aBtn.x, this.aBtn.y, this.btnDim, this.btnDim);
-    ctx.strokeRect(this.aBtn.x, this.aBtn.y, this.btnDim, this.btnDim);
 
 
 
     if (this.actionFlag) {
-        // toggleAllOff();
-        ctx.fillRect(this.a_moveBtn.x, this.a_moveBtn.y, this.btnDim, this.btnDim);
-        ctx.strokeRect(this.a_moveBtn.x, this.a_moveBtn.y, this.btnDim, this.btnDim);
-        // ctx.fillRect(gameEngine.surfaceWidth - this.btnDim * 5, gameEngine.surfaceHeight - this.btnDim * 2, this.btnDim, this.btnDim);
-        // ctx.strokeRect(gameEngine.surfaceWidth - this.btnDim * 5, gameEngine.surfaceHeight - this.btnDim * 2, this.btnDim, this.btnDim);
-        // this.actionFlag = true;
+        ctx.drawImage(this.buttonIcon, this.a_moveBtn.x, this.a_moveBtn.y, this.btnDim, this.btnDim);
+        ctx.drawImage(this.fightIcon, this.a_moveBtn.x + 10, this.a_moveBtn.y + 10, this.btnDim - 20, this.btnDim - 20);
         if (debug) {
             console.log("ac" + this.actionFlag);
             console.log("tr" + this.troopFlag);
@@ -1038,12 +1075,9 @@ ControlDisplay.prototype.draw = function (ctx) {
 
 
     if (this.troopFlag) {
-        // toggleAllOff();
-        ctx.fillRect(this.t_infBtn.x, this.t_infBtn.y, this.btnDim, this.btnDim);
-        ctx.strokeRect(this.t_infBtn.x, this.t_infBtn.y, this.btnDim, this.btnDim);
-        // ctx.fillRect(gameEngine.surfaceWidth - this.btnDim * 4, gameEngine.surfaceHeight - this.btnDim * 2, this.btnDim, this.btnDim);
-        // ctx.strokeRect(gameEngine.surfaceWidth - this.btnDim * 4, gameEngine.surfaceHeight - this.btnDim * 2, this.btnDim, this.btnDim);
-        // this.troopFlag = true;
+        ctx.drawImage(this.buttonIcon, this.t_infBtn.x, this.t_infBtn.y, this.btnDim, this.btnDim);
+        ctx.drawImage(this.soldierIcon, this.t_infBtn.x + 10, this.t_infBtn.y + 10, this.btnDim - 20, this.btnDim - 20);
+
         if (debug) {
             console.log("ac" + this.actionFlag);
             console.log("tr" + this.troopFlag);
@@ -1053,12 +1087,11 @@ ControlDisplay.prototype.draw = function (ctx) {
 
 
     if (this.buildingFlag) {
-        // toggleAllOff();
-        ctx.fillRect(this.b_farmBtn.x, this.b_farmBtn.y, this.btnDim, this.btnDim);
-        ctx.strokeRect(this.b_farmBtn.x, this.b_farmBtn.y, this.btnDim, this.btnDim);
-        ctx.fillRect(this.b_barBtn.x, this.b_barBtn.y, this.btnDim, this.btnDim);
-        ctx.strokeRect(this.b_barBtn.x, this.b_barBtn.y, this.btnDim, this.btnDim);
-        // this.buildingFlag = true;
+        ctx.drawImage(this.buttonIcon, this.b_farmBtn.x, this.b_farmBtn.y, this.btnDim, this.btnDim);
+        ctx.drawImage(this.buttonIcon, this.b_barBtn.x, this.b_barBtn.y, this.btnDim, this.btnDim);
+
+        ctx.drawImage(this.barracksIcon, this.b_barBtn.x + 10, this.b_barBtn.y + 10, this.btnDim - 20, this.btnDim - 20);
+        ctx.drawImage(this.siloIcon, this.b_farmBtn.x + 10, this.b_farmBtn.y + 10, this.btnDim - 20, this.btnDim - 20);
         if (debug) {
             console.log("ac" + this.actionFlag);
             console.log("tr" + this.troopFlag);
@@ -1135,7 +1168,6 @@ InputHandler.prototype.update = function (ctx) {
                 changeCameraOrigin(Number(cameraOrigin.x) + Number(this.sensitivity), cameraOrigin.y);
                 // createArray(cameraOrigin);
                 if (debug) {
-
                     console.log("%c RegionArray below this:", "background: #222; color: #bada55");
                     console.log(regionArray);
                 }
@@ -1525,8 +1557,6 @@ WelcomeScreen.prototype.update = function (ctx) {
 
 
 
-
-
         // gameEngine.addEntity(new Alien(gameEngine, 300, 250));
 
         gameEngine.addEntity(new MinimapDisplay(gameEngine));
@@ -1583,6 +1613,25 @@ function Main() {
     // Welcome Screen
     AM.queueDownload("./img/welcome_screen.png");
     AM.queueDownload("./img/button_new-game.png");
+
+    // Control Display
+    AM.queueDownload("./img/control/button.png");
+    AM.queueDownload("./img/control/action_on.png");
+    AM.queueDownload("./img/control/action_off.png");
+    AM.queueDownload("./img/control/build_on.png");
+    AM.queueDownload("./img/control/build_off.png");
+    AM.queueDownload("./img/control/build_troop_on.png");
+    AM.queueDownload("./img/control/build_troop_off.png");
+    AM.queueDownload("./img/control/end_turn_on.png");
+    AM.queueDownload("./img/control/end_turn_off.png");
+    AM.queueDownload("./img/control/barracks_on.png");
+    AM.queueDownload("./img/control/fight.png");
+    AM.queueDownload("./img/control/silo.png");
+    AM.queueDownload("./img/control/silo2.png");
+    AM.queueDownload("./img/control/move.png");
+    AM.queueDownload("./img/control/soldier5.png");
+
+
 
     AM.downloadAll(function () {
         gameEngine.addEntity(new WelcomeScreen(gameEngine));
