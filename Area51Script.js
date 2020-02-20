@@ -1139,8 +1139,7 @@ WelcomeScreen.prototype.update = function (ctx) {
 
         for (var i = 0; i < regionsList.length; i++) {
             if (regionsList[i] != undefined) {
-                buildFarm(regionsList[i]);
-                buildBarracks(regionsList[i]);
+
             }
         }
 
