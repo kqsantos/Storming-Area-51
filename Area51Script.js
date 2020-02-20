@@ -321,21 +321,20 @@ function getClickedRegion(rects, x, y) {
 }
 
 function setSpritesToUnselected(region) {
-    if (region.troop.length > 0) {
-        if (region.troop["soldier"] != null) {
-            region.troop["soldier"].selected = false;
-        }
+
+    if (region.troop["soldier"] != null) {
+        region.troop["soldier"].selected = false;
     }
+
     if (region.cap != null) {
         region.cap.selected = false;
     }
 }
 
 function setSpritesToSelected(region) {
-    if (region.troop.length > 0) {
-        if (region.troop["soldier"] != null) {
-            region.troop["soldier"].selected = true;
-        }
+
+    if (region.troop["soldier"] != null) {
+        region.troop["soldier"].selected = true;
     }
     if (region.cap != null) {
         region.cap.selected = true;
@@ -796,10 +795,10 @@ function ControlDisplay(game) {
     this.troopFlag = false;
     this.buildingFlag = false;
 
-    this.actionActive = false;
-    this.troopActive = false;
-    this.buildingActive = false;
-    this.endTurnActive = false;
+    this.actionActive = true;
+    this.troopActive = true;
+    this.buildingActive = true;
+    this.endTurnActive = true;
 
     Entity.call(this, game, 0, 0);
 }
@@ -818,7 +817,7 @@ ControlDisplay.prototype.update = function (ctx) {
         }
     }
 
-    if (this.isActivate) {
+    if (true) {
         toggleAllOn();
         if (click !== null) {
             var x = getClickedItem(this.menu, click.x, click.y);
@@ -874,19 +873,25 @@ ControlDisplay.prototype.draw = function (ctx) {
     ctx.drawImage(this.buttonIcon, this.bBtn.x, this.bBtn.y, this.btnDim, this.btnDim);
     ctx.drawImage(this.buttonIcon, this.eTBtn.x, this.eTBtn.y, this.btnDim, this.btnDim);
 
-    if (this.actionActivate || this.buildingActivate || this.troopActivate || this.endTurnActivate) {
+    if (this.actionActive) {
         ctx.drawImage(this.actionIconOn, this.aBtn.x + 10, this.aBtn.y + 10, this.btnDim - 20, this.btnDim - 20);
-        ctx.drawImage(this.troopIconOn, this.tBtn.x + 10, this.tBtn.y + 10, this.btnDim - 20, this.btnDim - 20);
-        ctx.drawImage(this.buildIconOn, this.bBtn.x + 10, this.bBtn.y + 10, this.btnDim - 20, this.btnDim - 20);
-        ctx.drawImage(this.endTurnIconOn, this.eTBtn.x + 10, this.eTBtn.y + 10, this.btnDim - 20, this.btnDim - 20);
     } else {
         ctx.drawImage(this.actionIconOff, this.aBtn.x + 10, this.aBtn.y + 10, this.btnDim - 20, this.btnDim - 20);
-        ctx.drawImage(this.troopIconOff, this.tBtn.x + 10, this.tBtn.y + 10, this.btnDim - 20, this.btnDim - 20);
-        ctx.drawImage(this.buildIconOff, this.bBtn.x + 10, this.bBtn.y + 10, this.btnDim - 20, this.btnDim - 20);
-        ctx.drawImage(this.endTurnIconOff, this.eTBtn.x + 10, this.eTBtn.y + 10, this.btnDim - 20, this.btnDim - 20);
     }
 
+    if (this.buildingActive) {
+        ctx.drawImage(this.buildIconOn, this.bBtn.x + 10, this.bBtn.y + 10, this.btnDim - 20, this.btnDim - 20);
+    } else {
+        ctx.drawImage(this.buildIconOff, this.bBtn.x + 10, this.bBtn.y + 10, this.btnDim - 20, this.btnDim - 20);
+    }
 
+    if (this.troopActive) {
+        ctx.drawImage(this.troopIconOn, this.tBtn.x + 10, this.tBtn.y + 10, this.btnDim - 20, this.btnDim - 20);
+    } else {
+        ctx.drawImage(this.troopIconOff, this.tBtn.x + 10, this.tBtn.y + 10, this.btnDim - 20, this.btnDim - 20);
+    }
+
+    ctx.drawImage(this.endTurnIconOn, this.eTBtn.x + 10, this.eTBtn.y + 10, this.btnDim - 20, this.btnDim - 20);
 
 
     if (this.actionFlag) {
@@ -1079,31 +1084,6 @@ AudioHandler.prototype.draw = function (ctx) {
 // End - Audio Handler
 // ===================================================================
 
-// ===================================================================
-// Start - Sprite Handler
-// ===================================================================
-function SpriteHandler(game) {
-    var audio = new Audio("./sound/bg_music.mp3");
-    audio.play();
-    Entity.call(this, game, 0, 0);
-}
-
-SpriteHandler.prototype = new Entity();
-SpriteHandler.prototype.constructor = SpriteHandler;
-
-SpriteHandler.prototype.update = function (ctx) {
-
-}
-
-
-SpriteHandler.prototype.draw = function (ctx) {
-
-}
-// ===================================================================
-// End - Sprite Handler
-// ===================================================================
-
-
 
 // ===================================================================
 // Start - Welcome Screen
@@ -1161,10 +1141,17 @@ WelcomeScreen.prototype.update = function (ctx) {
             if (regionsList[i] != undefined) {
                 buildFarm(regionsList[i]);
                 buildBarracks(regionsList[i]);
-                buildSoldier(regionsList[i]);
-                addCaptainToRegion(regionsList[i]);
             }
         }
+
+        for (var i = 0; i < regionsList.length; i++) {
+            if (regionsList[i] != undefined) {
+                buildSoldier(regionsList[i]);
+            }
+        }
+
+        addCaptainToRegion(regionsList[43]);
+        addCaptainToRegion(regionsList[31]);
 
         // gameEngine.addEntity(new Alien(gameEngine, 300, 250));
 
@@ -1174,7 +1161,6 @@ WelcomeScreen.prototype.update = function (ctx) {
 
         gameEngine.addEntity(new InputHandler(gameEngine));
         gameEngine.addEntity(new AudioHandler(gameEngine));
-        gameEngine.addEntity(new SpriteHandler(gameEngine));
     }
 }
 
