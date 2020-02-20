@@ -23,11 +23,12 @@ var regionsList = [];
 BuildRegions();
 console.log("%c regionsList below this:", "background: #222; color: #bada55");
 console.log(regionsList);
+console.log(Object.keys(regionsList).length);
 
-for (var i = 0; i < regionsList.length; i++) {
-    if (regionsList[i] != undefined)
-        console.log(regionsList[i].barracksXY[0]);
-}
+// for (var i = 0; i < regionsList.length; i++) {
+//     if (regionsList[i] != undefined)
+//         console.log(regionsList[i].barracksXY[0]);
+// }
 
 var onScreenRegions = []; // This is the overlay used for the click event
 createArray(cameraOrigin);
@@ -43,8 +44,9 @@ var modbgHeight = bgHeight;
 var debug = true;
 var debugGrid = false;
 
-var selectedRegion = -1;
+var selectedRegion = null;
 var currentPlayerTurn = 0;
+var turnCount = 1;
 // ===================================================================
 // End - Global Variables
 // ===================================================================
@@ -170,15 +172,67 @@ function Player() {
 // Start - Utility Functions
 // ===================================================================\
 
-function addCaptainToRegion(region) {
-    if(curr)
-    var newCap = new 
-    region.cap = true;
-
+function toggleTurn() {
+    turnCount++;
+    // currentPlayerTurn %= turnCount;
 }
 
 function addCaptainToRegion(region) {
-    region.cap = true;
+    var newCap;
+    if (region.owner == 0) {
+        newCap = new SoldierCaptain(gameEngine, region.capXY[0], region.capXY[1]);
+    } else {
+        newCap = new AlienCaptain(gameEngine, region.capXY[0], region.capXY[1]);
+    }
+    region.cap = newCap;
+    gameEngine.addEntity(region.cap);
+}
+
+function removeCaptainFromRegion(region) {
+    if (region.cap != null) {
+        region.cap.removeFromWorld = true;
+        region.cap = null;
+    }
+}
+
+function buildFarm(region) {
+    var newFarm;
+    if (region.owner == 0) {
+        newFarm = new Farm(gameEngine, 0, region.farmXY[0], region.farmXY[1]);
+    } else {
+        newFarm = new Farm(gameEngine, 1, region.farmXY[0], region.farmXY[1]);
+    }
+    region.bldg.push(newFarm);
+    gameEngine.addEntity(newFarm);
+}
+
+function buildBarracks(region) {
+    var newBarracks;
+    if (region.owner == 0) {
+        newBarracks = new Barracks(gameEngine, 0, region.barracksXY[0], region.barracksXY[1]);
+    } else {
+        newBarracks = new Barracks(gameEngine, 1, region.barracksXY[0], region.barracksXY[1]);
+    }
+    region.bldg.push(newBarracks);
+    gameEngine.addEntity(newBarracks);
+}
+
+function buildSoldier(region) {
+    var newTroop;
+
+    if (region.troop["soldier"] != null) {
+        region.troop.count++;
+    }
+    else if (region.owner == 0) {
+        newTroop = new Soldier(gameEngine, region.troopXY[0], region.troopXY[1]);
+        region.troop["soldier"] = newTroop;
+        gameEngine.addEntity(region.troop["soldier"]);
+    }
+    else {
+        newTroop = new Alien(gameEngine, region.troopXY[0], region.troopXY[1]);
+        region.troop["soldier"] = newTroop;
+        gameEngine.addEntity(region.troop["soldier"]);
+    }
 }
 
 /**
@@ -197,18 +251,21 @@ function changeCameraOrigin(x, y) {
  * @param {*} origin 
  */
 function createArray(origin) {
-    for (var i = 0; i < gameEngine.surfaceWidth / dim; i++) {
-        onScreenRegions[i] = new Array((gameEngine.surfaceHeight / dim).toFixed(0));
-        console.log("hello" + (gameEngine.surfaceHeight / dim).toFixed(0))
+    var arrWidth = (gameEngine.surfaceWidth / dim).toFixed(0);
+    var arrHeigth = (gameEngine.surfaceHeight / dim).toFixed(0);
+
+    for (var i = 0; i < arrWidth; i++) {
+        onScreenRegions[i] = new Array(arrHeigth);
+        console.log("width of onScreenArray --- " + arrWidth);
     }
 
     // update the value of the array
-    for (var i = 0; i < gameEngine.surfaceWidth / dim; i++) {
+    for (var i = 0; i < arrWidth; i++) {
         for (var j = 0; j < gameEngine.surfaceHeight / dim; j++) {
             let xCor = origin.x + i;
             let yCor = origin.y + j;
 
-            if (gameBoard[xCor][yCor] != null) {
+            if (gameBoard[xCor][yCor] != undefined) {
                 onScreenRegions[i][j] = {
                     name: gameBoard[yCor][xCor],
                     x: i * dim,
@@ -230,7 +287,7 @@ function createArray(origin) {
  * @param {*} y y position of mouse click
  */
 function getClickedRegion(rects, x, y) {
-    var regionId = null;
+    var tempRegion = null;
     for (var i = 0, len = rects.length; i < len; i++) {
         for (var j = 0, len2 = rects[i].length; j < len2; j++) {
 
@@ -243,12 +300,47 @@ function getClickedRegion(rects, x, y) {
                 && left <= x
                 && bottom >= y
                 && top <= y) {
-                regionId = rects[i][j];
+                tempRegion = rects[i][j];
             }
 
         }
     }
-    return regionId;
+
+    if (regionsList[tempRegion.name] != null) {
+
+        if (selectedRegion != null) setSpritesToUnselected(selectedRegion);
+        selectedRegion = regionsList[tempRegion.name];
+        setSpritesToSelected(selectedRegion);
+
+
+    } else {
+        if (selectedRegion != null) setSpritesToUnselected(selectedRegion);
+        selectedRegion = null;
+    }
+
+}
+
+function setSpritesToUnselected(region) {
+    if (region.troop.length > 0) {
+        if (region.troop["soldier"] != null) {
+            region.troop["soldier"].selected = false;
+        }
+    }
+    if (region.cap != null) {
+        region.cap.selected = false;
+    }
+}
+
+function setSpritesToSelected(region) {
+    if (region.troop.length > 0) {
+        if (region.troop["soldier"] != null) {
+            region.troop["soldier"].selected = true;
+        }
+    }
+    if (region.cap != null) {
+        region.cap.selected = true;
+    }
+
 }
 
 function getClickedItem(items, x, y) {
@@ -275,48 +367,51 @@ function getClickedItem(items, x, y) {
 
 
 function BuildRegions() {
-    regionsList[10] = new Region(10, 0, [520 + (spriteDim * 50), 265 + (spriteDim * 29)], [410 + (spriteDim * 50), 445 + (spriteDim * 29)], [525 + (spriteDim * 50), 380 + (spriteDim * 29)], false, [0, 0], 'plains', [])
-    regionsList[11] = new Region(11, 0, [300 + (spriteDim * 59), 455 + (spriteDim * 46)], [455 + (spriteDim * 59), 560 + (spriteDim * 46)], [605 + (spriteDim * 59), 515 + (spriteDim * 46)], false, [0, 0], 'plains', [])
-    regionsList[12] = new Region(12, 0, [540 + (spriteDim * 22), 200 + (spriteDim * 54)], [530 + (spriteDim * 22), 450 + (spriteDim * 54)], [605 + (spriteDim * 22), 290 + (spriteDim * 54)], false, [0, 0], 'plains', [])
-    regionsList[13] = new Region(13, 0, [275 + (spriteDim * 19), 330 + (spriteDim * 61)], [275 + (spriteDim * 19), 415 + (spriteDim * 61)], [305 + (spriteDim * 19), 290 + (spriteDim * 61)], false, [0, 0], 'plains', [])
-    regionsList[14] = new Region(14, 0, [300 + (spriteDim * 0), 200 + (spriteDim * 68)], [230 + (spriteDim * 0), 450 + (spriteDim * 54)], [220 + (spriteDim * 0), 295 + (spriteDim * 55)], false, [0, 0], 'plains', [])
-    regionsList[15] = new Region(15, 0, [150, 260], [250, 185], [460, 270], false, [0, 0], 'plains', [])
-    regionsList[16] = new Region(16, 0, [470, 345], [445, 425], [345, 450], false, [0, 0], 'plains', [])
-    regionsList[17] = new Region(17, 0, [610, 205], [610, 355], [680, 440], false, [0, 0], 'plains', [])
-    regionsList[18] = new Region(18, 0, [310 + (spriteDim * 20), 265 + (spriteDim * 22)], [480 + (spriteDim * 20), 265 + (spriteDim * 22)], [445 + (spriteDim * 20), 335 + (spriteDim * 22)], false, [0, 0], 'plains', [])
-    regionsList[19] = new Region(19, 0, [285, 665], [245, 750], [235, 690], false, [0, 0], 'plains', [])
-    regionsList[40] = new Region(40, 0, [680 + (spriteDim * 101), 140 + (spriteDim * 61)], [570 + (spriteDim * 101), 480 + (spriteDim * 61)], [525 + (spriteDim * 101), 410 + (spriteDim * 61)], false, [0, 0], 'tundra', [])
-    regionsList[41] = new Region(41, 0, [880 + (spriteDim * 101), 285 + (spriteDim * 55)], [1010 + (spriteDim * 101), 475 + (spriteDim * 55)], [1055 + (spriteDim * 101), 163 + (spriteDim * 55)], false, [0, 0], 'tundra', [])
-    regionsList[42] = new Region(42, 0, [975 + (spriteDim * 101), 240 + (spriteDim * 38)], [1085 + (spriteDim * 101), 250 + (spriteDim * 38)], [940 + (spriteDim * 101), 245 + (spriteDim * 38)], false, [0, 0], 'tundra', [])
-    regionsList[43] = new Region(43, 0, [735 + (spriteDim * 101), 100 + (spriteDim * 0)], [750 + (spriteDim * 101), 310 + (spriteDim * 0)], [800 + (spriteDim * 101), 220 + (spriteDim * 0)], false, [0, 0], 'tundra', [])
-    regionsList[44] = new Region(44, 0, [590 + (spriteDim * 101), 410 + (spriteDim * 21)], [665 + (spriteDim * 101), 335 + (spriteDim * 21)], [580 + (spriteDim * 101), 300 + (spriteDim * 21)], false, [0, 0], 'tundra', [])
-    regionsList[45] = new Region(45, 0, [635 + (spriteDim * 37), 60 + (spriteDim * 3)], [660 + (spriteDim * 37), 140 + (spriteDim * 3)], [555 + (spriteDim * 37), 140 + (spriteDim * 3)], false, [0, 0], 'tundra', [])
-    regionsList[46] = new Region(46, 0, [390 + (spriteDim * 61), 465 + (spriteDim * 0)], [210 + (spriteDim * 61), 440 + (spriteDim * 0)], [350 + (spriteDim * 61), 360 + (spriteDim * 0)], false, [0, 0], 'tundra', [])
-    regionsList[47] = new Region(47, 0, [640 + (spriteDim * 61), 410 + (spriteDim * 0)], [575 + (spriteDim * 61), 115 + (spriteDim * 0)], [590 + (spriteDim * 61), 280 + (spriteDim * 0)], false, [0, 0], 'tundra', [])
-    regionsList[48] = new Region(48, 0, [310 + (spriteDim * 101), 320 + (spriteDim * 0)], [310 + (spriteDim * 101), 580 + (spriteDim * 0)], [460 + (spriteDim * 101), 315 + (spriteDim * 0)], false, [0, 0], 'tundra', [])
-    regionsList[49] = new Region(49, 0, [965 + (spriteDim * 101), 420 + (spriteDim * 0)], [965 + (spriteDim * 101), 300 + (spriteDim * 0)], [1100 + (spriteDim * 101), 230 + (spriteDim * 0)], false, [0, 0], 'tundra', [])
-    regionsList[50] = new Region(50, 0, [450 + (spriteDim * 101), 380 + (spriteDim * 42)], [335 + (spriteDim * 101), 275 + (spriteDim * 42)], [530 + (spriteDim * 101), 310 + (spriteDim * 42)], false, [0, 0], 'tundra', [])
-    regionsList[29] = new Region(29, 1, [760 + (dim * 0), 310 + (dim * 148)], [770 + (dim * 0), 500 + (dim * 148)], [925 + (dim * 0), 430 + (dim * 148)], false, [0, 0], 'sand', [])
-    regionsList[30] = new Region(30, 1, [590 + (dim * 0), 385 + (dim * 148)], [590 + (dim * 0), 495 + (dim * 148)], [510 + (dim * 0), 465 + (dim * 148)], false, [0, 0], 'sand', [])
-    regionsList[31] = new Region(31, 1, [170 + (dim * 0), 385 + (dim * 148)], [315 + (dim * 0), 390 + (dim * 148)], [275 + (dim * 0), 555 + (dim * 148)], false, [0, 0], 'sand', [])
-    regionsList[32] = new Region(32, 1, [295 + (dim * 0), 495 + (dim * 123)], [430 + (dim * 0), 565 + (dim * 123)], [595 + (dim * 0), 490 + (dim * 123)], false, [0, 0], 'sand', [])
-    regionsList[33] = new Region(33, 1, [140 + (dim * 0), 360 + (dim * 123)], [135 + (dim * 0), 480 + (dim * 123)], [190 + (dim * 0), 220 + (dim * 123)], false, [0, 0], 'sand', [])
-    regionsList[34] = new Region(34, 1, [570 + (dim * 41), 75 + (dim * 113)], [500 + (dim * 41), 270 + (dim * 113)], [675 + (dim * 41), 175 + (dim * 113)], false, [0, 0], 'sand', [])
-    regionsList[35] = new Region(35, 1, [295 + (dim * 1), 280 + (dim * 87)], [310 + (dim * 1), 480 + (dim * 87)], [300 + (dim * 1), 385 + (dim * 87)], false, [0, 0], 'sand', [])
-    regionsList[36] = new Region(36, 1, [500 + (dim * 1), 290 + (dim * 87)], [670 + (dim * 1), 290 + (dim * 87)], [715 + (dim * 1), 220 + (dim * 87)], false, [0, 0], 'sand', [])
-    regionsList[37] = new Region(37, 1, [720 + (dim * 1), 480 + (dim * 87)], [535 + (dim * 1), 480 + (dim * 87)], [730 + (dim * 1), 415 + (dim * 87)], false, [0, 0], 'sand', [])
-    regionsList[38] = new Region(38, 1, [320 + (dim * 0), 180 + (dim * 123)], [540 + (dim * 0), 360 + (dim * 123)], [515 + (dim * 0), 290 + (dim * 123)], false, [0, 0], 'sand', [])
-    regionsList[39] = new Region(39, 1, [440 + (dim * 41), 420 + (dim * 113)], [420 + (dim * 41), 570 + (dim * 113)], [600 + (dim * 41), 515 + (dim * 113)], false, [0, 0], 'sand', [])
-    regionsList[60] = new Region(60, 1, [235 + (dim * 101), 435 + (dim * 81)], [350 + (dim * 101), 430 + (dim * 81)], [410 + (dim * 101), 300 + (dim * 81)], false, [0, 0], 'grassland', [])
-    regionsList[61] = new Region(61, 1, [965 + (dim * 101), 440 + (dim * 81)], [845 + (dim * 101), 315 + (dim * 81)], [1140 + (dim * 101), 345 + (dim * 81)], false, [0, 0], 'grassland', [])
-    regionsList[62] = new Region(62, 1, [815 + (dim * 101), 70 + (dim * 123)], [925 + (dim * 101), 165 + (dim * 123)], [1100 + (dim * 101), 115 + (dim * 123)], false, [0, 0], 'grassland', [])
-    regionsList[63] = new Region(63, 1, [895 + (dim * 101), 455 + (dim * 123)], [560 + (dim * 101), 345 + (dim * 123)], [850 + (dim * 101), 370 + (dim * 123)], false, [0, 0], 'grassland', [])
-    regionsList[64] = new Region(64, 1, [770 + (dim * 83), 200 + (dim * 117)], [645 + (dim * 83), 230 + (dim * 117)], [875 + (dim * 83), 185 + (dim * 117)], false, [0, 0], 'grassland', [])
-    regionsList[65] = new Region(65, 1, [450 + (dim * 83), 340 + (dim * 117)], [470 + (dim * 83), 430 + (dim * 117)], [625 + (dim * 83), 385 + (dim * 117)], false, [0, 0], 'grassland', [])
-    regionsList[66] = new Region(66, 1, [450 + (dim * 83), 340 + (dim * 117)], [470 + (dim * 83), 430 + (dim * 117)], [625 + (dim * 83), 385 + (dim * 117)], false, [0, 0], 'grassland', [])
-    regionsList[67] = new Region(67, 1, [125 + (dim * 97), 285 + (dim * 148)], [300 + (dim * 97), 290 + (dim * 148)], [95 + (dim * 97), 145 + (dim * 148)], false, [0, 0], 'grassland', [])
-    regionsList[68] = new Region(68, 1, [590 + (dim * 97), 350 + (dim * 148)], [700 + (dim * 97), 425 + (dim * 148)], [575 + (dim * 97), 490 + (dim * 148)], false, [0, 0], 'grassland', [])
-    regionsList[69] = new Region(69, 1, [1105 + (dim * 97), 420 + (dim * 148)], [1000 + (dim * 97), 500 + (dim * 148)], [1045 + (dim * 97), 340 + (dim * 148)], false, [0, 0], 'grassland', [])
+    regionsList[10] = new Region(10, 0, [1025, 568], [949, 745], [1121, 665], null, [963, 604], 'plains', []);
+    regionsList[11] = new Region(11, 0, [1040, 990], [1100, 1050], [1225, 997], null, [1125, 904], 'plains', []);
+    regionsList[12] = new Region(12, 0, [750, 800], [752, 1044], [810, 898], null, [842, 920], 'plains', []);
+    regionsList[13] = new Region(13, 0, [479, 1013], [481, 1090], [509, 951], null, [643, 1053], 'plains', []);
+    regionsList[14] = new Region(14, 0, [189, 811], [199, 991], [233, 913], null, [291, 997], 'plains', []);
+    regionsList[15] = new Region(15, 0, [145, 260], [230, 180], [480, 241], null, [384, 217], 'plains', []);
+    regionsList[16] = new Region(16, 0, [442, 329], [446, 403], [310, 400], null, [220, 371], 'plains', []);
+    regionsList[17] = new Region(17, 0, [575, 163], [575, 255], [620, 399], null, [706, 229], 'plains', []);
+    regionsList[18] = new Region(18, 0, [675, 490], [695, 555], [590, 510], null, [585, 575], 'plains', []);
+    regionsList[19] = new Region(19, 0, [290, 633], [215, 705], [138, 635], null, [210, 603], 'plains', []);
+
+    regionsList[40] = new Region(40, 0, [1759, 731], [1773, 845], [1635, 1109], null, [1721, 1139], 'tundra', []);
+    regionsList[41] = new Region(41, 0, [1957, 881], [2083, 1061], [2117, 767], null, [2033, 771], 'tundra', []);
+    regionsList[42] = new Region(42, 0, [2073, 653], [2161, 653], [2015, 655], null, [1907, 649], 'tundra', []);
+    regionsList[43] = new Region(43, 0, [2051, 491], [2049, 389], [2141, 223], null, [2065, 273], 'tundra', []);
+    regionsList[44] = new Region(44, 0, [1675, 607], [1773, 617], [1685, 523], null, [1781, 515], 'tundra', []);
+    regionsList[45] = new Region(45, 0, [1011, 99], [1071, 170], [953, 177], null, [831, 145], 'tundra', []);
+    regionsList[46] = new Region(46, 0, [835, 435], [989, 429], [1017, 339], null, [849, 313], 'tundra', []);
+    regionsList[47] = new Region(47, 0, [1221, 99], [1307, 395], [1281, 201], null, [1229, 311], 'tundra', []);
+    regionsList[48] = new Region(48, 0, [1445, 345], [1443, 549], [1565, 289], null, [1549, 597], 'tundra', []);
+    regionsList[49] = new Region(49, 0, [1831, 101], [1903, 301], [1823, 201], null, [1761, 291], 'tundra', []);
+    regionsList[50] = new Region(50, 0, [1375, 819], [1371, 969], [1559, 765], null, [1649, 767], 'tundra', []);
+
+    regionsList[29] = new Region(29, 1, [707, 1965], [703, 2051], [855, 2059], null, [899, 1971], 'sand', []);
+    regionsList[30] = new Region(30, 1, [557, 2033], [553, 2115], [475, 2137], null, [447, 2027], 'sand', []);
+    regionsList[31] = new Region(31, 1, [137, 2025], [277, 2027], [255, 2177], null, [247, 2095], 'sand', []);
+    regionsList[32] = new Region(32, 1, [363, 1917], [261, 1847], [569, 1855], null, [487, 1907], 'sand', []);
+    regionsList[33] = new Region(33, 1, [135, 1783], [137, 1715], [183, 1587], null, [147, 1901], 'sand', []);
+    regionsList[34] = new Region(34, 1, [900, 1332], [884, 1532], [1089, 1427], null, [996, 1408], 'sand', []);
+    regionsList[35] = new Region(35, 1, [184, 1238], [276, 1432], [366, 1336], null, [270, 1324], 'sand', []);
+    regionsList[36] = new Region(36, 1, [466, 1252], [566, 1186], [672, 1184], null, [770, 1188], 'sand', []);
+    regionsList[37] = new Region(37, 1, [554, 1432], [548, 1360], [702, 1362], null, [770, 1356], 'sand', []);
+    regionsList[38] = new Region(38, 1, [542, 1550], [572, 1716], [490, 1642], null, [384, 1628], 'sand', []);
+    regionsList[39] = new Region(39, 1, [822, 1670], [824, 1752], [1024, 1752], null, [978, 1828], 'sand', []);
+
+    regionsList[60] = new Region(60, 1, [1368, 1328], [1464, 1326], [1512, 1170], null, [1326, 1206], 'grassland', []);
+    regionsList[61] = new Region(61, 1, [1930, 1214], [2052, 1326], [2198, 1218], null, [2084, 1208], 'grassland', []);
+    regionsList[62] = new Region(62, 1, [1838, 1587], [2012, 1559], [2118, 1515], null, [1910, 1479], 'grassland', []);
+    regionsList[63] = new Region(63, 1, [1678, 1705], [1988, 1801], [1910, 1807], null, [1964, 1715], 'grassland', []);
+    regionsList[64] = new Region(64, 1, [1494, 1463], [1590, 1543], [1706, 1517], null, [1726, 1443], 'grassland', []);
+    regionsList[65] = new Region(65, 1, [1174, 1602], [1182, 1449], [1336, 1471], null, [1222, 1497], 'grassland', []);
+    regionsList[66] = new Region(66, 1, [1361, 1646], [1369, 1728], [1477, 1628], null, [1487, 1708], 'grassland', []);
+    regionsList[67] = new Region(67, 1, [1225, 1940], [1377, 1940], [1383, 2088], null, [1313, 2030], 'grassland', []);
+    regionsList[68] = new Region(68, 1, [1643, 2002], [1767, 2022], [1623, 2122], null, [1697, 2106], 'grassland', []);
+    regionsList[69] = new Region(69, 1, [2007, 2126], [2111, 2136], [2105, 2016], null, [2051, 1958], 'grassland', []);
 
 }
 
@@ -413,12 +508,12 @@ function buildBldg(type, region, player) {
     }
 }
 
-function buildTroop(type, region, player) {
-    if (type == 'captain' || type == 'soldier') {
-        region.troops.push(new Troop(type, 1));
-        player.moneyCount--;
-    }
-}
+// function buildTroop(type, region, player) {
+//     if (type == 'captain' || type == 'soldier') {
+//         region.troops.push(new Troop(type, 1));
+//         player.moneyCount--;
+//     }
+// }
 
 // ===================================================================
 // End - Menu Functions
@@ -482,20 +577,18 @@ MapDisplay.prototype.draw = function (ctx) {
     // **Debug code** Displays Region ID on map
     if (debug && debugGrid) {
 
-
-
         var xCal = 2;
         var yCal = -3;
-        for (var i = 0; i < gameEngine.surfaceWidth / dim; i++) {
-            for (var j = 0; j < gameEngine.surfaceHeight / dim; j++) {
+        for (var i = 0; i < onScreenRegions.length; i++) {
+            for (var j = 0; j < onScreenRegions[i].length; j++) {
                 // add sahdows to numbers
                 ctx.fillStyle = "black";
-                ctx.font = "8px Arial";
-                ctx.fillText(onScreenRegions[i][j].name, (i * dim) + xCal + 1, ((j + 1) * dim) + yCal + 1);
+                ctx.font = "10px Arial";
+                ctx.fillText(onScreenRegions[i][j].name, (i * dim) + xCal + 2, ((j + 1) * dim) + yCal + 2);
 
                 //displays numbers
                 ctx.fillStyle = "white";
-                ctx.font = "8px Arial";
+                ctx.font = "10px Arial";
                 ctx.fillText(onScreenRegions[i][j].name, (i * dim) + xCal, ((j + 1) * dim) + yCal);
 
                 // displays rectangles
@@ -604,8 +697,8 @@ MinimapDisplay.prototype.update = function (ctx) {
             }
         }
 
-        changeCameraOrigin(xTranslationToMap, yTranslationToMap);
-        // createArray(cameraOrigin);
+        changeCameraOrigin(Number(xTranslationToMap), Number(yTranslationToMap));
+        createArray(cameraOrigin);
         console.log(cameraOrigin);
 
 
@@ -680,7 +773,7 @@ function ControlDisplay(game) {
     this.endTurnIconOn = AM.getAsset("./img/control/end_turn_on.png")
     this.endTurnIconOff = AM.getAsset("./img/control/end_turn_off.png")
 
-    this.isActivate = true;
+    this.updateFlag = false;
 
     var w = gameEngine.surfaceWidth;
     var h = gameEngine.surfaceHeight;
@@ -703,10 +796,10 @@ function ControlDisplay(game) {
     this.troopFlag = false;
     this.buildingFlag = false;
 
-    this.actionActivate = false;
-    this.troopActivate = false;
-    this.buildingActivate = false;
-    this.endTurnActivate = false;
+    this.actionActive = false;
+    this.troopActive = false;
+    this.buildingActive = false;
+    this.endTurnActive = false;
 
     Entity.call(this, game, 0, 0);
 }
@@ -718,6 +811,12 @@ ControlDisplay.prototype.constructor = ControlDisplay;
 ControlDisplay.prototype.update = function (ctx) {
     var click = gameEngine.click;
     var that = this;
+
+    if (selectedRegion != null) {
+        if (selectedRegion.bldg.length == 2) {
+            this.troopActive = false;
+        }
+    }
 
     if (this.isActivate) {
         toggleAllOn();
@@ -851,56 +950,58 @@ InputHandler.prototype.update = function (ctx) {
     if (key != null) {
         if (key["code"] === "KeyW") {
             if (Number(cameraOrigin.y) - Number(this.sensitivity) > 0) {
-                changeCameraOrigin(cameraOrigin.x, Number(cameraOrigin.y) - Number(this.sensitivity));
-                createArray(cameraOrigin);
+                changeCameraOrigin(Number(cameraOrigin.x), Number(cameraOrigin.y) - Number(this.sensitivity));
+
                 if (debug) {
                     console.log("%c RegionArray below this:", "background: #222; color: #bada55");
                     console.log(onScreenRegions);
                 }
             } else {
-                changeCameraOrigin(cameraOrigin.x, 0);
+                changeCameraOrigin(Number(cameraOrigin.x), 0);
             }
-
+            createArray(cameraOrigin);
         }
         else if (key["code"] === "KeyA") {
             if (Number(cameraOrigin.x) - Number(this.sensitivity) > 0) {
-                changeCameraOrigin(Number(cameraOrigin.x) - Number(this.sensitivity), cameraOrigin.y);
-                // cameraOrigin.x--;
-                createArray(cameraOrigin);
+                changeCameraOrigin(Number(cameraOrigin.x) - Number(this.sensitivity), Number(cameraOrigin.y));
+
+
                 if (debug) {
                     console.log("%c RegionArray below this:", "background: #222; color: #bada55");
                     console.log(onScreenRegions);
                 }
             } else {
-                changeCameraOrigin(0, cameraOrigin.y);
+                changeCameraOrigin(0, Number(cameraOrigin.y));
             }
+            createArray(cameraOrigin);
         }
         else if (key["code"] === "KeyS") {
             if (Number(cameraOrigin.y) + Number(this.sensitivity) < this.keyYMax) {
-                changeCameraOrigin(cameraOrigin.x, Number(cameraOrigin.y) + Number(this.sensitivity));
-                createArray(cameraOrigin);
+                changeCameraOrigin(Number(cameraOrigin.x), Number(cameraOrigin.y) + Number(this.sensitivity));
+
                 if (debug) {
                     console.log("%c RegionArray below this:", "background: #222; color: #bada55");
                     console.log(onScreenRegions);
                 }
             } else {
-                changeCameraOrigin(cameraOrigin.x, this.keyYMax);
+                changeCameraOrigin(Number(cameraOrigin.x), Number(this.keyYMax));
             }
-
+            createArray(cameraOrigin);
 
         }
         else if (key["code"] === "KeyD") {
             if (Number(cameraOrigin.x) + Number(this.sensitivity) < Number(this.keyXMax)) {
-                changeCameraOrigin(Number(cameraOrigin.x) + Number(this.sensitivity), cameraOrigin.y);
-                createArray(cameraOrigin);
+                changeCameraOrigin(Number(cameraOrigin.x) + Number(this.sensitivity), Number(cameraOrigin.y));
+
                 if (debug) {
                     console.log("%c RegionArray below this:", "background: #222; color: #bada55");
                     console.log(onScreenRegions);
                 }
 
             } else {
-                changeCameraOrigin(this.keyXMax, cameraOrigin.y);
+                changeCameraOrigin(Number(this.keyXMax), Number(cameraOrigin.y));
             }
+            createArray(cameraOrigin);
         }
         console.log(key["code"])
         console.log(cameraOrigin);
@@ -914,12 +1015,22 @@ InputHandler.prototype.update = function (ctx) {
     var click = gameEngine.click;
     if (click != null) {
 
-        var regionClicked = getClickedRegion(onScreenRegions, click.x, click.y);
+        getClickedRegion(onScreenRegions, click.x, click.y);
+
+
         console.log("%c Region clicked below this:", "background: #222; color: #bada55");
         console.log(click);
-        console.log(regionClicked);
+        console.log(selectedRegion);
         console.log("True Location --- " + (Number(dim * cameraOrigin.x) + Number(click.x)) + ", " +
             (Number(dim * cameraOrigin.y) + Number(click.y)));
+        var text = "[" + (Number(dim * cameraOrigin.x) + Number(click.x)) + ", " +
+            (Number(dim * cameraOrigin.y) + Number(click.y)) + "]";
+        navigator.clipboard.writeText(text).then(function () {
+            console.log('Async: Copying to clipboard was successful!');
+        }, function (err) {
+            console.error('Async: Could not copy text: ', err);
+        });
+
 
         gameEngine.click = null;
     }
@@ -1087,221 +1198,228 @@ WelcomeScreen.prototype.update = function (ctx) {
         // Region[10].bldg.push(new Barracks(gameEngine, 0, Region[10].bldgXY[0], Region[10].bldgXY[1]));
         //Plains
         //15
-        gameEngine.addEntity(new Barracks(gameEngine, 0, 150, 260));
-        gameEngine.addEntity(new Farm(gameEngine, 0, 250, 185));
-        gameEngine.addEntity(new AlienCaptain(gameEngine, 460, 270));
+        // gameEngine.addEntity(new Barracks(gameEngine, 0, 150, 260));
+        // gameEngine.addEntity(new Farm(gameEngine, 0, 250, 185));
+        // gameEngine.addEntity(new AlienCaptain(gameEngine, 460, 270));
 
-        //16
-        gameEngine.addEntity(new Barracks(gameEngine, 0, 470, 345));
-        gameEngine.addEntity(new Farm(gameEngine, 0, 445, 425));
-        gameEngine.addEntity(new SoldierCaptain(gameEngine, 345, 450));
+        // //16
+        // gameEngine.addEntity(new Barracks(gameEngine, 0, 470, 345));
+        // gameEngine.addEntity(new Farm(gameEngine, 0, 445, 425));
+        // gameEngine.addEntity(new SoldierCaptain(gameEngine, 345, 450));
 
-        //19
-        gameEngine.addEntity(new Barracks(gameEngine, 0, 285, 665));
-        gameEngine.addEntity(new Farm(gameEngine, 0, 245, 750));
-        gameEngine.addEntity(new Soldier(gameEngine, 235, 690));
+        // //19
+        // gameEngine.addEntity(new Barracks(gameEngine, 0, 285, 665));
+        // gameEngine.addEntity(new Farm(gameEngine, 0, 245, 750));
+        // gameEngine.addEntity(new Soldier(gameEngine, 235, 690));
 
-        //17
-        gameEngine.addEntity(new Barracks(gameEngine, 0, 610, 205));
-        gameEngine.addEntity(new Farm(gameEngine, 0, 610, 355));
-        gameEngine.addEntity(new Soldier(gameEngine, 680, 440));
+        // //17
+        // gameEngine.addEntity(new Barracks(gameEngine, 0, 610, 205));
+        // gameEngine.addEntity(new Farm(gameEngine, 0, 610, 355));
+        // gameEngine.addEntity(new Soldier(gameEngine, 680, 440));
 
-        //14
-        gameEngine.addEntity(new Barracks(gameEngine, 0, 300 + (dim * 0), 200 + (dim * 68)));
-        gameEngine.addEntity(new Farm(gameEngine, 0, 230 + (dim * 0), 450 + (dim * 54)));
-        gameEngine.addEntity(new Soldier(gameEngine, 220 + (dim * 0), 295 + (dim * 55)));
+        // //14
+        // gameEngine.addEntity(new Barracks(gameEngine, 0, 300 + (dim * 0), 200 + (dim * 68)));
+        // gameEngine.addEntity(new Farm(gameEngine, 0, 230 + (dim * 0), 450 + (dim * 54)));
+        // gameEngine.addEntity(new Soldier(gameEngine, 220 + (dim * 0), 295 + (dim * 55)));
 
-        //13
-        gameEngine.addEntity(new Barracks(gameEngine, 0, 275 + (dim * 19), 330 + (dim * 61)));
-        gameEngine.addEntity(new Farm(gameEngine, 0, 275 + (dim * 19), 415 + (dim * 61)));
-        gameEngine.addEntity(new Soldier(gameEngine, 305 + (dim * 19), 290 + (dim * 61)));
+        // //13
+        // gameEngine.addEntity(new Barracks(gameEngine, 0, 275 + (dim * 19), 330 + (dim * 61)));
+        // gameEngine.addEntity(new Farm(gameEngine, 0, 275 + (dim * 19), 415 + (dim * 61)));
+        // gameEngine.addEntity(new Soldier(gameEngine, 305 + (dim * 19), 290 + (dim * 61)));
 
-        //18
-        gameEngine.addEntity(new Barracks(gameEngine, 0, 310 + (dim * 20), 265 + (dim * 22)));
-        gameEngine.addEntity(new Farm(gameEngine, 0, 480 + (dim * 20), 265 + (dim * 22)));
-        gameEngine.addEntity(new Soldier(gameEngine, 445 + (dim * 20), 335 + (dim * 22)));
+        // //18
+        // gameEngine.addEntity(new Barracks(gameEngine, 0, 310 + (dim * 20), 265 + (dim * 22)));
+        // gameEngine.addEntity(new Farm(gameEngine, 0, 480 + (dim * 20), 265 + (dim * 22)));
+        // gameEngine.addEntity(new Soldier(gameEngine, 445 + (dim * 20), 335 + (dim * 22)));
 
-        //12
-        gameEngine.addEntity(new Barracks(gameEngine, 0, 540 + (dim * 22), 200 + (dim * 54)));
-        gameEngine.addEntity(new Farm(gameEngine, 0, 530 + (dim * 22), 450 + (dim * 54)));
-        gameEngine.addEntity(new Soldier(gameEngine, 605 + (dim * 22), 290 + (dim * 54)));
+        // //12
+        // gameEngine.addEntity(new Barracks(gameEngine, 0, 540 + (dim * 22), 200 + (dim * 54)));
+        // gameEngine.addEntity(new Farm(gameEngine, 0, 530 + (dim * 22), 450 + (dim * 54)));
+        // gameEngine.addEntity(new Soldier(gameEngine, 605 + (dim * 22), 290 + (dim * 54)));
 
-        //10
-        gameEngine.addEntity(new Barracks(gameEngine, 0, 520 + (dim * 50), 265 + (dim * 29)));
-        gameEngine.addEntity(new Farm(gameEngine, 0, 410 + (dim * 50), 445 + (dim * 29)));
-        gameEngine.addEntity(new Soldier(gameEngine, 525 + (dim * 50), 380 + (dim * 29)));
+        // //10
+        // gameEngine.addEntity(new Barracks(gameEngine, 0, 520 + (dim * 50), 265 + (dim * 29)));
+        // gameEngine.addEntity(new Farm(gameEngine, 0, 410 + (dim * 50), 445 + (dim * 29)));
+        // gameEngine.addEntity(new Soldier(gameEngine, 525 + (dim * 50), 380 + (dim * 29)));
 
-        //11
-        gameEngine.addEntity(new Barracks(gameEngine, 0, 300 + (dim * 59), 455 + (dim * 46)));
-        gameEngine.addEntity(new Farm(gameEngine, 0, 455 + (dim * 59), 560 + (dim * 46)));
-        gameEngine.addEntity(new Soldier(gameEngine, 605 + (dim * 59), 515 + (dim * 46)));
-
-
-        //Tundra
-        //45
-        gameEngine.addEntity(new Barracks(gameEngine, 0, 635 + (dim * 37), 60 + (dim * 3)));
-        gameEngine.addEntity(new Farm(gameEngine, 0, 660 + (dim * 37), 140 + (dim * 3)));
-        gameEngine.addEntity(new Soldier(gameEngine, 555 + (dim * 37), 140 + (dim * 3)));
-
-        //46
-        gameEngine.addEntity(new Barracks(gameEngine, 0, 390 + (dim * 61), 465 + (dim * 0)));
-        gameEngine.addEntity(new Farm(gameEngine, 0, 210 + (dim * 61), 440 + (dim * 0)));
-        gameEngine.addEntity(new Soldier(gameEngine, 350 + (dim * 61), 360 + (dim * 0)));
-
-        //47
-        gameEngine.addEntity(new Barracks(gameEngine, 0, 640 + (dim * 61), 410 + (dim * 0)));
-        gameEngine.addEntity(new Farm(gameEngine, 0, 575 + (dim * 61), 115 + (dim * 0)));
-        gameEngine.addEntity(new Soldier(gameEngine, 590 + (dim * 61), 280 + (dim * 0)));
-
-        //48
-        gameEngine.addEntity(new Barracks(gameEngine, 0, 310 + (dim * 101), 320 + (dim * 0)));
-        gameEngine.addEntity(new Farm(gameEngine, 0, 310 + (dim * 101), 580 + (dim * 0)));
-        gameEngine.addEntity(new Soldier(gameEngine, 460 + (dim * 101), 315 + (dim * 0)));
-
-        //49
-        gameEngine.addEntity(new Barracks(gameEngine, 0, 965 + (dim * 101), 420 + (dim * 0)));
-        gameEngine.addEntity(new Farm(gameEngine, 0, 965 + (dim * 101), 300 + (dim * 0)));
-        gameEngine.addEntity(new Soldier(gameEngine, 1100 + (dim * 101), 230 + (dim * 0)));
-
-        //43
-        gameEngine.addEntity(new Barracks(gameEngine, 0, 735 + (dim * 101), 100 + (dim * 0)));
-        gameEngine.addEntity(new Farm(gameEngine, 0, 750 + (dim * 101), 310 + (dim * 0)));
-        gameEngine.addEntity(new Soldier(gameEngine, 800 + (dim * 101), 220 + (dim * 0)));
-
-        //44
-        gameEngine.addEntity(new Barracks(gameEngine, 0, 590 + (dim * 101), 410 + (dim * 21)));
-        gameEngine.addEntity(new Farm(gameEngine, 0, 665 + (dim * 101), 335 + (dim * 21)));
-        gameEngine.addEntity(new Soldier(gameEngine, 580 + (dim * 101), 300 + (dim * 21)));
-
-        //42
-        gameEngine.addEntity(new Barracks(gameEngine, 0, 975 + (dim * 101), 240 + (dim * 38)));
-        gameEngine.addEntity(new Farm(gameEngine, 0, 1085 + (dim * 101), 250 + (dim * 38)));
-        gameEngine.addEntity(new Soldier(gameEngine, 940 + (dim * 101), 245 + (dim * 38)));
-
-        //50
-        gameEngine.addEntity(new Barracks(gameEngine, 0, 450 + (dim * 101), 380 + (dim * 42)));
-        gameEngine.addEntity(new Farm(gameEngine, 0, 335 + (dim * 101), 275 + (dim * 42)));
-        gameEngine.addEntity(new Soldier(gameEngine, 530 + (dim * 101), 310 + (dim * 42)));
-
-        //40
-        gameEngine.addEntity(new Barracks(gameEngine, 0, 680 + (dim * 101), 140 + (dim * 61)));
-        gameEngine.addEntity(new Farm(gameEngine, 0, 570 + (dim * 101), 480 + (dim * 61)));
-        gameEngine.addEntity(new Soldier(gameEngine, 525 + (dim * 101), 410 + (dim * 61)));
-
-        //41
-        gameEngine.addEntity(new Barracks(gameEngine, 0, 880 + (dim * 101), 285 + (dim * 55)));
-        gameEngine.addEntity(new Farm(gameEngine, 0, 1010 + (dim * 101), 475 + (dim * 55)));
-        gameEngine.addEntity(new Soldier(gameEngine, 1055 + (dim * 101), 163 + (dim * 55)));
-
-        //Sand
-        //35
-        gameEngine.addEntity(new Barracks(gameEngine, 1, 295 + (dim * 1), 280 + (dim * 87)));
-        gameEngine.addEntity(new Farm(gameEngine, 1, 310 + (dim * 1), 480 + (dim * 87)));
-        gameEngine.addEntity(new Alien(gameEngine, 300 + (dim * 1), 385 + (dim * 87)));
-
-        //36
-        gameEngine.addEntity(new Barracks(gameEngine, 1, 500 + (dim * 1), 290 + (dim * 87)));
-        gameEngine.addEntity(new Farm(gameEngine, 1, 670 + (dim * 1), 290 + (dim * 87)));
-        gameEngine.addEntity(new Alien(gameEngine, 715 + (dim * 1), 220 + (dim * 87)));
-
-        //37
-        gameEngine.addEntity(new Barracks(gameEngine, 1, 720 + (dim * 1), 480 + (dim * 87)));
-        gameEngine.addEntity(new Farm(gameEngine, 1, 535 + (dim * 1), 480 + (dim * 87)));
-        gameEngine.addEntity(new Alien(gameEngine, 730 + (dim * 1), 415 + (dim * 87)));
-
-        //34
-        gameEngine.addEntity(new Barracks(gameEngine, 1, 570 + (dim * 41), 75 + (dim * 113)));
-        gameEngine.addEntity(new Farm(gameEngine, 1, 500 + (dim * 41), 270 + (dim * 113)));
-        gameEngine.addEntity(new Alien(gameEngine, 675 + (dim * 41), 175 + (dim * 113)));
-
-        //39
-        gameEngine.addEntity(new Barracks(gameEngine, 1, 440 + (dim * 41), 420 + (dim * 113)));
-        gameEngine.addEntity(new Farm(gameEngine, 1, 420 + (dim * 41), 570 + (dim * 113)));
-        gameEngine.addEntity(new Alien(gameEngine, 600 + (dim * 41), 515 + (dim * 113)));
-
-        //33
-        gameEngine.addEntity(new Barracks(gameEngine, 1, 140 + (dim * 0), 360 + (dim * 123)));
-        gameEngine.addEntity(new Farm(gameEngine, 1, 135 + (dim * 0), 480 + (dim * 123)));
-        gameEngine.addEntity(new Alien(gameEngine, 190 + (dim * 0), 220 + (dim * 123)));
-
-        //38
-        gameEngine.addEntity(new Barracks(gameEngine, 1, 320 + (dim * 0), 180 + (dim * 123)));
-        gameEngine.addEntity(new Farm(gameEngine, 1, 540 + (dim * 0), 360 + (dim * 123)));
-        gameEngine.addEntity(new Alien(gameEngine, 515 + (dim * 0), 290 + (dim * 123)));
-
-        //32
-        gameEngine.addEntity(new Barracks(gameEngine, 1, 295 + (dim * 0), 495 + (dim * 123)));
-        gameEngine.addEntity(new Farm(gameEngine, 1, 430 + (dim * 0), 565 + (dim * 123)));
-        gameEngine.addEntity(new Alien(gameEngine, 595 + (dim * 0), 490 + (dim * 123)));
-
-        //31
-        gameEngine.addEntity(new Barracks(gameEngine, 1, 170 + (dim * 0), 385 + (dim * 148)));
-        gameEngine.addEntity(new Farm(gameEngine, 1, 315 + (dim * 0), 390 + (dim * 148)));
-        gameEngine.addEntity(new Alien(gameEngine, 275 + (dim * 0), 555 + (dim * 148)));
-
-        //30
-        gameEngine.addEntity(new Barracks(gameEngine, 1, 590 + (dim * 0), 385 + (dim * 148)));
-        gameEngine.addEntity(new Farm(gameEngine, 1, 590 + (dim * 0), 495 + (dim * 148)));
-        gameEngine.addEntity(new Alien(gameEngine, 510 + (dim * 0), 465 + (dim * 148)));
-
-        //29
-        gameEngine.addEntity(new Barracks(gameEngine, 1, 760 + (dim * 0), 310 + (dim * 148)));
-        gameEngine.addEntity(new Farm(gameEngine, 1, 770 + (dim * 0), 500 + (dim * 148)));
-        gameEngine.addEntity(new Alien(gameEngine, 925 + (dim * 0), 430 + (dim * 148)));
-
-        //Grassland
-        //60
-        gameEngine.addEntity(new Barracks(gameEngine, 1, 235 + (dim * 101), 435 + (dim * 81)));
-        gameEngine.addEntity(new Farm(gameEngine, 1, 350 + (dim * 101), 430 + (dim * 81)));
-        gameEngine.addEntity(new Alien(gameEngine, 410 + (dim * 101), 300 + (dim * 81)));
-
-        //61
-        gameEngine.addEntity(new Barracks(gameEngine, 1, 965 + (dim * 101), 440 + (dim * 81)));
-        gameEngine.addEntity(new Farm(gameEngine, 1, 845 + (dim * 101), 315 + (dim * 81)));
-        gameEngine.addEntity(new Alien(gameEngine, 1140 + (dim * 101), 345 + (dim * 81)));
-
-        //65
-        gameEngine.addEntity(new Barracks(gameEngine, 1, 260 + (dim * 83), 140 + (dim * 117)));
-        gameEngine.addEntity(new Farm(gameEngine, 1, 255 + (dim * 83), 225 + (dim * 117)));
-        gameEngine.addEntity(new Alien(gameEngine, 425 + (dim * 83), 175 + (dim * 117)));
-
-        //64
-        gameEngine.addEntity(new Barracks(gameEngine, 1, 770 + (dim * 83), 200 + (dim * 117)));
-        gameEngine.addEntity(new Farm(gameEngine, 1, 645 + (dim * 83), 230 + (dim * 117)));
-        gameEngine.addEntity(new Alien(gameEngine, 875 + (dim * 83), 185 + (dim * 117)));
-
-        //66
-        gameEngine.addEntity(new Barracks(gameEngine, 1, 450 + (dim * 83), 340 + (dim * 117)));
-        gameEngine.addEntity(new Farm(gameEngine, 1, 470 + (dim * 83), 430 + (dim * 117)));
-        gameEngine.addEntity(new Alien(gameEngine, 625 + (dim * 83), 385 + (dim * 117)));
-
-        //62
-        gameEngine.addEntity(new Barracks(gameEngine, 1, 815 + (dim * 101), 70 + (dim * 123)));
-        gameEngine.addEntity(new Farm(gameEngine, 1, 925 + (dim * 101), 165 + (dim * 123)));
-        gameEngine.addEntity(new Alien(gameEngine, 1100 + (dim * 101), 115 + (dim * 123)));
-
-        //63
-        gameEngine.addEntity(new Barracks(gameEngine, 1, 895 + (dim * 101), 455 + (dim * 123)));
-        gameEngine.addEntity(new Farm(gameEngine, 1, 560 + (dim * 101), 345 + (dim * 123)));
-        gameEngine.addEntity(new Alien(gameEngine, 850 + (dim * 101), 370 + (dim * 123)));
-
-        //67
-        gameEngine.addEntity(new Barracks(gameEngine, 1, 125 + (dim * 97), 285 + (dim * 148)));
-        gameEngine.addEntity(new Farm(gameEngine, 1, 300 + (dim * 97), 290 + (dim * 148)));
-        gameEngine.addEntity(new Alien(gameEngine, 340 + (dim * 97), 455 + (dim * 148)));
-
-        //68
-        gameEngine.addEntity(new Barracks(gameEngine, 1, 590 + (dim * 97), 350 + (dim * 148)));
-        gameEngine.addEntity(new Farm(gameEngine, 1, 700 + (dim * 97), 425 + (dim * 148)));
-        gameEngine.addEntity(new Alien(gameEngine, 575 + (dim * 97), 490 + (dim * 148)));
-
-        //69
-        gameEngine.addEntity(new Barracks(gameEngine, 1, 1105 + (dim * 97), 420 + (dim * 148)));
-        gameEngine.addEntity(new Farm(gameEngine, 1, 1000 + (dim * 97), 500 + (dim * 148)));
-        gameEngine.addEntity(new Alien(gameEngine, 1045 + (dim * 97), 340 + (dim * 148)));
+        // //11
+        // gameEngine.addEntity(new Barracks(gameEngine, 0, 300 + (dim * 59), 455 + (dim * 46)));
+        // gameEngine.addEntity(new Farm(gameEngine, 0, 455 + (dim * 59), 560 + (dim * 46)));
+        // gameEngine.addEntity(new Soldier(gameEngine, 605 + (dim * 59), 515 + (dim * 46)));
 
 
+        // //Tundra
+        // //45
+        // gameEngine.addEntity(new Barracks(gameEngine, 0, 635 + (dim * 37), 60 + (dim * 3)));
+        // gameEngine.addEntity(new Farm(gameEngine, 0, 660 + (dim * 37), 140 + (dim * 3)));
+        // gameEngine.addEntity(new Soldier(gameEngine, 555 + (dim * 37), 140 + (dim * 3)));
 
+        // //46
+        // gameEngine.addEntity(new Barracks(gameEngine, 0, 390 + (dim * 61), 465 + (dim * 0)));
+        // gameEngine.addEntity(new Farm(gameEngine, 0, 210 + (dim * 61), 440 + (dim * 0)));
+        // gameEngine.addEntity(new Soldier(gameEngine, 350 + (dim * 61), 360 + (dim * 0)));
+
+        // //47
+        // gameEngine.addEntity(new Barracks(gameEngine, 0, 640 + (dim * 61), 410 + (dim * 0)));
+        // gameEngine.addEntity(new Farm(gameEngine, 0, 575 + (dim * 61), 115 + (dim * 0)));
+        // gameEngine.addEntity(new Soldier(gameEngine, 590 + (dim * 61), 280 + (dim * 0)));
+
+        // //48
+        // gameEngine.addEntity(new Barracks(gameEngine, 0, 310 + (dim * 101), 320 + (dim * 0)));
+        // gameEngine.addEntity(new Farm(gameEngine, 0, 310 + (dim * 101), 580 + (dim * 0)));
+        // gameEngine.addEntity(new Soldier(gameEngine, 460 + (dim * 101), 315 + (dim * 0)));
+
+        // //49
+        // gameEngine.addEntity(new Barracks(gameEngine, 0, 965 + (dim * 101), 420 + (dim * 0)));
+        // gameEngine.addEntity(new Farm(gameEngine, 0, 965 + (dim * 101), 300 + (dim * 0)));
+        // gameEngine.addEntity(new Soldier(gameEngine, 1100 + (dim * 101), 230 + (dim * 0)));
+
+        // //43
+        // gameEngine.addEntity(new Barracks(gameEngine, 0, 735 + (dim * 101), 100 + (dim * 0)));
+        // gameEngine.addEntity(new Farm(gameEngine, 0, 750 + (dim * 101), 310 + (dim * 0)));
+        // gameEngine.addEntity(new Soldier(gameEngine, 800 + (dim * 101), 220 + (dim * 0)));
+
+        // //44
+        // gameEngine.addEntity(new Barracks(gameEngine, 0, 590 + (dim * 101), 410 + (dim * 21)));
+        // gameEngine.addEntity(new Farm(gameEngine, 0, 665 + (dim * 101), 335 + (dim * 21)));
+        // gameEngine.addEntity(new Soldier(gameEngine, 580 + (dim * 101), 300 + (dim * 21)));
+
+        // //42
+        // gameEngine.addEntity(new Barracks(gameEngine, 0, 975 + (dim * 101), 240 + (dim * 38)));
+        // gameEngine.addEntity(new Farm(gameEngine, 0, 1085 + (dim * 101), 250 + (dim * 38)));
+        // gameEngine.addEntity(new Soldier(gameEngine, 940 + (dim * 101), 245 + (dim * 38)));
+
+        // //50
+        // gameEngine.addEntity(new Barracks(gameEngine, 0, 450 + (dim * 101), 380 + (dim * 42)));
+        // gameEngine.addEntity(new Farm(gameEngine, 0, 335 + (dim * 101), 275 + (dim * 42)));
+        // gameEngine.addEntity(new Soldier(gameEngine, 530 + (dim * 101), 310 + (dim * 42)));
+
+        // //40
+        // gameEngine.addEntity(new Barracks(gameEngine, 0, 680 + (dim * 101), 140 + (dim * 61)));
+        // gameEngine.addEntity(new Farm(gameEngine, 0, 570 + (dim * 101), 480 + (dim * 61)));
+        // gameEngine.addEntity(new Soldier(gameEngine, 525 + (dim * 101), 410 + (dim * 61)));
+
+        // //41
+        // gameEngine.addEntity(new Barracks(gameEngine, 0, 880 + (dim * 101), 285 + (dim * 55)));
+        // gameEngine.addEntity(new Farm(gameEngine, 0, 1010 + (dim * 101), 475 + (dim * 55)));
+        // gameEngine.addEntity(new Soldier(gameEngine, 1055 + (dim * 101), 163 + (dim * 55)));
+
+        // //Sand
+        // //35
+        // gameEngine.addEntity(new Barracks(gameEngine, 1, 295 + (dim * 1), 280 + (dim * 87)));
+        // gameEngine.addEntity(new Farm(gameEngine, 1, 310 + (dim * 1), 480 + (dim * 87)));
+        // gameEngine.addEntity(new Alien(gameEngine, 300 + (dim * 1), 385 + (dim * 87)));
+
+        // //36
+        // gameEngine.addEntity(new Barracks(gameEngine, 1, 500 + (dim * 1), 290 + (dim * 87)));
+        // gameEngine.addEntity(new Farm(gameEngine, 1, 670 + (dim * 1), 290 + (dim * 87)));
+        // gameEngine.addEntity(new Alien(gameEngine, 715 + (dim * 1), 220 + (dim * 87)));
+
+        // //37
+        // gameEngine.addEntity(new Barracks(gameEngine, 1, 720 + (dim * 1), 480 + (dim * 87)));
+        // gameEngine.addEntity(new Farm(gameEngine, 1, 535 + (dim * 1), 480 + (dim * 87)));
+        // gameEngine.addEntity(new Alien(gameEngine, 730 + (dim * 1), 415 + (dim * 87)));
+
+        // //34
+        // gameEngine.addEntity(new Barracks(gameEngine, 1, 570 + (dim * 41), 75 + (dim * 113)));
+        // gameEngine.addEntity(new Farm(gameEngine, 1, 500 + (dim * 41), 270 + (dim * 113)));
+        // gameEngine.addEntity(new Alien(gameEngine, 675 + (dim * 41), 175 + (dim * 113)));
+
+        // //39
+        // gameEngine.addEntity(new Barracks(gameEngine, 1, 440 + (dim * 41), 420 + (dim * 113)));
+        // gameEngine.addEntity(new Farm(gameEngine, 1, 420 + (dim * 41), 570 + (dim * 113)));
+        // gameEngine.addEntity(new Alien(gameEngine, 600 + (dim * 41), 515 + (dim * 113)));
+
+        // //33
+        // gameEngine.addEntity(new Barracks(gameEngine, 1, 140 + (dim * 0), 360 + (dim * 123)));
+        // gameEngine.addEntity(new Farm(gameEngine, 1, 135 + (dim * 0), 480 + (dim * 123)));
+        // gameEngine.addEntity(new Alien(gameEngine, 190 + (dim * 0), 220 + (dim * 123)));
+
+        // //38
+        // gameEngine.addEntity(new Barracks(gameEngine, 1, 320 + (dim * 0), 180 + (dim * 123)));
+        // gameEngine.addEntity(new Farm(gameEngine, 1, 540 + (dim * 0), 360 + (dim * 123)));
+        // gameEngine.addEntity(new Alien(gameEngine, 515 + (dim * 0), 290 + (dim * 123)));
+
+        // //32
+        // gameEngine.addEntity(new Barracks(gameEngine, 1, 295 + (dim * 0), 495 + (dim * 123)));
+        // gameEngine.addEntity(new Farm(gameEngine, 1, 430 + (dim * 0), 565 + (dim * 123)));
+        // gameEngine.addEntity(new Alien(gameEngine, 595 + (dim * 0), 490 + (dim * 123)));
+
+        // //31
+        // gameEngine.addEntity(new Barracks(gameEngine, 1, 170 + (dim * 0), 385 + (dim * 148)));
+        // gameEngine.addEntity(new Farm(gameEngine, 1, 315 + (dim * 0), 390 + (dim * 148)));
+        // gameEngine.addEntity(new Alien(gameEngine, 275 + (dim * 0), 555 + (dim * 148)));
+
+        // //30
+        // gameEngine.addEntity(new Barracks(gameEngine, 1, 590 + (dim * 0), 385 + (dim * 148)));
+        // gameEngine.addEntity(new Farm(gameEngine, 1, 590 + (dim * 0), 495 + (dim * 148)));
+        // gameEngine.addEntity(new Alien(gameEngine, 510 + (dim * 0), 465 + (dim * 148)));
+
+        // //29
+        // gameEngine.addEntity(new Barracks(gameEngine, 1, 760 + (dim * 0), 310 + (dim * 148)));
+        // gameEngine.addEntity(new Farm(gameEngine, 1, 770 + (dim * 0), 500 + (dim * 148)));
+        // gameEngine.addEntity(new Alien(gameEngine, 925 + (dim * 0), 430 + (dim * 148)));
+
+        // //Grassland
+        // //60
+        // gameEngine.addEntity(new Barracks(gameEngine, 1, 235 + (dim * 101), 435 + (dim * 81)));
+        // gameEngine.addEntity(new Farm(gameEngine, 1, 350 + (dim * 101), 430 + (dim * 81)));
+        // gameEngine.addEntity(new Alien(gameEngine, 410 + (dim * 101), 300 + (dim * 81)));
+
+        // //61
+        // gameEngine.addEntity(new Barracks(gameEngine, 1, 965 + (dim * 101), 440 + (dim * 81)));
+        // gameEngine.addEntity(new Farm(gameEngine, 1, 845 + (dim * 101), 315 + (dim * 81)));
+        // gameEngine.addEntity(new Alien(gameEngine, 1140 + (dim * 101), 345 + (dim * 81)));
+
+        // //65
+        // gameEngine.addEntity(new Barracks(gameEngine, 1, 260 + (dim * 83), 140 + (dim * 117)));
+        // gameEngine.addEntity(new Farm(gameEngine, 1, 255 + (dim * 83), 225 + (dim * 117)));
+        // gameEngine.addEntity(new Alien(gameEngine, 425 + (dim * 83), 175 + (dim * 117)));
+
+        // //64
+        // gameEngine.addEntity(new Barracks(gameEngine, 1, 770 + (dim * 83), 200 + (dim * 117)));
+        // gameEngine.addEntity(new Farm(gameEngine, 1, 645 + (dim * 83), 230 + (dim * 117)));
+        // gameEngine.addEntity(new Alien(gameEngine, 875 + (dim * 83), 185 + (dim * 117)));
+
+        // //66
+        // gameEngine.addEntity(new Barracks(gameEngine, 1, 450 + (dim * 83), 340 + (dim * 117)));
+        // gameEngine.addEntity(new Farm(gameEngine, 1, 470 + (dim * 83), 430 + (dim * 117)));
+        // gameEngine.addEntity(new Alien(gameEngine, 625 + (dim * 83), 385 + (dim * 117)));
+
+        // //62
+        // gameEngine.addEntity(new Barracks(gameEngine, 1, 815 + (dim * 101), 70 + (dim * 123)));
+        // gameEngine.addEntity(new Farm(gameEngine, 1, 925 + (dim * 101), 165 + (dim * 123)));
+        // gameEngine.addEntity(new Alien(gameEngine, 1100 + (dim * 101), 115 + (dim * 123)));
+
+        // //63
+        // gameEngine.addEntity(new Barracks(gameEngine, 1, 895 + (dim * 101), 455 + (dim * 123)));
+        // gameEngine.addEntity(new Farm(gameEngine, 1, 560 + (dim * 101), 345 + (dim * 123)));
+        // gameEngine.addEntity(new Alien(gameEngine, 850 + (dim * 101), 370 + (dim * 123)));
+
+        // //67
+        // gameEngine.addEntity(new Barracks(gameEngine, 1, 125 + (dim * 97), 285 + (dim * 148)));
+        // gameEngine.addEntity(new Farm(gameEngine, 1, 300 + (dim * 97), 290 + (dim * 148)));
+        // gameEngine.addEntity(new Alien(gameEngine, 340 + (dim * 97), 455 + (dim * 148)));
+
+        // //68
+        // gameEngine.addEntity(new Barracks(gameEngine, 1, 590 + (dim * 97), 350 + (dim * 148)));
+        // gameEngine.addEntity(new Farm(gameEngine, 1, 700 + (dim * 97), 425 + (dim * 148)));
+        // gameEngine.addEntity(new Alien(gameEngine, 575 + (dim * 97), 490 + (dim * 148)));
+
+        // //69
+        // gameEngine.addEntity(new Barracks(gameEngine, 1, 1105 + (dim * 97), 420 + (dim * 148)));
+        // gameEngine.addEntity(new Farm(gameEngine, 1, 1000 + (dim * 97), 500 + (dim * 148)));
+        // gameEngine.addEntity(new Alien(gameEngine, 1045 + (dim * 97), 340 + (dim * 148)));
+
+
+        for (var i = 0; i < regionsList.length; i++) {
+            if (regionsList[i] != undefined) {
+                buildFarm(regionsList[i]);
+                buildBarracks(regionsList[i]);
+                buildSoldier(regionsList[i]);
+                addCaptainToRegion(regionsList[i]);
+            }
+        }
 
         // gameEngine.addEntity(new Alien(gameEngine, 300, 250));
 

@@ -4,7 +4,7 @@
 function SoldierCaptain(game, x, y) {
     this.animation = new Animation(AM.getAsset("./img/sprites/cap_soldier_animated.png"), 58, 80, 173, 0.2, 3, true, 1);
     this.standing = AM.getAsset("./img/sprites/cap_soldier_standing.png");
-    this.selected = true;
+    this.selected = false;
     this.x = x;
     this.y = y;
     Entity.call(this, game, this.x, this.y);
@@ -37,7 +37,7 @@ SoldierCaptain.prototype.draw = function (ctx) {
 function AlienCaptain(game, x, y) {
     this.animation = new Animation(AM.getAsset("./img/sprites/cap_alien_animated.png"), 77, 80, 233, 0.2, 3, true, 1);
     this.standing = AM.getAsset("./img/sprites/cap_alien_standing.png");
-    this.selected = true;
+    this.selected = false;
     this.x = x;
     this.y = y;
     Entity.call(this, game, this.x, this.y);
@@ -71,9 +71,10 @@ AlienCaptain.prototype.draw = function (ctx) {
 function Alien(game, x, y) {
     this.animation = new Animation(AM.getAsset("./img/sprites/alien_animated.png"), 56, 60, 174, 0.2, 3, true, 1);
     this.standing = AM.getAsset("./img/sprites/alien_standing.png");
-    this.selected = true;
+    this.selected = false;
     this.x = x;
     this.y = y;
+    this.count = 1;
     Entity.call(this, game, this.x, this.y);
 }
 
@@ -91,6 +92,29 @@ Alien.prototype.draw = function (ctx) {
     } else {
         ctx.drawImage(this.standing, this.x - (cameraOrigin.x * dim), this.y - (cameraOrigin.y * dim));
     }
+    // ctx.drawImage(this.standing, this.x - (cameraOrigin.x * dim), this.y - (cameraOrigin.y * dim));
+    // ctx.drawImage(this.standing, this.x - (cameraOrigin.x * dim), this.y - (cameraOrigin.y * dim));
+
+    // // add sahdows to numbers
+    // ctx.fillStyle = "bada55";
+    // ctx.font = "10px Arial";
+    // ctx.fillText(onScreenRegions[i][j].name, (i * dim) + xCal + 2, ((j + 1) * dim) + yCal + 2);
+
+    // //displays numbers
+    // ctx.fillStyle = "#bada55";
+    // ctx.font = "10px Arial";
+    // ctx.fillText(onScreenRegions[i][j].name, (i * dim) + xCal, ((j + 1) * dim) + yCal);
+
+    // displays count
+
+    ctx.fillStyle = "black";
+    ctx.globalAlpha = 0.6;
+    ctx.fillRect(this.x - (cameraOrigin.x * dim) + 12, this.y - (cameraOrigin.y * dim) + 40, 30, 20);
+    ctx.globalAlpha = 1.0;
+    ctx.fillStyle = "#bada55";
+    ctx.font = "14px Arial";
+    ctx.fillText(this.count, this.x - (cameraOrigin.x * dim) + 18, this.y - (cameraOrigin.y * dim) + 54);
+
 
 }
 // ===================================================================
@@ -106,9 +130,10 @@ Alien.prototype.draw = function (ctx) {
 function Soldier(game, x, y) {
     this.animation = new Animation(AM.getAsset("./img/sprites/soldier_animated.png"), 44, 60, 216, .2, 5, true, 1);
     this.standing = AM.getAsset("./img/sprites/soldier_standing.png");
-    this.selected = true;
+    this.selected = false;
     this.x = x;
     this.y = y;
+    this.count = 1;
     Entity.call(this, game, this.x, this.y);
 }
 
@@ -124,6 +149,13 @@ Soldier.prototype.draw = function (ctx) {
     } else {
         ctx.drawImage(this.standing, this.x - (cameraOrigin.x * dim), this.y - (cameraOrigin.y * dim));
     }
+    ctx.fillStyle = "black";
+    ctx.globalAlpha = 0.6;
+    ctx.fillRect(this.x - (cameraOrigin.x * dim) + 8, this.y - (cameraOrigin.y * dim) + 40, 30, 20);
+    ctx.globalAlpha = 1.0;
+    ctx.fillStyle = "#bada55";
+    ctx.font = "14px Arial";
+    ctx.fillText(this.count, this.x - (cameraOrigin.x * dim) + 14, this.y - (cameraOrigin.y * dim) + 54);
 }
 // ===================================================================
 // End - Soldier
