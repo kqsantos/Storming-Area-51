@@ -173,8 +173,8 @@ function Player() {
 // ===================================================================\
 
 function toggleTurn() {
+    currentPlayerTurn = currentPlayerTurn % 2;
     turnCount++;
-    // currentPlayerTurn %= turnCount;
 }
 
 function addCaptainToRegion(region) {
@@ -366,51 +366,51 @@ function getClickedItem(items, x, y) {
 
 
 function BuildRegions() {
-    regionsList[10] = new Region(10, 0, [1025, 568], [949, 745], [1121, 665], null, [963, 604], 'plains', []);
-    regionsList[11] = new Region(11, 0, [1040, 990], [1100, 1050], [1225, 997], null, [1125, 904], 'plains', []);
-    regionsList[12] = new Region(12, 0, [750, 800], [752, 1044], [810, 898], null, [842, 920], 'plains', []);
-    regionsList[13] = new Region(13, 0, [479, 1013], [481, 1090], [509, 951], null, [643, 1053], 'plains', []);
-    regionsList[14] = new Region(14, 0, [189, 811], [199, 991], [233, 913], null, [291, 997], 'plains', []);
-    regionsList[15] = new Region(15, 0, [145, 260], [230, 180], [480, 241], null, [384, 217], 'plains', []);
-    regionsList[16] = new Region(16, 0, [442, 329], [446, 403], [310, 400], null, [220, 371], 'plains', []);
-    regionsList[17] = new Region(17, 0, [575, 163], [575, 255], [620, 399], null, [706, 229], 'plains', []);
-    regionsList[18] = new Region(18, 0, [675, 490], [695, 555], [590, 510], null, [585, 575], 'plains', []);
-    regionsList[19] = new Region(19, 0, [290, 633], [215, 705], [138, 635], null, [210, 603], 'plains', []);
+    regionsList[10] = new Region(10, 0, [1025, 568], [949, 745], [1121, 665], null, [963, 604], 'plains', [11,12,46,47]);
+    regionsList[11] = new Region(11, 0, [1040, 990], [1100, 1050], [1225, 997], null, [1125, 904], 'plains', [10,12,50,60]);
+    regionsList[12] = new Region(12, 0, [750, 800], [752, 1044], [810, 898], null, [842, 920], 'plains', [10,11,13,18,36]);
+    regionsList[13] = new Region(13, 0, [479, 1013], [481, 1090], [509, 951], null, [643, 1053], 'plains', [12,14,36]);
+    regionsList[14] = new Region(14, 0, [189, 811], [199, 991], [233, 913], null, [291, 997], 'plains', [13,36,35,19]);
+    regionsList[15] = new Region(15, 0, [145, 260], [230, 180], [480, 241], null, [384, 217], 'plains', [16,17]);
+    regionsList[16] = new Region(16, 0, [442, 329], [446, 403], [310, 400], null, [220, 371], 'plains', [15,17,18,19]);
+    regionsList[17] = new Region(17, 0, [575, 163], [575, 255], [620, 399], null, [706, 229], 'plains', [15,16,18,45,46]);
+    regionsList[18] = new Region(18, 0, [675, 490], [695, 555], [590, 510], null, [585, 575], 'plains', [12,19,16,17,46]);
+    regionsList[19] = new Region(19, 0, [290, 633], [215, 705], [138, 635], null, [210, 603], 'plains', [16,18,14]);
 
-    regionsList[40] = new Region(40, 0, [1759, 731], [1773, 845], [1635, 1109], null, [1721, 1139], 'tundra', []);
-    regionsList[41] = new Region(41, 0, [1957, 881], [2083, 1061], [2117, 767], null, [2033, 771], 'tundra', []);
-    regionsList[42] = new Region(42, 0, [2073, 653], [2161, 653], [2015, 655], null, [1907, 649], 'tundra', []);
-    regionsList[43] = new Region(43, 0, [2051, 491], [2049, 389], [2141, 223], null, [2065, 273], 'tundra', []);
-    regionsList[44] = new Region(44, 0, [1675, 607], [1773, 617], [1685, 523], null, [1781, 515], 'tundra', []);
-    regionsList[45] = new Region(45, 0, [1011, 99], [1071, 170], [953, 177], null, [831, 145], 'tundra', []);
-    regionsList[46] = new Region(46, 0, [835, 435], [989, 429], [1017, 339], null, [849, 313], 'tundra', []);
-    regionsList[47] = new Region(47, 0, [1221, 99], [1307, 395], [1281, 201], null, [1229, 311], 'tundra', []);
-    regionsList[48] = new Region(48, 0, [1445, 345], [1443, 549], [1565, 289], null, [1549, 597], 'tundra', []);
-    regionsList[49] = new Region(49, 0, [1831, 101], [1903, 301], [1823, 201], null, [1761, 291], 'tundra', []);
-    regionsList[50] = new Region(50, 0, [1375, 819], [1371, 969], [1559, 765], null, [1649, 767], 'tundra', []);
+    regionsList[40] = new Region(40, 0, [1759, 731], [1773, 845], [1635, 1109], null, [1721, 1139], 'tundra', [60,61,41,50,42,44]);
+    regionsList[41] = new Region(41, 0, [1957, 881], [2083, 1061], [2117, 767], null, [2033, 771], 'tundra', [42,40,61]);
+    regionsList[42] = new Region(42, 0, [2073, 653], [2161, 653], [2015, 655], null, [1907, 649], 'tundra', [41,40,44,43]);
+    regionsList[43] = new Region(43, 0, [2051, 491], [2049, 389], [2141, 223], null, [2065, 273], 'tundra', [42,49]);
+    regionsList[44] = new Region(44, 0, [1675, 607], [1773, 617], [1685, 523], null, [1781, 515], 'tundra', [42,40,50,48,49]);
+    regionsList[45] = new Region(45, 0, [1011, 99], [1071, 170], [953, 177], null, [831, 145], 'tundra', [17,46,47]);
+    regionsList[46] = new Region(46, 0, [835, 435], [989, 429], [1017, 339], null, [849, 313], 'tundra', [17,18,10,47,45]);
+    regionsList[47] = new Region(47, 0, [1221, 99], [1307, 395], [1281, 201], null, [1229, 311], 'tundra', [45,46,10,48,50]);
+    regionsList[48] = new Region(48, 0, [1445, 345], [1443, 549], [1565, 289], null, [1549, 597], 'tundra', [47,50,44,49]);
+    regionsList[49] = new Region(49, 0, [1831, 101], [1903, 301], [1823, 201], null, [1761, 291], 'tundra', [48,44,43]);
+    regionsList[50] = new Region(50, 0, [1375, 819], [1371, 969], [1559, 765], null, [1649, 767], 'tundra', [10,11,60,40,44,48,47]);
 
-    regionsList[29] = new Region(29, 1, [707, 1965], [703, 2051], [855, 2059], null, [899, 1971], 'sand', []);
-    regionsList[30] = new Region(30, 1, [557, 2033], [553, 2115], [475, 2137], null, [447, 2027], 'sand', []);
-    regionsList[31] = new Region(31, 1, [137, 2025], [277, 2027], [255, 2177], null, [247, 2095], 'sand', []);
-    regionsList[32] = new Region(32, 1, [363, 1917], [261, 1847], [569, 1855], null, [487, 1907], 'sand', []);
-    regionsList[33] = new Region(33, 1, [135, 1783], [137, 1715], [183, 1587], null, [147, 1901], 'sand', []);
-    regionsList[34] = new Region(34, 1, [900, 1332], [884, 1532], [1089, 1427], null, [996, 1408], 'sand', []);
-    regionsList[35] = new Region(35, 1, [184, 1238], [276, 1432], [366, 1336], null, [270, 1324], 'sand', []);
-    regionsList[36] = new Region(36, 1, [466, 1252], [566, 1186], [672, 1184], null, [770, 1188], 'sand', []);
-    regionsList[37] = new Region(37, 1, [554, 1432], [548, 1360], [702, 1362], null, [770, 1356], 'sand', []);
-    regionsList[38] = new Region(38, 1, [542, 1550], [572, 1716], [490, 1642], null, [384, 1628], 'sand', []);
-    regionsList[39] = new Region(39, 1, [822, 1670], [824, 1752], [1024, 1752], null, [978, 1828], 'sand', []);
+    regionsList[29] = new Region(29, 1, [707, 1965], [703, 2051], [855, 2059], null, [899, 1971], 'sand', [30,32,39,67]);
+    regionsList[30] = new Region(30, 1, [557, 2033], [553, 2115], [475, 2137], null, [447, 2027], 'sand', [29,31,32]);
+    regionsList[31] = new Region(31, 1, [137, 2025], [277, 2027], [255, 2177], null, [247, 2095], 'sand', [30,32,33]);
+    regionsList[32] = new Region(32, 1, [363, 1917], [261, 1847], [569, 1855], null, [487, 1907], 'sand', [29,30,31,33,38]);
+    regionsList[33] = new Region(33, 1, [135, 1783], [137, 1715], [183, 1587], null, [147, 1901], 'sand', [31,32,38,35]);
+    regionsList[34] = new Region(34, 1, [900, 1332], [884, 1532], [1089, 1427], null, [996, 1408], 'sand', [65,60,,39,37]);
+    regionsList[35] = new Region(35, 1, [184, 1238], [276, 1432], [366, 1336], null, [270, 1324], 'sand', [14,36,37,38,33]);
+    regionsList[36] = new Region(36, 1, [466, 1252], [566, 1186], [672, 1184], null, [770, 1188], 'sand', [12,13,14,35,37,34]);
+    regionsList[37] = new Region(37, 1, [554, 1432], [548, 1360], [702, 1362], null, [770, 1356], 'sand', [34,36,35,38]);
+    regionsList[38] = new Region(38, 1, [542, 1550], [572, 1716], [490, 1642], null, [384, 1628], 'sand', [39,32,33,35,37]);
+    regionsList[39] = new Region(39, 1, [822, 1670], [824, 1752], [1024, 1752], null, [978, 1828], 'sand', [34,38,29,65]);
 
-    regionsList[60] = new Region(60, 1, [1368, 1328], [1464, 1326], [1512, 1170], null, [1326, 1206], 'grassland', []);
-    regionsList[61] = new Region(61, 1, [1930, 1214], [2052, 1326], [2198, 1218], null, [2084, 1208], 'grassland', []);
-    regionsList[62] = new Region(62, 1, [1838, 1587], [2012, 1559], [2118, 1515], null, [1910, 1479], 'grassland', []);
-    regionsList[63] = new Region(63, 1, [1678, 1705], [1988, 1801], [1910, 1807], null, [1964, 1715], 'grassland', []);
-    regionsList[64] = new Region(64, 1, [1494, 1463], [1590, 1543], [1706, 1517], null, [1726, 1443], 'grassland', []);
-    regionsList[65] = new Region(65, 1, [1174, 1602], [1182, 1449], [1336, 1471], null, [1222, 1497], 'grassland', []);
-    regionsList[66] = new Region(66, 1, [1361, 1646], [1369, 1728], [1477, 1628], null, [1487, 1708], 'grassland', []);
-    regionsList[67] = new Region(67, 1, [1225, 1940], [1377, 1940], [1383, 2088], null, [1313, 2030], 'grassland', []);
-    regionsList[68] = new Region(68, 1, [1643, 2002], [1767, 2022], [1623, 2122], null, [1697, 2106], 'grassland', []);
-    regionsList[69] = new Region(69, 1, [2007, 2126], [2111, 2136], [2105, 2016], null, [2051, 1958], 'grassland', []);
+    regionsList[60] = new Region(60, 1, [1368, 1328], [1464, 1326], [1512, 1170], null, [1326, 1206], 'grassland', [40,50,11,64,65,34]);
+    regionsList[61] = new Region(61, 1, [1930, 1214], [2052, 1326], [2198, 1218], null, [2084, 1208], 'grassland', [41,40,62]);
+    regionsList[62] = new Region(62, 1, [1838, 1587], [2012, 1559], [2118, 1515], null, [1910, 1479], 'grassland', [61,64,63]);
+    regionsList[63] = new Region(63, 1, [1678, 1705], [1988, 1801], [1910, 1807], null, [1964, 1715], 'grassland', [62,64,66,68,69]);
+    regionsList[64] = new Region(64, 1, [1494, 1463], [1590, 1543], [1706, 1517], null, [1726, 1443], 'grassland', [62,63,66,65,60]);
+    regionsList[65] = new Region(65, 1, [1174, 1602], [1182, 1449], [1336, 1471], null, [1222, 1497], 'grassland', [34,39,66,60,64]);
+    regionsList[66] = new Region(66, 1, [1361, 1646], [1369, 1728], [1477, 1628], null, [1487, 1708], 'grassland', [64,65,63,68,67]);
+    regionsList[67] = new Region(67, 1, [1225, 1940], [1377, 1940], [1383, 2088], null, [1313, 2030], 'grassland', [66,29]);
+    regionsList[68] = new Region(68, 1, [1643, 2002], [1767, 2022], [1623, 2122], null, [1697, 2106], 'grassland', [69,63]);
+    regionsList[69] = new Region(69, 1, [2007, 2126], [2111, 2136], [2105, 2016], null, [2051, 1958], 'grassland', [63,68]);
 
 }
 
@@ -649,7 +649,7 @@ MinimapDisplay.prototype.update = function (ctx) {
         click.x >= this.originX &&
         click.y >= this.originY &&
         click.x <= this.smWidth &&
-        click.y <= this.smWidth) {
+        click.y <= this.smHeight) {
         if (debug) {
             console.log("%c Minimap click below this:", "background: #222; color: #bada55");
         }
@@ -1361,7 +1361,7 @@ WelcomeScreen.prototype.update = function (ctx) {
 
     
     if(gameEngine.mouseOver != null) {
-        var temp = getClickedItem(this.hitBoxes, gameEngine.mouseOver.x, gameEngine.mouseOver.y);
+        var temp = getClickedItem(this.hitBoxes, gameEngine.mouseOver.layerX, gameEngine.mouseOver.layerY);
         console.log(temp);
         if(temp != null && temp.name === "newGame") {
             this.display = this.hover;
@@ -1391,6 +1391,7 @@ WelcomeScreen.prototype.update = function (ctx) {
         this.removeFromWorld = true;
         gameEngine.addEntity(new MapDisplay(gameEngine));
 
+        // Starting conditions
         for (var i = 0; i < regionsList.length; i++) {
             if (regionsList[i] != undefined) {
                 buildFarm(regionsList[i]);
@@ -1398,8 +1399,10 @@ WelcomeScreen.prototype.update = function (ctx) {
             }
         }
 
+
         for (var i = 0; i < regionsList.length; i++) {
             if (regionsList[i] != undefined) {
+                if ((i >= 40 && i <= 50) || (i >= 29 && i <= 39))
                 buildSoldier(regionsList[i]);
             }
         }
