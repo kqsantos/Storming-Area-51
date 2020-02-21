@@ -950,6 +950,7 @@ ControlDisplay.prototype.update = function (ctx) {
             
         }
         gameEngine.click = null;
+        toggleAllOff();
     }
 
     // Sub-menu for Build Button
@@ -980,6 +981,7 @@ ControlDisplay.prototype.update = function (ctx) {
             
         }
         gameEngine.click = null;
+        toggleAllOff();
     }
 
 
