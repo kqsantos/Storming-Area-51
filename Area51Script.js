@@ -144,7 +144,7 @@ function Building(name, cost) {
  * @param {*} neighbors array of neighbor IDs
  */
 function Region(id, owner, barracksXY, farmXY, troopXY, cap, capXY, territory, neighbors) {
-    this.id = id,
+        this.id = id,
         this.owner = owner,
         this.bldg = [],
         this.barracksXY = barracksXY,
@@ -157,10 +157,10 @@ function Region(id, owner, barracksXY, farmXY, troopXY, cap, capXY, territory, n
         this.neighbors = neighbors
 }
 
-function Player() {
-    this.moneyCount = 0,
-        this.ownedRegions = []
-
+function Player(ID) {
+    this.ID = ID;
+    this.foodCount = 0,
+    this.upgradeLevel = 0;
 }
 // ===================================================================
 // End - Map Entities
@@ -221,7 +221,7 @@ function buildSoldier(region) {
     var newTroop;
 
     if (region.troop["soldier"] != null) {
-        region.troop.count++;
+        region.troop["soldier"].count++;
     }
     else if (region.owner == 0) {
         newTroop = new Soldier(gameEngine, region.troopXY[0], region.troopXY[1]);
@@ -460,11 +460,12 @@ function BuildBoard() {
     return gameboard;
 }
 
-// function StartGame(regionArray) {
-//     this.regionArray.forEach((region) => region.troopCount += 4);
-//     this.regionArray[0].enemyHero = true;
-//     this.regionArray[12].friendlyHero = true;
-// }
+function collectFood (player) {
+    var foodCount = 0;
+    regionsList.forEach((region) => {
+        if(player.id === region.owner) foodCount += 1;
+    });
+}
 
 // ===================================================================
 // End - Utility Functions
@@ -474,16 +475,21 @@ function BuildBoard() {
 // Start - Menu Functions
 // ===================================================================
 function moveFight(source, destination) {
+    //Rebuild
+    
     if (destination.owner === source.owner || destination.troops === []) {
         while (source.troops.length() > 0) destination.troops.push(source.troops.pop()); // Pushes troops from one destination to the next.
     } else {
-        source.cap ? atkPow = source.troops.length() * 2 : atkPow = source.troops.length();
-        destination.cap ? defPow = destination.troops.length() * 2 : defPow = destination.troops.length();
+
+        var atkPow = 0;
+        source.troops.forEach((troop) => atkPow += troop.count*troop.atk);
+
+        var defPow = 0;
+        source.troops.forEach((troop) => defPow += troop.count*troop.def);
 
         while (defPow > 0 && atkPow > 0) {
             if (Math.random() > 0.5) {
                 atkPow--
-                if (!source.cap || (source.cap && atkPow % 2 == 1)) source.troops.pop();
             } else {
                 defPow--;
             }
@@ -491,28 +497,22 @@ function moveFight(source, destination) {
 
         if (atkPow > defPow) {
             destination.owner = source.owner;
-            region1.troops = [];
+            destination.troops = source.troops;
+            source.troops = [];
             return true; // Attacker won
         } else {
-            region1.troops = [];
+            destination.troops = [];
             return false; // Defender won
         }
     }
 }
 
-function buildBldg(type, region, player) {
-    if (type == 'farm' || type == 'barracks') {
-        region.bldg.push(new Building(type, 1));
-        player.moneyCount--;
-    }
+function moveCap(source, destination) {
+    if (destination.owner === source.owner) {
+        source.cap = destination.cap;
+        source.cap = null;
+    } 
 }
-
-// function buildTroop(type, region, player) {
-//     if (type == 'captain' || type == 'soldier') {
-//         region.troops.push(new Troop(type, 1));
-//         player.moneyCount--;
-//     }
-// }
 
 // ===================================================================
 // End - Menu Functions
@@ -919,14 +919,14 @@ ControlDisplay.prototype.update = function (ctx) {
             if (this.moveActive == true && actionItem.name == "moveFight") {
                 var source = selectedRegion;
                 var destination = this.currentRegion;
-                // Ryan's function goes here
+                // Ryan's function goes here (Don't have destination)
                 
 
 
             }
             else if (this.capActive == true && actionItem.name == "moveCap") {
                 var source = selectedRegion;
-                // Ryan's function goes here
+                // Ryan's function goes here (Don't have destination)
 
 
 
