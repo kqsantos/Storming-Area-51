@@ -21,6 +21,7 @@ function GameEngine() {
     this.newGame = false;
     this.zoomIn = false;
     this.zoomOut= false;
+    this.mouseOver = null;
 }
 
 GameEngine.prototype.init = function (ctx) {
@@ -48,16 +49,7 @@ GameEngine.prototype.startInput = function () {
     var elem = this.ctx.canvas;
 
     if (elem && elem.getContext) {
-        // list of rectangles to render
-        var rects = [{ name: "endTurn", x: 1018, y: 678, w: 136, h: 35 },
-        { name: "buildTroop", x: 75, y: 0, w: 50, h: 50 }];
-
-        var rects2 = [{ name: "action", x: 960, y: 640, w: 80, h: 80 },
-        { name: "troop", x: 1040, y: 640, w: 80, h: 80 },
-        {name: "building", x: 1120, y: 640, w: 80, h: 80},
-        {name: "endTurn", x: 1200, y:640, w: 80, h: 80}];
         // get context
-
         var context = elem.getContext('2d');
 
         // Animation Mouse Down Listener
@@ -69,6 +61,15 @@ GameEngine.prototype.startInput = function () {
 
         elem.addEventListener("keydown", function (e) {
             that.keyDown = e;
+            // console.log("%c KeyDown info below this:", "background: #222; color: #bada55");
+            // console.log(e);
+            // console.log("Key Down Event - Char " + e.code + " Code " + e.keyCode);
+        }, false);
+
+        elem.addEventListener("mousemove", function (e) {
+            console.log(e);
+            that.mouseOver = e;
+            
             // console.log("%c KeyDown info below this:", "background: #222; color: #bada55");
             // console.log(e);
             // console.log("Key Down Event - Char " + e.code + " Code " + e.keyCode);

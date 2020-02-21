@@ -1329,6 +1329,10 @@ AudioHandler.prototype.draw = function (ctx) {
 function WelcomeScreen(game) {
     // Welcome Screen Background
     this.animation = new Animation(AM.getAsset("./img/welcome_screen.png"), 1280, 720, 7680, .08, 6, true, 1);
+    this.background = AM.getAsset("./img/welcome_background.png");
+    this.hover = AM.getAsset("./img/welcome_hover2.png");
+
+    this.display = this.background;
     this.ctx = game.ctx;
 
     // New Game Button Paramters
@@ -1339,12 +1343,11 @@ function WelcomeScreen(game) {
     this.ngbY = 500; //Y-coordinate of button
 
     // Hitboxes for the buttons
-    this.hitBoxes = [{ name: "newGame", x: this.ngbX, y: this.ngbY, w: this.ngbWidth, h: this.ngbHeight }];
+    this.hitBoxes = [{ name: "newGame", x: 591, y: 388, w: 567, h: 165 }];
 
     this.audio = new Audio("./sound/welcome_music.mp3");
     this.audio.autoplay = true;
     this.audio.play();
-
 
     Entity.call(this, game, 0, 0);
 }
@@ -1353,6 +1356,18 @@ WelcomeScreen.prototype = new Entity();
 WelcomeScreen.prototype.constructor = WelcomeScreen;
 
 WelcomeScreen.prototype.update = function (ctx) {
+
+    
+    if(gameEngine.mouseOver != null) {
+        var temp = getClickedItem(this.hitBoxes, gameEngine.mouseOver.x, gameEngine.mouseOver.y);
+        console.log(temp);
+        if(temp != null && temp.name === "newGame") {
+            this.display = this.hover;
+        } else {
+            this.display = this.background;
+        }
+        gameEngine.mouseOver = null;
+    }
 
     if (gameEngine.click != null) {
 
@@ -1404,6 +1419,7 @@ WelcomeScreen.prototype.update = function (ctx) {
 WelcomeScreen.prototype.draw = function (ctx) {
     this.animation.drawFrame(this.game.clockTick, this.ctx, this.x, this.y);
     ctx.drawImage(this.newGameButton, this.ngbX, this.ngbY, this.ngbWidth, this.ngbHeight);
+    ctx.drawImage(this.display, 0, 0);
 }
 // ===================================================================
 // End - Welcome SCreen
@@ -1449,6 +1465,10 @@ function Main() {
     // Welcome Screen
     AM.queueDownload("./img/welcome_screen.png");
     AM.queueDownload("./img/button_new-game.png");
+
+    AM.queueDownload("./img/welcome_background.png");
+    AM.queueDownload("./img/welcome_hover.png");
+    AM.queueDownload("./img/welcome_hover2.png");
 
     // Control Display
     AM.queueDownload("./img/control/button.png");
