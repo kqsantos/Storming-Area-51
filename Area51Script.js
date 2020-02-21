@@ -985,6 +985,31 @@ ControlDisplay.prototype.update = function (ctx) {
     }
 
 
+    // End turn button
+    if (click != null &&
+        click.x >= this.eTBtn.x &&
+        click.y >= this.eTBtn.y &&
+        click.x <= (this.eTBtn.x + this.btnDim) &&
+        click.y <= (this.eTBtn.y + this.btnDim)) {
+        var endItem = getClickedItem(this.menu, click.x, click.y);
+        if (endItem != null) {
+            if (this.endTurnActive == true && endItem.name == "endTurn") {
+                // Ryan's function goes here
+
+
+
+
+
+            }
+            
+        }
+        gameEngine.click = null;
+        toggleAllOff();
+    }
+
+
+
+
     if (click != null &&
         click.x >= this.aBtn.x &&
         click.y >= this.aBtn.y &&
