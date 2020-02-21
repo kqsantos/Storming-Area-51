@@ -173,8 +173,9 @@ function Player() {
 // ===================================================================\
 
 function toggleTurn() {
+    currentPlayerTurn = currentPlayerTurn % 2;
     turnCount++;
-    // currentPlayerTurn %= turnCount;
+    
 }
 
 function addCaptainToRegion(region) {
