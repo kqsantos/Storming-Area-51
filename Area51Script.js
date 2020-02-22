@@ -191,7 +191,7 @@ function addCaptainToRegion(region) {
 
 function buildFarm(region) {
     var newFarm;
-    region.owner === 0 ? newFarm = new Farm(gameEngine, 0, region.farmXY[0], region.farmXY[1]) : newFarm = new Farm(gameEngine, 1, region.farmXY[0], region.farmXY[1]);
+    region.owner === 0 ? newFarm = new Farm(gameEngine, 0, region.farmXY[0], region.farmXY[1]) :newFarm = new Farm(gameEngine, 1, region.farmXY[0], region.farmXY[1]);
     region.bldg["farm"] = newFarm;
     gameEngine.addEntity(newFarm);
 }
@@ -292,7 +292,8 @@ function getClickedRegion(rects, x, y, owner) {
         }
     }
     console.log(regionsList[tempRegion.name].owner == owner)
-    if (regionsList[tempRegion.name] != null && regionsList[tempRegion.name].owner == owner) {
+
+    if (regionsList[tempRegion.name] != null && (regionsList[tempRegion.name].owner == owner || gameEngine.GUIEntities[2].destinationSelect)) {
         if (selectedRegion != null) setSpritesToUnselected(selectedRegion);
         selectedRegion = regionsList[tempRegion.name];
         setSpritesToSelected(selectedRegion);
@@ -439,11 +440,12 @@ function collectFood(player) {
 // Start - Menu Functions
 // ===================================================================
 function moveFight(source, destination) {
-
+    console.log(source)
+    console.log(destination)
     var validMove = source.neighbors.includes(destination.id);
     var validSource = source.troop['soldier'] !== null;
 
-    if ((destination.owner === source.owner || destination.troop === []) && validMove && validSource) {
+    if ((destination.owner === -1 || destination.owner === source.owner || destination.troop === []) && validMove && validSource) {
         destination.owner = source.owner;
 
         if (destination.troop['soldier'] != null) {
@@ -498,10 +500,11 @@ function moveCap(source, destination) {
     console.log('valid');
 
     if (destination.owner === source.owner && validMove) {
-        destination.cap.removeFromWorld = true;
+        
         destination.cap = source.cap;
         destination.cap.x = destination.capXY[0];
         destination.cap.y = destination.capXY[1];
+        // source.cap.removeFromWorld = true;
         source.cap = null;
     }
 }
@@ -575,15 +578,15 @@ MapDisplay.prototype.update = function (ctx) {
         }
     }
 
-    if(!isThereCaptainForPlayer1) {
-        console.log("PLAYER 0 WINS");
-        // TRIGGER GAME OVER SCREEN
-    }
+    // if(!isThereCaptainForPlayer1) {
+    //     console.log("PLAYER 0 WINS");
+    //     // TRIGGER GAME OVER SCREEN
+    // }
 
-    if(!isThereCaptainForPlayer0) {
-        console.log("PLAYER 1 WINS");
-        // TRIGGER GAME OVER SCREEN
-    }
+    // if(!isThereCaptainForPlayer0) {
+    //     console.log("PLAYER 1 WINS");
+    //     // TRIGGER GAME OVER SCREEN
+    // }
 
 }
 
@@ -895,9 +898,9 @@ ControlDisplay.prototype.update = function (ctx) {
 
     // Captain flag
     if (selectedRegion != null && selectedRegion.cap != null) {
-        this.captainActive = true;
+        this.capActive = true;
     } else {
-        this.captainActive = false;
+        this.capActive = false;
     }
 
     // Move flag
@@ -941,36 +944,36 @@ ControlDisplay.prototype.update = function (ctx) {
 
     if (this.destinationSelect && this.moveDelay) {
         this.moveDestination = selectedRegion;
-        var regionFound = false;
-        for (var i = 0; i < this.moveDestination.neighbors.length; i++) {
-            if (this.moveDestination.neighbors[i] == this.moveSource.id) {
-                regionFound = true;
-            }
-        }
-        if (regionFound) {
-            moveFight(this.moveSource, this.moveDestination);
-            selectedRegion = this.moveDestination;
-            
-        } else {
-            selectedRegion = null;
-        }
+        // var regionFound = false;
 
+        // for (var i = 0; i < this.moveDestination.neighbors.length; i++) {
+        //     if (this.moveDestination.neighbors[i] == this.moveSource.id) {
+        //         regionFound = true;
+        //     }
+        // }
+
+        // if (regionFound) {
+        //     
+        //     
+        // } else {
+        //     selectedRegion = null;
+        // }
+
+        moveFight(this.moveSource, this.moveDestination);
+        selectedRegion = this.moveDestination;
         this.destinationSelect = false;
         this.moveDelay = false;
-        console.log("source " + this.moveSource.id)
-        console.log("des " + this.moveDestination.id)
-        moveFight(this.moveSource, this.moveDestination);
-        this.moveSource = null;
-
         this.moveDestination = null;
         this.moveSource = null;
     }
+
     // console.log(selectedRegion)
     if (this.moveDelay && this.destinationSelectCaptain) {
+        console.log("Hello")
         this.moveDestination = selectedRegion;
+        moveCap(this.moveSource, this.moveDestination)
         this.destinationSelect = false;
         this.moveDelay = false;
-        moveCap(this.moveSource, this.moveDestination)
         this.moveSource = null;
         this.moveDestination = null;
     }
@@ -984,6 +987,8 @@ ControlDisplay.prototype.update = function (ctx) {
         click.y <= (this.a_moveBtn.y + this.btnDim)) {
         var actionItem = getClickedItem(this.actionMenu, click.x, click.y);
         if (actionItem != null) {
+
+            console.log()
             if (this.moveActive == true && actionItem.name == "moveFight") {
 
                 this.destinationSelect = true;
@@ -993,7 +998,7 @@ ControlDisplay.prototype.update = function (ctx) {
             }
             else if (this.capActive == true && actionItem.name == "moveCap") {
 
-
+                
                 this.destinationSelectCaptain = true;
                 this.moveSource = selectedRegion;
             }
@@ -1172,7 +1177,7 @@ ControlDisplay.prototype.draw = function (ctx) {
 
 
     if (this.actionFlag) {
-        if (this.captainActive) {
+        if (this.capActive) {
             ctx.drawImage(this.buttonIcon, this.a_capBtn.x, this.a_capBtn.y, this.btnDim, this.btnDim);
             ctx.drawImage(this.kingIconOn, this.a_capBtn.x + 10, this.a_capBtn.y + 10, this.btnDim - 20, this.btnDim - 20);
         } else {
@@ -1338,12 +1343,11 @@ InputHandler.prototype.update = function (ctx) {
         // console.log(gameEngine.GUIEntities[2].moveDelay)
         // console.log(gameEngine.GUIEntities[2].destinationSelect)
 
-        if (gameEngine.GUIEntities[2].destinationSelect) {
+        if (gameEngine.GUIEntities[2].destinationSelect || gameEngine.GUIEntities[2].destinationSelectCaptain) {
 
             gameEngine.GUIEntities[2].moveDelay = true;
             console.log("movedelay after moveDelay set " + gameEngine.GUIEntities[2].moveDelay)
         }
-
 
 
         console.log("%c Region clicked below this:", "background: #222; color: #bada55");
@@ -1489,8 +1493,8 @@ WelcomeScreen.prototype.update = function (ctx) {
             if (regionsList[i] != undefined) {
                 if ((i >= 40 && i <= 50) || (i >= 29 && i <= 39)) {
                     buildSoldier(regionsList[i]);
-                    // buildFarm(regionsList[i]);
-                    // buildBarracks(regionsList[i]);
+                    buildFarm(regionsList[i]);
+                    buildBarracks(regionsList[i]);
                 }
 
             }
