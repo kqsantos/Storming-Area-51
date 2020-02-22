@@ -157,10 +157,11 @@ function Region(id, owner, barracksXY, farmXY, troopXY, cap, capXY, territory, n
         this.neighbors = neighbors
 }
 
-function Player(ID) {
+function Player(ID, type) {
     this.ID = ID;
     this.foodCount = 0,
-        this.upgradeLevel = 0;
+    this.upgradeLevel = 0;
+    this.type = type;
 }
 // ===================================================================
 // End - Map Entities
@@ -190,22 +191,14 @@ function addCaptainToRegion(region) {
 
 function buildFarm(region) {
     var newFarm;
-    if (region.owner == 0) {
-        newFarm = new Farm(gameEngine, 0, region.farmXY[0], region.farmXY[1]);
-    } else {
-        newFarm = new Farm(gameEngine, 1, region.farmXY[0], region.farmXY[1]);
-    }
+    region.owner === 0 ? newFarm = new Farm(gameEngine, 0, region.farmXY[0], region.farmXY[1]) : newFarm = new Farm(gameEngine, 1, region.farmXY[0], region.farmXY[1]);
     region.bldg["farm"] = newFarm;
     gameEngine.addEntity(newFarm);
 }
 
 function buildBarracks(region) {
     var newBarracks;
-    if (region.owner == 0) {
-        newBarracks = new Barracks(gameEngine, 0, region.barracksXY[0], region.barracksXY[1]);
-    } else {
-        newBarracks = new Barracks(gameEngine, 1, region.barracksXY[0], region.barracksXY[1]);
-    }
+    region.owner == 0 ? newBarracks = new Barracks(gameEngine, 0, region.barracksXY[0], region.barracksXY[1]) : newBarracks = new Barracks(gameEngine, 1, region.barracksXY[0], region.barracksXY[1]);
     region.bldg["barracks"] = newBarracks;
     gameEngine.addEntity(newBarracks);
 }
@@ -314,25 +307,13 @@ function getClickedRegion(rects, x, y) {
 }
 
 function setSpritesToUnselected(region) {
-
-    if (region.troop["soldier"] != null) {
-        region.troop["soldier"].selected = false;
-    }
-
-    if (region.cap != null) {
-        region.cap.selected = false;
-    }
+    if (region.troop["soldier"] != null) region.troop["soldier"].selected = false;
+    if (region.cap != null) region.cap.selected = false;
 }
 
 function setSpritesToSelected(region) {
-
-    if (region.troop["soldier"] != null) {
-        region.troop["soldier"].selected = true;
-    }
-    if (region.cap != null) {
-        region.cap.selected = true;
-    }
-
+    if (region.troop["soldier"] != null) region.troop["soldier"].selected = true;
+    if (region.cap != null) region.cap.selected = true;
 }
 
 function getClickedItem(items, x, y) {
@@ -344,14 +325,7 @@ function getClickedItem(items, x, y) {
         var top = items[i].y;
         var bottom = items[i].y + items[i].h;
 
-        if (right >= x
-            && left <= x
-            && bottom >= y
-            && top <= y) {
-            output = items[i];
-        }
-
-
+        if (right >= x && left <= x && bottom >= y && top <= y) output = items[i];
     }
     return output;
 }
@@ -468,10 +442,11 @@ function collectFood(player) {
 // Start - Menu Functions
 // ===================================================================
 function moveFight(source, destination) {
-    //Rebuild
-    console.log("Hello from the moveFight");
 
-    if (destination.owner === source.owner || destination.troop === []) {
+    var validMove = source.neighbors.includes(destination.id);
+    var validSource = source.troop['soldier'] !== null;
+
+    if ((destination.owner === source.owner || destination.troop === []) && validMove && validSource) {
         destination.owner = source.owner;
 
         if(destination.troop['soldier'] != null){
@@ -485,10 +460,8 @@ function moveFight(source, destination) {
         }
 
         source.troop = [];
-        
-        console.log(destination.troop);
-        console.log(source.troop);
-    } else {
+
+    } else if (validMove && validSource){
 
         var atkPow = 0;
 
@@ -497,31 +470,23 @@ function moveFight(source, destination) {
         var defPow = 0;
         defPow += Number(destination.troop['soldier'].count) * Number(destination.troop['soldier'].def);
 
-        console.log(source);
-        console.log(destination);
-        console.log('pow' + atkPow + ' ' + defPow);
-
         while (defPow > 0 && atkPow > 0) {
-            if (Math.random() > 0.5) {
-                atkPow--
-                console.log('atk --')
-            } else {
-                defPow--;
-                console.log('atk --')
-            }
-
-            console.log('fight stuff')
+            Math.random() > 0.5 ? atkPow-- : defPow--;
         }
+
+        console.log('ATTACK = ' + atkPow);
 
         if (atkPow > defPow) {
             destination.troop['soldier'].removeFromWorld = true;
             destination.owner = source.owner;
             destination.troop = source.troop;
+            destination.troop['soldier'].count = atkPow;
             destination.troop['soldier'].x = destination.troopXY[0];
             destination.troop['soldier'].y = destination.troopXY[1];
             source.troop = [];
             // Attacker won
         } else {
+            destination.troop.count = atkPow;
             source.troop['soldier'].removeFromWorld = true;
             source.troop = [];
             // Defender won
@@ -530,8 +495,16 @@ function moveFight(source, destination) {
 }
 
 function moveCap(source, destination) {
-    if (destination.owner === source.owner) {
-        source.cap = destination.cap;
+
+    var validMove = source.neighbors.includes(destination.id);
+
+    console.log('valid');
+
+    if (destination.owner === source.owner && validMove) {
+        destination.cap.removeFromWorld = true;
+        destination.cap = source.cap;
+        destination.cap.x = destination.capXY[0];
+        destination.cap.y = destination.capXY[1];
         source.cap = null;
     }
 }
@@ -697,25 +670,19 @@ MinimapDisplay.prototype.update = function (ctx) {
             if (debug) {
                 console.log("triggered 1");
             }
-
         }
         if (Number(xTranslationToMap) <= 0) {
             xTranslationToMap = 0;
-            if (debug) {
-                console.log("triggered 2");
-            }
+            if (debug) console.log("triggered 2");
         }
         if (Number(yTranslationToMap) >= Number(this.yMax)) {
             yTranslationToMap = this.yMax;
-            if (debug) {
-                console.log("triggered 3");
-            }
+            if (debug) console.log("triggered 3");
         }
         if (Number(yTranslationToMap) <= 0) {
             yTranslationToMap = 0;
-            if (debug) {
-                console.log("triggered 4");
-            }
+            if (debug) console.log("triggered 4");
+
         }
 
         changeCameraOrigin(Number(xTranslationToMap), Number(yTranslationToMap));
@@ -731,9 +698,8 @@ MinimapDisplay.prototype.update = function (ctx) {
             console.log("camera origin x --- " + cameraOrigin["x"]);
             console.log("camera origin y --- " + cameraOrigin["y"]);
         }
-
-
         gameEngine.click = null;
+
     } else if (click != null &&
         click.x <= this.minimapBorderWidth &&
         click.y <= this.miniMapBorderHeight) {
@@ -814,7 +780,6 @@ function ControlDisplay(game) {
     this.t_infBtn = { x: w - this.btnDim * 3, y: h - this.btnDim * 2 };
     this.b_farmBtn = { x: w - this.btnDim * 2, y: h - this.btnDim * 2 };
     this.b_barBtn = { x: w - this.btnDim * 3, y: h - this.btnDim * 2 };
-
 
     this.menu = [{ name: "action", x: this.aBtn.x, y: this.aBtn.y, w: this.btnDim, h: this.btnDim },
     { name: "troop", x: this.tBtn.x, y: this.tBtn.y, w: this.btnDim, h: this.btnDim },
@@ -954,7 +919,6 @@ ControlDisplay.prototype.update = function (ctx) {
         this.moveDelay = false;
         console.log("source " + this.moveSource.id)
         console.log("des " + this.moveDestination.id)
-        // Ryan's function goes here
         moveFight(this.moveSource, this.moveDestination);
         this.moveSource = null;
         this.moveDestination = null;
@@ -964,7 +928,6 @@ ControlDisplay.prototype.update = function (ctx) {
         this.moveDestination = selectedRegion;
         this.destinationSelect = false;
         this.moveDelay = false;
-        // Ryan's function goes here
         moveCap(this.moveSource, this.moveDestination)
         this.moveSource = null;
         this.moveDestination = null;
@@ -997,10 +960,6 @@ ControlDisplay.prototype.update = function (ctx) {
     }
 
 
-
-
-
-
     // Sub-menu for Troop Button
     if (click != null && this.troopFlag == true &&
         click.x >= this.t_infBtn.x &&
@@ -1011,7 +970,6 @@ ControlDisplay.prototype.update = function (ctx) {
         if (troopItem != null) {
             if (this.soldierActive == true && troopItem.name == "troop1") {
                 var source = selectedRegion;
-                // Ryan's function goes here
                 buildSoldier(source);
             }
 
@@ -1030,21 +988,16 @@ ControlDisplay.prototype.update = function (ctx) {
         if (buildingItem != null) {
             if (this.farmActive == true && buildingItem.name == "farm") {
                 var source = selectedRegion;
-                // Ryan's function goes here
                 buildFarm(source);
 
             } else if (this.barracksActive == true && buildingItem.name == "barracks") {
                 var source = selectedRegion;
-                // Ryan's function goes here
                 buildBarracks(source);
-
             }
-
         }
         gameEngine.click = null;
         toggleAllOff();
     }
-
 
     // End turn button
     if (click != null &&
@@ -1057,17 +1010,12 @@ ControlDisplay.prototype.update = function (ctx) {
             if (this.endTurnActive == true && endItem.name == "endTurn") {
                 // Ryan's function goes here
 
-
-
-
-
             }
 
         }
         gameEngine.click = null;
         toggleAllOff();
     }
-
 
 
     if (click != null &&
@@ -1102,8 +1050,6 @@ ControlDisplay.prototype.update = function (ctx) {
             } else {
                 toggleAllOff();
             }
-
-
 
             // enable/disable based on number of buildings
             // if (selectedRegion.bldg.length === 2) {
