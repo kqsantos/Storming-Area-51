@@ -1,19 +1,28 @@
 window.requestAnimFrame = (function () {
     return window.requestAnimationFrame ||
-            window.webkitRequestAnimationFrame ||
-            window.mozRequestAnimationFrame ||
-            window.oRequestAnimationFrame ||
-            window.msRequestAnimationFrame ||
-            function (/* function */ callback, /* DOMElement */ element) {
-                window.setTimeout(callback, 1000 / 60);
-            };
+        window.webkitRequestAnimationFrame ||
+        window.mozRequestAnimationFrame ||
+        window.oRequestAnimationFrame ||
+        window.msRequestAnimationFrame ||
+        function (/* function */ callback, /* DOMElement */ element) {
+            window.setTimeout(callback, 1000 / 60);
+        };
 })();
 
 function GameEngine() {
     this.entities = [];
+    // this.factionEntities = [];
     this.ctx = null;
     this.surfaceWidth = null;
     this.surfaceHeight = null;
+    this.click = null;
+    this.keyDown = null;
+    this.cameraOrigin = null;
+    this.newGame = false;
+    this.zoomIn = false;
+    this.zoomOut= false;
+    this.mouseOver = null;
+    this.GUIEntities = [];
 }
 
 GameEngine.prototype.init = function (ctx) {
@@ -37,70 +46,48 @@ GameEngine.prototype.start = function () {
 GameEngine.prototype.startInput = function () {
     console.log('Starting input');
 
-    var getXandY = function (e) {
-        var x = e.clientX - that.ctx.canvas.getBoundingClientRect().left;
-        var y = e.clientY - that.ctx.canvas.getBoundingClientRect().top;
-
-        if (x < 1024) {
-            x = Math.floor(x / 32);
-            y = Math.floor(y / 32);
-        }
-
-        return { x: x, y: y };
-    }
-
     var that = this;
-
-    function collides(rects, x, y) {
-        var isCollision = false;
-        for (var i = 0, len = rects.length; i < len; i++) {
-            var left = rects[i].x, right = rects[i].x+rects[i].w;
-            var top = rects[i].y, bottom = rects[i].y+rects[i].h;
-            if (right >= x
-                && left <= x
-                && bottom >= y
-                && top <= y) {
-                isCollision = rects[i];
-            }
-        }
-        return isCollision;
-    }
-
     var elem = this.ctx.canvas;
-    
+
     if (elem && elem.getContext) {
-        // list of rectangles to render
-        var rects = [{name: "endTurn", x: 1018, y: 678, w: 136, h: 35},
-                     {name: "buildTroop", x: 75, y: 0, w: 50, h: 50}];
-      // get context
-      var context = elem.getContext('2d');
-      if (context) {
-    
-          for (var i = 0, len = rects.length; i < len; i++) {
-            context.fillRect(rects[i].x, rects[i].y, rects[i].w, rects[i].h);
-          }
-    
-      }
-    
-        // listener, using W3C style for example    
-        elem.addEventListener('click', function(e) {
-            console.log('click: ' + e.offsetX + '/' + e.offsetY);
-            var rect = collides(rects, e.offsetX, e.offsetY);
-            console.log(rect);
-            if (rect.name === "endTurn") {
-                that.endTurnPress = true;
-                console.log('End Turn collision: ' + rect.x + '/' + rect.y);
-            } else {
-                console.log('no collision');
+        // get context
+        var context = elem.getContext('2d');
+
+        // Animation Mouse Down Listener
+        elem.addEventListener('click', function (e) {
+
+            that.click = { x: e.layerX, y: e.layerY };
+            // console.log(e);
+        }, false);
+
+        elem.addEventListener("keydown", function (e) {
+            that.keyDown = e;
+            // console.log("%c KeyDown info below this:", "background: #222; color: #bada55");
+            // console.log(e);
+            // console.log("Key Down Event - Char " + e.code + " Code " + e.keyCode);
+        }, false);
+
+        elem.addEventListener("mousemove", function (e) {
+            //console.log(e);
+            that.mouseOver = e;
+            
+            // console.log("%c KeyDown info below this:", "background: #222; color: #bada55");
+            // console.log(e);
+            // console.log("Key Down Event - Char " + e.code + " Code " + e.keyCode);
+        }, false);
+
+        elem.addEventListener("wheel", function (e) {
+            if(e.deltaY < 0) {
+                that.zoomIn = true;
+                console.log("zoom in");
+            }
+            if(e.deltaY > 0) {
+                that.zoomOut = true;
+                console.log("zoom out");
             }
         }, false);
-    }
 
-    this.ctx.canvas.addEventListener("click", function (e) {
-        that.click = getXandY(e);
-        console.log(e);
-        console.log("Left Click Event - X,Y " + e.layerX + ", " + e.layerY);
-    }, false);
+    }
 
     console.log('Input started');
 }
@@ -110,22 +97,57 @@ GameEngine.prototype.addEntity = function (entity) {
     this.entities.push(entity);
 }
 
+GameEngine.prototype.addGUIEntity = function (entity) {
+    console.log('added entity');
+    this.GUIEntities.push(entity);
+}
+
 GameEngine.prototype.draw = function () {
     this.ctx.clearRect(0, 0, this.surfaceWidth, this.surfaceHeight);
     this.ctx.save();
+
     for (var i = 0; i < this.entities.length; i++) {
         this.entities[i].draw(this.ctx);
     }
+    for (var i = 0; i < this.GUIEntities.length; i++) {
+        this.GUIEntities[i].draw(this.ctx);
+    }
+
     this.ctx.restore();
 }
 
 GameEngine.prototype.update = function () {
     var entitiesCount = this.entities.length;
 
+    var GUIentitiesCount = this.GUIEntities.length;
+    for (var i = 0; i < GUIentitiesCount; i++) {
+        var GUIentity = this.GUIEntities[i];
+
+        if (!GUIentity.removeFromWorld) {
+            GUIentity.update();
+        }
+    }
+
     for (var i = 0; i < entitiesCount; i++) {
         var entity = this.entities[i];
 
-        entity.update();
+        if (!entity.removeFromWorld) {
+            entity.update();
+        }
+    }
+
+
+
+    for (var i = this.entities.length - 1; i >= 0; --i) {
+        if (this.entities[i].removeFromWorld) {
+            this.entities.splice(i, 1);
+        }
+    }
+
+    for (var i = this.GUIEntities.length - 1; i >= 0; --i) {
+        if (this.GUIEntities[i].removeFromWorld) {
+            this.GUIEntities.splice(i, 1);
+        }
     }
 }
 
@@ -133,7 +155,7 @@ GameEngine.prototype.loop = function () {
     this.clockTick = this.timer.tick();
     this.update();
     this.draw();
-    this.endTurnPress = null;
+    this.endTurnButtonHoverFlag = null;
 }
 
 function Timer() {
@@ -157,34 +179,25 @@ function Entity(game, x, y) {
     this.x = x;
     this.y = y;
     this.removeFromWorld = false;
+    this.clickTrigger = null;
 }
 
 Entity.prototype.update = function () {
 }
 
 Entity.prototype.draw = function (ctx) {
-    if (this.game.showOutlines && this.radius) {
-        this.game.ctx.beginPath();
-        this.game.ctx.strokeStyle = "green";
-        this.game.ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2, false);
-        this.game.ctx.stroke();
-        this.game.ctx.closePath();
-    }
 }
 
-Entity.prototype.rotateAndCache = function (image, angle) {
-    var offscreenCanvas = document.createElement('canvas');
-    var size = Math.max(image.width, image.height);
-    offscreenCanvas.width = size;
-    offscreenCanvas.height = size;
-    var offscreenCtx = offscreenCanvas.getContext('2d');
-    offscreenCtx.save();
-    offscreenCtx.translate(size / 2, size / 2);
-    offscreenCtx.rotate(angle);
-    offscreenCtx.translate(0, 0);
-    offscreenCtx.drawImage(image, -(image.width / 2), -(image.height / 2));
-    offscreenCtx.restore();
-    //offscreenCtx.strokeStyle = "red";
-    //offscreenCtx.strokeRect(0,0,size,size);
-    return offscreenCanvas;
+function GUIEntity(game, x, y) {
+    this.game = game;
+    this.x = x;
+    this.y = y;
+    this.removeFromWorld = false;
+    this.clickTrigger = null;
+}
+
+GUIEntity.prototype.update = function () {
+}
+
+GUIEntity.prototype.draw = function (ctx) {
 }
