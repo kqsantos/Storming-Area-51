@@ -210,6 +210,8 @@ function buildFarm(region) {
     region.owner === 0 ? newFarm = new Farm(gameEngine, 0, region.farmXY[0], region.farmXY[1]) : newFarm = new Farm(gameEngine, 1, region.farmXY[0], region.farmXY[1]);
     region.bldg["farm"] = newFarm;
     gameEngine.addEntity(newFarm);
+
+    players[currentPlayerTurn].foodCount -= new Farm(gameEngine,0, 0, 0).cost;
 }
 
 function buildBarracks(region) {
@@ -217,6 +219,8 @@ function buildBarracks(region) {
     region.owner == 0 ? newBarracks = new Barracks(gameEngine, 0, region.barracksXY[0], region.barracksXY[1]) : newBarracks = new Barracks(gameEngine, 1, region.barracksXY[0], region.barracksXY[1]);
     region.bldg["barracks"] = newBarracks;
     gameEngine.addEntity(newBarracks);
+
+    players[currentPlayerTurn].foodCount -= new Barracks(gameEngine,0, 0, 0).cost;
 }
 
 function buildSoldier(region) {
@@ -235,6 +239,8 @@ function buildSoldier(region) {
         region.troop["soldier"] = newTroop;
         gameEngine.addEntity(region.troop["soldier"]);
     }
+
+    players[currentPlayerTurn].foodCount -= new Soldier(gameEngine, 0, 0).cost;
 }
 
 /**
@@ -940,24 +946,27 @@ ControlDisplay.prototype.update = function (ctx) {
     }
 
     // Soldier flag
-    if (selectedRegion != null && selectedRegion.bldg["barracks"] == null) {
-        this.soldierActive = false;
-    } else {
+    if (selectedRegion != null && selectedRegion.bldg["barracks"] != null &&
+        players[currentPlayerTurn].foodCount >= (new Soldier(gameEngine, 0, 0).cost)) {
         this.soldierActive = true;
+    } else {
+        this.soldierActive = false;
     }
 
     // Barracks flag
-    if (selectedRegion != null && selectedRegion.bldg["barracks"] != null) {
-        this.barracksActive = false
+    if (selectedRegion != null && selectedRegion.bldg["barracks"] == null &&
+    players[currentPlayerTurn].foodCount >= (new Barracks(gameEngine,0, 0, 0).cost)) {
+        this.barracksActive = true
     } else {
-        this.barracksActive = true;
+        this.barracksActive = false;
     }
 
     // Farm flag
-    if (selectedRegion != null && selectedRegion.bldg["farm"] != null) {
-        this.farmActive = false
-    } else {
+    if (selectedRegion != null && selectedRegion.bldg["farm"] == null &&
+    players[currentPlayerTurn].foodCount >= (new Farm(gameEngine,0, 0, 0).cost)) {
         this.farmActive = true;
+    } else {
+        this.farmActive = false;
     }
 
 
@@ -1072,6 +1081,7 @@ ControlDisplay.prototype.update = function (ctx) {
             }
         }
         gameEngine.click = null;
+        toggleAllOff();
     }
 
 
@@ -1584,6 +1594,12 @@ WelcomeScreen.prototype.update = function (ctx) {
         gameEngine.addEntity(new AudioHandler(gameEngine));
 
 
+        // Initial player values
+        players.push(new Player(0, 0));
+        players[0].foodCount = 245;
+        players.push(new Player(1, 0));
+        players[1].foodCount = 3;
+
         // Start buildings, troops
         for (var i = 0; i < regionsList.length; i++) {
             if (regionsList[i] != undefined) {
@@ -1600,11 +1616,7 @@ WelcomeScreen.prototype.update = function (ctx) {
         addCaptainToRegion(regionsList[43]);
         addCaptainToRegion(regionsList[31]);
 
-        // Initial player values
-        players.push(new Player(0, 0));
-        players[0].foodCount = 3;
-        players.push(new Player(1, 0));
-        players[1].foodCount = 3;
+
 
         // gameEngine.addEntity(new Alien(gameEngine, 300, 250));
 
