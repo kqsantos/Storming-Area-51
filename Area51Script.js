@@ -174,11 +174,22 @@ function Player(ID, type) {
 // ===================================================================\
 
 function toggleTurn() {
-    for(var i = 0; i < regionsList.length; i++){
-        if(regionsList[i] != null && regionsList[i].owner == currentPlayerTurn && regionsList["farm"] != null){
+    for (var i = 0; i < regionsList.length; i++) {
+        if (regionsList[i] != null) {
+            console.log("FOOOOOOD")
+            console.log(players[currentPlayerTurn].foodCount);
+            console.log("i = " + i)
+            console.log(regionsList[i].owner)
+            console.log("CUrrent" + currentPlayerTurn)
+            console.log(regionsList[i].bldg["farm"])
+        }
+
+        if (regionsList[i] != null && regionsList[i].owner == currentPlayerTurn && regionsList[i].bldg["farm"] != null) {
             players[currentPlayerTurn].foodCount += 1;
+
         }
     }
+
     currentPlayerTurn = turnCount % 2;
     turnCount++;
 }
@@ -563,14 +574,14 @@ MapDisplay.prototype = new Entity();
 MapDisplay.prototype.constructor = MapDisplay;
 
 MapDisplay.prototype.update = function (ctx) {
-    for(var i = 0; i < regionsList.length; i++){
-        if(regionsList[i] != null){
+    for (var i = 0; i < regionsList.length; i++) {
+        if (regionsList[i] != null) {
             setSpritesToUnselected(regionsList[i]);
         }
     }
     if (selectedRegion != null) {
         setSpritesToSelected(selectedRegion);
-    } 
+    }
     var isThereCaptainForPlayer0 = false;
     var isThereCaptainForPlayer1 = false;
 
@@ -1123,7 +1134,7 @@ ControlDisplay.prototype.update = function (ctx) {
                 // Ryan's function goes here
                 selectedRegion = null;
                 toggleTurn();
-                
+
             }
 
         }
@@ -1335,8 +1346,8 @@ InputHandler.prototype = new Entity();
 InputHandler.prototype.constructor = InputHandler;
 
 InputHandler.prototype.update = function (ctx) {
-    console.log("%c Current Region:", "background: #222; color: #bada55");
-    console.log(selectedRegion);
+    //console.log("%c Current Region:", "background: #222; color: #bada55");
+    //console.log(selectedRegion);
     // Control for WASD map movement
     var key = gameEngine.keyDown;
     if (key != null) {
@@ -1589,9 +1600,11 @@ WelcomeScreen.prototype.update = function (ctx) {
         addCaptainToRegion(regionsList[43]);
         addCaptainToRegion(regionsList[31]);
 
+        // Initial player values
         players.push(new Player(0, 0));
+        players[0].foodCount = 3;
         players.push(new Player(1, 0));
-
+        players[1].foodCount = 3;
 
         // gameEngine.addEntity(new Alien(gameEngine, 300, 250));
 
