@@ -408,7 +408,7 @@ function BuildRegions() {
     regionsList[31] = new Region(31, 1, [137, 2025], [277, 2027], [255, 2177], null, [247, 2095], 'sand', [30, 32, 33]);
     regionsList[32] = new Region(32, 1, [363, 1917], [261, 1847], [569, 1855], null, [487, 1907], 'sand', [29, 30, 31, 33, 38]);
     regionsList[33] = new Region(33, 1, [135, 1783], [137, 1715], [183, 1587], null, [147, 1901], 'sand', [31, 32, 38, 35]);
-    regionsList[34] = new Region(34, 1, [900, 1332], [884, 1532], [1089, 1427], null, [996, 1408], 'sand', [65, 60, , 39, 37]);
+    regionsList[34] = new Region(34, 1, [900, 1332], [884, 1532], [1089, 1427], null, [996, 1408], 'sand', [65, 60, 36, 39, 37]);
     regionsList[35] = new Region(35, 1, [184, 1238], [276, 1432], [366, 1336], null, [270, 1324], 'sand', [14, 36, 37, 38, 33]);
     regionsList[36] = new Region(36, 1, [466, 1252], [566, 1186], [672, 1184], null, [770, 1188], 'sand', [12, 13, 14, 35, 37, 34]);
     regionsList[37] = new Region(37, 1, [554, 1432], [548, 1360], [702, 1362], null, [770, 1356], 'sand', [34, 36, 35, 38]);
@@ -421,7 +421,7 @@ function BuildRegions() {
     regionsList[63] = new Region(63, -1, [1678, 1705], [1988, 1801], [1910, 1807], null, [1964, 1715], 'grassland', [62, 64, 66, 68, 69]);
     regionsList[64] = new Region(64, -1, [1494, 1463], [1590, 1543], [1706, 1517], null, [1726, 1443], 'grassland', [62, 63, 66, 65, 60]);
     regionsList[65] = new Region(65, -1, [1174, 1602], [1182, 1449], [1336, 1471], null, [1222, 1497], 'grassland', [34, 39, 66, 60, 64]);
-    regionsList[66] = new Region(66, -1, [1361, 1646], [1369, 1728], [1477, 1628], null, [1487, 1708], 'grassland', [64, 65, 63, 68, 67]);
+    regionsList[66] = new Region(66, -1, [1361, 1646], [1369, 1728], [1477, 1628], null, [1487, 1708], 'grassland', [64, 65, 63, 67]);
     regionsList[67] = new Region(67, -1, [1225, 1940], [1377, 1940], [1383, 2088], null, [1313, 2030], 'grassland', [66, 29]);
     regionsList[68] = new Region(68, -1, [1643, 2002], [1767, 2022], [1623, 2122], null, [1697, 2106], 'grassland', [69, 63]);
     regionsList[69] = new Region(69, -1, [2007, 2126], [2111, 2136], [2105, 2016], null, [2051, 1958], 'grassland', [63, 68]);
@@ -503,7 +503,7 @@ function moveFight(source, destination) {
         if (destination.troop['soldier'] != null && source.troop['soldier'].count != 0) {
 
             // Move all troops from allied territory to territory with troops
-            if (source.troop['soldier'].count - source.troop['soldier'].hasMoved == source.troop['soldier'].count) {
+            if (source.troop['soldier'].hasMoved == 0) {
                 destination.troop['soldier'].count += source.troop['soldier'].count;
                 destination.troop['soldier'].hasMoved += source.troop['soldier'].count;
                 source.troop['soldier'].removeFromWorld = true;
@@ -518,7 +518,7 @@ function moveFight(source, destination) {
 
         } else if (source.troop['soldier'].count != 0) {
             // Move all troops from allied territory to territory with no troops
-            if (source.troop['soldier'].count - source.troop['soldier'].hasMoved == source.troop['soldier'].count) {
+            if (source.troop['soldier'].hasMoved == 0) {
                 destination.troop = source.troop;
                 destination.troop['soldier'].hasMoved = source.troop['soldier'].count;
                 destination.troop['soldier'].x = destination.troopXY[0];
@@ -527,7 +527,12 @@ function moveFight(source, destination) {
             }
             // Move only the troops that hasn't moved from allied territory to territory with no troops
             else {
-                destination.troop["soldier"] = new Soldier(gameEngine, destination.troopXY[0], destination.troopXY[1]);
+                if (source.owner == 0) {
+                    destination.troop["soldier"] = new Soldier(gameEngine, destination.troopXY[0], destination.troopXY[1]);
+                } else {
+                    destination.troop["soldier"] = new Alien(gameEngine, destination.troopXY[0], destination.troopXY[1]);
+                }
+
                 gameEngine.addEntity(destination.troop["soldier"]);
                 destination.troop['soldier'].count = source.troop['soldier'].count - source.troop['soldier'].hasMoved;
                 destination.troop['soldier'].hasMoved = source.troop['soldier'].count - source.troop['soldier'].hasMoved;
@@ -536,17 +541,17 @@ function moveFight(source, destination) {
 
 
         }
-    } else if (validMove && validSource && destination.troop["soldier"] == null){
+    } else if (validMove && validSource && destination.troop["soldier"] == null) {
         destination.owner = source.owner;
         destination.troop = source.troop;
         destination.troop['soldier'].x = destination.troopXY[0];
         destination.troop['soldier'].y = destination.troopXY[1];
         destination.troop['soldier'].hasMoved = destination.troop['soldier'].count;
         source.troop = [];
-    }else if (validMove && validSource) {
+    } else if (validMove && validSource) {
         var atkPow = 0;
 
-        atkPow += source.troop['soldier'].count * source.troop['soldier'].atk;
+        atkPow += (source.troop['soldier'].count - source.troop['soldier'].hasMoved) * source.troop['soldier'].atk;
 
         var defPow = 0;
         defPow += Number(destination.troop['soldier'].count) * Number(destination.troop['soldier'].def);
@@ -558,24 +563,45 @@ function moveFight(source, destination) {
         console.log('ATTACK = ' + atkPow);
 
         if (atkPow > defPow) {
+            // The captain will die if you defeat the enemy
             if (destination.cap != null) {
                 destination.cap.removeFromWorld = true;
                 destination.cap = null;
             }
-            destination.troop['soldier'].removeFromWorld = true;
-            destination.owner = source.owner;
-            destination.troop = source.troop;
-            destination.troop['soldier'].count = atkPow;
-            destination.troop['soldier'].x = destination.troopXY[0];
-            destination.troop['soldier'].y = destination.troopXY[1];
-            destination.troop['soldier'].hasMoved = destination.troop['soldier'].count;
-            source.troop = [];
 
+            if (source.troop['soldier'].hasMoved == 0) {
+                destination.troop['soldier'].removeFromWorld = true;
+                destination.owner = source.owner;
+                destination.troop = source.troop;
+                destination.troop['soldier'].count = atkPow;
+                destination.troop['soldier'].x = destination.troopXY[0];
+                destination.troop['soldier'].y = destination.troopXY[1];
+                destination.troop['soldier'].hasMoved = destination.troop['soldier'].count;
+                source.troop = [];
+            } else {
+                destination.troop['soldier'].removeFromWorld = true;
+                destination.troop = [];
+                if (source.owner == 0) {
+                    destination.troop["soldier"] = new Soldier(gameEngine, destination.troopXY[0], destination.troopXY[1]);
+                } else {
+                    destination.troop["soldier"] = new Alien(gameEngine, destination.troopXY[0], destination.troopXY[1]);
+                }
+                destination.owner = source.owner;
+                gameEngine.addEntity(destination.troop["soldier"]);
+                destination.troop['soldier'].count = atkPow;
+                destination.troop['soldier'].hasMoved = atkPow;
+                source.troop['soldier'].count = source.troop['soldier'].hasMoved;
+            }
             // Attacker won
         } else {
-            destination.troop.count = atkPow;
-            source.troop['soldier'].removeFromWorld = true;
-            source.troop = [];
+            if (source.troop['soldier'].hasMoved == 0) {
+                destination.troop['soldier'].count = defPow;
+                source.troop['soldier'].removeFromWorld = true;
+                source.troop = [];
+            } else {
+                source.troop['soldier'].count = source.troop['soldier'].hasMoved;
+            }
+
             // Defender won
         }
     }
@@ -737,7 +763,7 @@ MapDisplay.prototype.draw = function (ctx) {
 
         ctx.fillStyle = "white";
         ctx.font = "150px Arial";
-        ctx.fillText("PLAYER " + this.endGame + " WINS", (gameEngine.surfaceWidth / 2) - (570) + 3, 430+ 3);
+        ctx.fillText("PLAYER " + this.endGame + " WINS", (gameEngine.surfaceWidth / 2) - (570) + 3, 430 + 3);
     } else {
         // ctx.globalAlpha = 0.6;
         ctx.fillStyle = "black";
