@@ -77,6 +77,7 @@ function Alien(game, x, y) {
     this.x = x;
     this.y = y;
     this.count = 1;
+    this.cost = 1;
     Entity.call(this, game, this.x, this.y);
 }
 
@@ -138,6 +139,7 @@ function Soldier(game, x, y) {
     this.x = x;
     this.y = y;
     this.count = 1;
+    this.cost = 1;
     Entity.call(this, game, this.x, this.y);
 }
 
@@ -176,6 +178,7 @@ function Barracks(game, owner, x, y) {
     this.owner = owner;
     this.x = x;
     this.y = y;
+    this.cost = 5;
     Entity.call(this, game, this.x, this.y);
 }
 
@@ -207,6 +210,7 @@ function Farm(game, owner, x, y) {
     this.owner = owner;
     this.x = x;
     this.y = y;
+    this.cost = 5;
     Entity.call(this, game, this.x, this.y);
 }
 
