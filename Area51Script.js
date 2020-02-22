@@ -279,7 +279,7 @@ function createArray(origin) {
  * @param {*} x x position of mouse click
  * @param {*} y y position of mouse click
  */
-function getClickedRegion(rects, x, y) {
+function getClickedRegion(rects, x, y, owner) {
     var tempRegion = null;
     for (var i = 0, len = rects.length; i < len; i++) {
         for (var j = 0, len2 = rects[i].length; j < len2; j++) {
@@ -298,14 +298,11 @@ function getClickedRegion(rects, x, y) {
 
         }
     }
-
-    if (regionsList[tempRegion.name] != null) {
-
+    console.log(regionsList[tempRegion.name].owner == owner)
+    if (regionsList[tempRegion.name] != null && regionsList[tempRegion.name].owner == owner) {
         if (selectedRegion != null) setSpritesToUnselected(selectedRegion);
         selectedRegion = regionsList[tempRegion.name];
         setSpritesToSelected(selectedRegion);
-
-
     } else {
         if (selectedRegion != null) setSpritesToUnselected(selectedRegion);
         selectedRegion = null;
@@ -359,16 +356,16 @@ function getClickedItem(items, x, y) {
 
 
 function BuildRegions() {
-    regionsList[10] = new Region(10, 0, [1025, 568], [949, 745], [1121, 665], null, [963, 604], 'plains', [11, 12, 46, 47]);
-    regionsList[11] = new Region(11, 0, [1040, 990], [1100, 1050], [1225, 997], null, [1125, 904], 'plains', [10, 12, 50, 60]);
-    regionsList[12] = new Region(12, 0, [750, 800], [752, 1044], [810, 898], null, [842, 920], 'plains', [10, 11, 13, 18, 36]);
-    regionsList[13] = new Region(13, 0, [479, 1013], [481, 1090], [509, 951], null, [643, 1053], 'plains', [12, 14, 36]);
-    regionsList[14] = new Region(14, 0, [189, 811], [199, 991], [233, 913], null, [291, 997], 'plains', [13, 36, 35, 19]);
-    regionsList[15] = new Region(15, 0, [145, 260], [230, 180], [480, 241], null, [384, 217], 'plains', [16, 17]);
-    regionsList[16] = new Region(16, 0, [442, 329], [446, 403], [310, 400], null, [220, 371], 'plains', [15, 17, 18, 19]);
-    regionsList[17] = new Region(17, 0, [575, 163], [575, 255], [620, 399], null, [706, 229], 'plains', [15, 16, 18, 45, 46]);
-    regionsList[18] = new Region(18, 0, [675, 490], [695, 555], [590, 510], null, [585, 575], 'plains', [12, 19, 16, 17, 46]);
-    regionsList[19] = new Region(19, 0, [290, 633], [215, 705], [138, 635], null, [210, 603], 'plains', [16, 18, 14]);
+    regionsList[10] = new Region(10, -1, [1025, 568], [949, 745], [1121, 665], null, [963, 604], 'plains', [11, 12, 46, 47]);
+    regionsList[11] = new Region(11, -1, [1040, 990], [1100, 1050], [1225, 997], null, [1125, 904], 'plains', [10, 12, 50, 60]);
+    regionsList[12] = new Region(12, -1, [750, 800], [752, 1044], [810, 898], null, [842, 920], 'plains', [10, 11, 13, 18, 36]);
+    regionsList[13] = new Region(13, -1, [479, 1013], [481, 1090], [509, 951], null, [643, 1053], 'plains', [12, 14, 36]);
+    regionsList[14] = new Region(14, -1, [189, 811], [199, 991], [233, 913], null, [291, 997], 'plains', [13, 36, 35, 19]);
+    regionsList[15] = new Region(15, -1, [145, 260], [230, 180], [480, 241], null, [384, 217], 'plains', [16, 17]);
+    regionsList[16] = new Region(16, -1, [442, 329], [446, 403], [310, 400], null, [220, 371], 'plains', [15, 17, 18, 19]);
+    regionsList[17] = new Region(17, -1, [575, 163], [575, 255], [620, 399], null, [706, 229], 'plains', [15, 16, 18, 45, 46]);
+    regionsList[18] = new Region(18, -1, [675, 490], [695, 555], [590, 510], null, [585, 575], 'plains', [12, 19, 16, 17, 46]);
+    regionsList[19] = new Region(19, -1, [290, 633], [215, 705], [138, 635], null, [210, 603], 'plains', [16, 18, 14]);
 
     regionsList[40] = new Region(40, 0, [1759, 731], [1773, 845], [1635, 1109], null, [1721, 1139], 'tundra', [60, 61, 41, 50, 42, 44]);
     regionsList[41] = new Region(41, 0, [1957, 881], [2083, 1061], [2117, 767], null, [2033, 771], 'tundra', [42, 40, 61]);
@@ -394,16 +391,16 @@ function BuildRegions() {
     regionsList[38] = new Region(38, 1, [542, 1550], [572, 1716], [490, 1642], null, [384, 1628], 'sand', [39, 32, 33, 35, 37]);
     regionsList[39] = new Region(39, 1, [822, 1670], [824, 1752], [1024, 1752], null, [978, 1828], 'sand', [34, 38, 29, 65]);
 
-    regionsList[60] = new Region(60, 1, [1368, 1328], [1464, 1326], [1512, 1170], null, [1326, 1206], 'grassland', [40, 50, 11, 64, 65, 34]);
-    regionsList[61] = new Region(61, 1, [1930, 1214], [2052, 1326], [2198, 1218], null, [2084, 1208], 'grassland', [41, 40, 62]);
-    regionsList[62] = new Region(62, 1, [1838, 1587], [2012, 1559], [2118, 1515], null, [1910, 1479], 'grassland', [61, 64, 63]);
-    regionsList[63] = new Region(63, 1, [1678, 1705], [1988, 1801], [1910, 1807], null, [1964, 1715], 'grassland', [62, 64, 66, 68, 69]);
-    regionsList[64] = new Region(64, 1, [1494, 1463], [1590, 1543], [1706, 1517], null, [1726, 1443], 'grassland', [62, 63, 66, 65, 60]);
-    regionsList[65] = new Region(65, 1, [1174, 1602], [1182, 1449], [1336, 1471], null, [1222, 1497], 'grassland', [34, 39, 66, 60, 64]);
-    regionsList[66] = new Region(66, 1, [1361, 1646], [1369, 1728], [1477, 1628], null, [1487, 1708], 'grassland', [64, 65, 63, 68, 67]);
-    regionsList[67] = new Region(67, 1, [1225, 1940], [1377, 1940], [1383, 2088], null, [1313, 2030], 'grassland', [66, 29]);
-    regionsList[68] = new Region(68, 1, [1643, 2002], [1767, 2022], [1623, 2122], null, [1697, 2106], 'grassland', [69, 63]);
-    regionsList[69] = new Region(69, 1, [2007, 2126], [2111, 2136], [2105, 2016], null, [2051, 1958], 'grassland', [63, 68]);
+    regionsList[60] = new Region(60, -1, [1368, 1328], [1464, 1326], [1512, 1170], null, [1326, 1206], 'grassland', [40, 50, 11, 64, 65, 34]);
+    regionsList[61] = new Region(61, -1, [1930, 1214], [2052, 1326], [2198, 1218], null, [2084, 1208], 'grassland', [41, 40, 62]);
+    regionsList[62] = new Region(62, -1, [1838, 1587], [2012, 1559], [2118, 1515], null, [1910, 1479], 'grassland', [61, 64, 63]);
+    regionsList[63] = new Region(63, -1, [1678, 1705], [1988, 1801], [1910, 1807], null, [1964, 1715], 'grassland', [62, 64, 66, 68, 69]);
+    regionsList[64] = new Region(64, -1, [1494, 1463], [1590, 1543], [1706, 1517], null, [1726, 1443], 'grassland', [62, 63, 66, 65, 60]);
+    regionsList[65] = new Region(65, -1, [1174, 1602], [1182, 1449], [1336, 1471], null, [1222, 1497], 'grassland', [34, 39, 66, 60, 64]);
+    regionsList[66] = new Region(66, -1, [1361, 1646], [1369, 1728], [1477, 1628], null, [1487, 1708], 'grassland', [64, 65, 63, 68, 67]);
+    regionsList[67] = new Region(67, -1, [1225, 1940], [1377, 1940], [1383, 2088], null, [1313, 2030], 'grassland', [66, 29]);
+    regionsList[68] = new Region(68, -1, [1643, 2002], [1767, 2022], [1623, 2122], null, [1697, 2106], 'grassland', [69, 63]);
+    regionsList[69] = new Region(69, -1, [2007, 2126], [2111, 2136], [2105, 2016], null, [2051, 1958], 'grassland', [63, 68]);
 
 }
 
@@ -474,18 +471,17 @@ function moveFight(source, destination) {
     if (destination.owner === source.owner || destination.troop === []) {
         destination.owner = source.owner;
 
-        if(destination.troop['soldier'] != null){
+        if (destination.troop['soldier'] != null) {
             destination.troop['soldier'].count += source.troop['soldier'].count;
             source.troop['soldier'].removeFromWorld = true;
-        } else{
+        } else {
             destination.troop = source.troop;
             destination.troop['soldier'].x = destination.troopXY[0];
             destination.troop['soldier'].y = destination.troopXY[1];
-            destination.troop['soldier'].selected = true;
         }
 
         source.troop = [];
-        
+
         console.log(destination.troop);
         console.log(source.troop);
     } else {
@@ -587,6 +583,40 @@ MapDisplay.prototype = new Entity();
 MapDisplay.prototype.constructor = MapDisplay;
 
 MapDisplay.prototype.update = function (ctx) {
+    if (selectedRegion != null) {
+        setSpritesToSelected(selectedRegion);
+    }
+    var isThereCaptainForPlayer0 = false;
+    var isThereCaptainForPlayer1 = false;
+
+    for (var i = 0; i < regionsList.length; i++) {
+        if(regionsList[i] != null) {
+
+
+            if(regionsList[i].cap != null) {
+                if(regionsList.owner == 0) {
+                    isThereCaptainForPlayer0 = true;
+                } else {
+                    isThereCaptainForPlayer1 = true;
+                }
+            }
+
+            if(isThereCaptainForPlayer0 && isThereCaptainForPlayer1) {
+                break;
+            }
+        }
+    }
+
+    if(!isThereCaptainForPlayer1) {
+        console.log("PLAYER 0 WINS");
+        // TRIGGER GAME OVER SCREEN
+    }
+
+    if(!isThereCaptainForPlayer0) {
+        console.log("PLAYER 1 WINS");
+        // TRIGGER GAME OVER SCREEN
+    }
+
 }
 
 MapDisplay.prototype.draw = function (ctx) {
@@ -875,7 +905,7 @@ ControlDisplay.prototype.update = function (ctx) {
     // }
 
     if (selectedRegion != this.currentRegion) {
-        if (selectedRegion != null) {
+        if (selectedRegion != null && selectedRegion.owner == currentPlayerTurn) {
             toggleAllOff();
             toggleAllOffMega();
             toggleAllOnMega();
@@ -910,7 +940,8 @@ ControlDisplay.prototype.update = function (ctx) {
         this.captainActive = false;
     }
 
-    if (selectedRegion != null && selectedRegion.troop != null) {
+    // Move flag
+    if (selectedRegion != null && selectedRegion.troop["soldier"] != null) {
         this.moveActive = true;
     } else {
         this.moveActive = false;
@@ -950,16 +981,31 @@ ControlDisplay.prototype.update = function (ctx) {
 
     if (this.destinationSelect && this.moveDelay) {
         this.moveDestination = selectedRegion;
+        var regionFound = false;
+        for (var i = 0; i < this.moveDestination.neighbors.length; i++) {
+            if (this.moveDestination.neighbors[i] == this.moveSource.id) {
+                regionFound = true;
+            }
+        }
+        if (regionFound) {
+            moveFight(this.moveSource, this.moveDestination);
+            selectedRegion = this.moveDestination;
+            
+        } else {
+            selectedRegion = null;
+        }
+
         this.destinationSelect = false;
         this.moveDelay = false;
         console.log("source " + this.moveSource.id)
         console.log("des " + this.moveDestination.id)
         // Ryan's function goes here
-        moveFight(this.moveSource, this.moveDestination);
-        this.moveSource = null;
+        //moveFight(this.moveSource, this.moveDestination);
+        
         this.moveDestination = null;
+        this.moveSource = null;
     }
-// console.log(selectedRegion)
+    // console.log(selectedRegion)
     if (this.moveDelay && this.destinationSelectCaptain) {
         this.moveDestination = selectedRegion;
         this.destinationSelect = false;
@@ -1149,6 +1195,7 @@ ControlDisplay.prototype.update = function (ctx) {
     }
 
 
+
 }
 
 ControlDisplay.prototype.draw = function (ctx) {
@@ -1271,7 +1318,7 @@ function InputHandler(game) {
 }
 
 InputHandler.prototype = new Entity();
-InputHandler.prototype.constructor = MapDisplay;
+InputHandler.prototype.constructor = InputHandler;
 
 InputHandler.prototype.update = function (ctx) {
     // Control for WASD map movement
@@ -1344,9 +1391,10 @@ InputHandler.prototype.update = function (ctx) {
     var click = gameEngine.click;
     if (click != null) {
 
-        getClickedRegion(onScreenRegions, click.x, click.y);
-        console.log(gameEngine.GUIEntities[2].moveDelay)
-        console.log(gameEngine.GUIEntities[2].destinationSelect)
+        getClickedRegion(onScreenRegions, click.x, click.y, currentPlayerTurn);
+
+        // console.log(gameEngine.GUIEntities[2].moveDelay)
+        // console.log(gameEngine.GUIEntities[2].destinationSelect)
 
         if (gameEngine.GUIEntities[2].destinationSelect) {
 
@@ -1361,6 +1409,8 @@ InputHandler.prototype.update = function (ctx) {
         console.log(selectedRegion);
         console.log("True Location --- " + (Number(dim * cameraOrigin.x) + Number(click.x)) + ", " +
             (Number(dim * cameraOrigin.y) + Number(click.y)));
+
+
         var text = "[" + (Number(dim * cameraOrigin.x) + Number(click.x)) + ", " +
             (Number(dim * cameraOrigin.y) + Number(click.y)) + "]";
         navigator.clipboard.writeText(text).then(function () {
@@ -1491,22 +1541,20 @@ WelcomeScreen.prototype.update = function (ctx) {
         gameEngine.addEntity(new InputHandler(gameEngine));
         gameEngine.addEntity(new AudioHandler(gameEngine));
 
-        // Starting conditions
+
+        // Start buildings, troops
         for (var i = 0; i < regionsList.length; i++) {
             if (regionsList[i] != undefined) {
-                buildFarm(regionsList[i]);
-                buildBarracks(regionsList[i]);
-            }
-        }
-
-
-        for (var i = 0; i < regionsList.length; i++) {
-            if (regionsList[i] != undefined) {
-                if ((i >= 40 && i <= 50) || (i >= 29 && i <= 39))
+                if ((i >= 40 && i <= 50) || (i >= 29 && i <= 39)) {
                     buildSoldier(regionsList[i]);
+                    // buildFarm(regionsList[i]);
+                    // buildBarracks(regionsList[i]);
+                }
+
             }
         }
 
+        // Start captains
         addCaptainToRegion(regionsList[43]);
         addCaptainToRegion(regionsList[31]);
 
