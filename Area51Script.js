@@ -157,11 +157,12 @@ function Region(id, owner, barracksXY, farmXY, troopXY, cap, capXY, territory, n
         this.neighbors = neighbors
 }
 
-function Player(ID, type) {
+function Player(ID, type, cameraXY) {
     this.ID = ID;
     this.foodCount = 0,
         this.upgradeLevel = 0;
     this.type = type;
+    this.cameraCoord = cameraXY;
 }
 // ===================================================================
 // End - Map Entities
@@ -174,15 +175,9 @@ function Player(ID, type) {
 // ===================================================================\
 
 function toggleTurn() {
+    players[currentPlayerTurn].cameraCoord = {x: cameraOrigin.x, y: cameraOrigin.y}
+
     for (var i = 0; i < regionsList.length; i++) {
-        if (regionsList[i] != null) {
-            console.log("FOOOOOOD")
-            console.log(players[currentPlayerTurn].foodCount);
-            console.log("i = " + i)
-            console.log(regionsList[i].owner)
-            console.log("CUrrent" + currentPlayerTurn)
-            console.log(regionsList[i].bldg["farm"])
-        }
 
         if (regionsList[i] != null && regionsList[i].owner == currentPlayerTurn && regionsList[i].bldg["farm"] != null) {
             players[currentPlayerTurn].foodCount += 1;
@@ -191,12 +186,22 @@ function toggleTurn() {
 
         if (regionsList[i] != null && regionsList[i].troop["soldier"] != null) {
             regionsList[i].troop["soldier"].hasMoved = 0;
+        }
+
+        if (regionsList[i] != null && regionsList[i].cap != null) {
+            regionsList[i].cap.hasMoved = false;
 
         }
+
+        
     }
 
     currentPlayerTurn = turnCount % 2;
     turnCount++;
+
+    console.log("GOING TO " + players[currentPlayerTurn].cameraCoord.x + " " + players[currentPlayerTurn].cameraCoord.y)
+    changeCameraOrigin(players[currentPlayerTurn].cameraCoord.x, players[currentPlayerTurn].cameraCoord. y);
+    createArray(cameraOrigin);
 }
 
 function addCaptainToRegion(region) {
@@ -556,6 +561,7 @@ function moveCap(source, destination) {
     if (destination.owner === source.owner && validMove) {
 
         destination.cap = source.cap;
+        destination.cap.hasMoved = true;
         destination.cap.x = destination.capXY[0];
         destination.cap.y = destination.capXY[1];
         // source.cap.removeFromWorld = true;
@@ -614,10 +620,10 @@ MapDisplay.prototype = new Entity();
 MapDisplay.prototype.constructor = MapDisplay;
 
 MapDisplay.prototype.update = function (ctx) {
-
+    console.log(players[0].cameraCoord);
 
     for (var i = 0; i < regionsList.length; i++) {
-        if (regionsList[i] != null) {
+        if (regionsList[i] != null && regionsList[i] != selectedRegion) {
             setSpritesToUnselected(regionsList[i]);
         }
     }
@@ -627,6 +633,7 @@ MapDisplay.prototype.update = function (ctx) {
     var isThereCaptainForPlayer0 = false;
     var isThereCaptainForPlayer1 = false;
 
+    // Hard worker
     for (var i = 0; i < regionsList.length; i++) {
         if (regionsList[i] != null) {
             if (regionsList[i].bldg["farm"] != null) {
@@ -912,7 +919,7 @@ function ControlDisplay(game) {
     this.actionActive = false;
     this.troopActive = false;
     this.buildingActive = false;
-    this.endTurnActive = false;
+    this.endTurnActive = true;
 
     // Sub-menu On/Off boolean
     this.moveActive = false;
@@ -968,7 +975,7 @@ ControlDisplay.prototype.update = function (ctx) {
     this.currentRegion = selectedRegion;
 
     // Captain flag
-    if (selectedRegion != null && selectedRegion.cap != null) {
+    if (selectedRegion != null && selectedRegion.cap != null && selectedRegion.cap.hasMoved == false) {
         this.capActive = true;
     } else {
         this.capActive = false;
@@ -1180,6 +1187,7 @@ ControlDisplay.prototype.update = function (ctx) {
                 this.destinationSelect = false;
                 // Ryan's function goes here
                 selectedRegion = null;
+                
                 toggleTurn();
 
             }
@@ -1634,9 +1642,11 @@ WelcomeScreen.prototype.update = function (ctx) {
 
 
         // Initial player values
-        players.push(new Player(0, 0));
+        changeCameraOrigin(59, 0);
+        createArray(cameraOrigin);
+        players.push(new Player(0, 0, {x: 59, y: 0}));
         players[0].foodCount = 245;
-        players.push(new Player(1, 0));
+        players.push(new Player(1, 0, {x: 0, y: 90}));
         players[1].foodCount = 3;
 
         // Start buildings, troops
