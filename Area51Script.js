@@ -144,7 +144,7 @@ function Building(name, cost) {
  * @param {*} neighbors array of neighbor IDs
  */
 function Region(id, owner, barracksXY, farmXY, troopXY, cap, capXY, territory, neighbors) {
-        this.id = id,
+    this.id = id,
         this.owner = owner,
         this.bldg = [],
         this.barracksXY = barracksXY,
@@ -160,7 +160,7 @@ function Region(id, owner, barracksXY, farmXY, troopXY, cap, capXY, territory, n
 function Player(ID) {
     this.ID = ID;
     this.foodCount = 0,
-    this.upgradeLevel = 0;
+        this.upgradeLevel = 0;
 }
 // ===================================================================
 // End - Map Entities
@@ -186,13 +186,6 @@ function addCaptainToRegion(region) {
     }
     region.cap = newCap;
     gameEngine.addEntity(region.cap);
-}
-
-function removeCaptainFromRegion(region) {
-    if (region.cap != null) {
-        region.cap.removeFromWorld = true;
-        region.cap = null;
-    }
 }
 
 function buildFarm(region) {
@@ -460,10 +453,10 @@ function BuildBoard() {
     return gameboard;
 }
 
-function collectFood (player) {
+function collectFood(player) {
     var foodCount = 0;
     regionsList.forEach((region) => {
-        if(player.id === region.owner) foodCount += 1;
+        if (player.id === region.owner) foodCount += 1;
     });
 }
 
@@ -476,35 +469,62 @@ function collectFood (player) {
 // ===================================================================
 function moveFight(source, destination) {
     //Rebuild
-    
-    if (destination.owner === source.owner || destination.troops === []) {
-            destination.owner = source.owner;
-            destination.troops = source.troops;
-            source.troops = [];
+    console.log("Hello from the moveFight");
+
+    if (destination.owner === source.owner || destination.troop === []) {
+        destination.owner = source.owner;
+
+        if(destination.troop['soldier'] != null){
+            destination.troop['soldier'].count += source.troop['soldier'].count;
+            source.troop['soldier'].removeFromWorld = true;
+        } else{
+            destination.troop = source.troop;
+            destination.troop['soldier'].x = destination.troopXY[0];
+            destination.troop['soldier'].y = destination.troopXY[1];
+            destination.troop['soldier'].selected = true;
+        }
+
+        source.troop = [];
+        
+        console.log(destination.troop);
+        console.log(source.troop);
     } else {
 
         var atkPow = 0;
-        source.troops.forEach((troop) => atkPow += troop.count*troop.atk);
+
+        atkPow += source.troop['soldier'].count * source.troop['soldier'].atk;
 
         var defPow = 0;
-        source.troops.forEach((troop) => defPow += troop.count*troop.def);
+        defPow += Number(destination.troop['soldier'].count) * Number(destination.troop['soldier'].def);
+
+        console.log(source);
+        console.log(destination);
+        console.log('pow' + atkPow + ' ' + defPow);
 
         while (defPow > 0 && atkPow > 0) {
             if (Math.random() > 0.5) {
                 atkPow--
+                console.log('atk --')
             } else {
                 defPow--;
+                console.log('atk --')
             }
+
+            console.log('fight stuff')
         }
 
         if (atkPow > defPow) {
+            destination.troop['soldier'].removeFromWorld = true;
             destination.owner = source.owner;
-            destination.troops = source.troops;
-            source.troops = [];
-            return true; // Attacker won
+            destination.troop = source.troop;
+            destination.troop['soldier'].x = destination.troopXY[0];
+            destination.troop['soldier'].y = destination.troopXY[1];
+            source.troop = [];
+            // Attacker won
         } else {
-            destination.troops = [];
-            return false; // Defender won
+            source.troop['soldier'].removeFromWorld = true;
+            source.troop = [];
+            // Defender won
         }
     }
 }
@@ -513,7 +533,7 @@ function moveCap(source, destination) {
     if (destination.owner === source.owner) {
         source.cap = destination.cap;
         source.cap = null;
-    } 
+    }
 }
 
 // ===================================================================
@@ -936,14 +956,18 @@ ControlDisplay.prototype.update = function (ctx) {
         console.log("des " + this.moveDestination.id)
         // Ryan's function goes here
         moveFight(this.moveSource, this.moveDestination);
+        this.moveSource = null;
+        this.moveDestination = null;
     }
-
+// console.log(selectedRegion)
     if (this.moveDelay && this.destinationSelectCaptain) {
         this.moveDestination = selectedRegion;
         this.destinationSelect = false;
         this.moveDelay = false;
         // Ryan's function goes here
         moveCap(this.moveSource, this.moveDestination)
+        this.moveSource = null;
+        this.moveDestination = null;
     }
 
 
@@ -1323,9 +1347,9 @@ InputHandler.prototype.update = function (ctx) {
         getClickedRegion(onScreenRegions, click.x, click.y);
         console.log(gameEngine.GUIEntities[2].moveDelay)
         console.log(gameEngine.GUIEntities[2].destinationSelect)
-        
-        if(gameEngine.GUIEntities[2].destinationSelect) {
-            
+
+        if (gameEngine.GUIEntities[2].destinationSelect) {
+
             gameEngine.GUIEntities[2].moveDelay = true;
             console.log("movedelay after moveDelay set " + gameEngine.GUIEntities[2].moveDelay)
         }

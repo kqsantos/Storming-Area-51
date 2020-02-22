@@ -72,6 +72,8 @@ function Alien(game, x, y) {
     this.animation = new Animation(AM.getAsset("./img/sprites/alien_animated.png"), 56, 60, 174, 0.2, 3, true, 1);
     this.standing = AM.getAsset("./img/sprites/alien_standing.png");
     this.selected = false;
+    this.atk = 1;
+    this.def = 1;
     this.x = x;
     this.y = y;
     this.count = 1;
@@ -131,6 +133,8 @@ function Soldier(game, x, y) {
     this.animation = new Animation(AM.getAsset("./img/sprites/soldier_animated.png"), 44, 60, 216, .2, 5, true, 1);
     this.standing = AM.getAsset("./img/sprites/soldier_standing.png");
     this.selected = false;
+    this.atk = 1;
+    this.def = 1;
     this.x = x;
     this.y = y;
     this.count = 1;
