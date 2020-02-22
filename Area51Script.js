@@ -1698,7 +1698,7 @@ WelcomeScreen.prototype.update = function (ctx) {
         }
 
         // Start captains
-        // addCaptainToRegion(regionsList[43]);
+        addCaptainToRegion(regionsList[43]);
         addCaptainToRegion(regionsList[31]);
 
 
