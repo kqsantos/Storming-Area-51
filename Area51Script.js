@@ -41,7 +41,7 @@ var bgHeight = 2340;
 var modbgWidth = bgWidth;
 var modbgHeight = bgHeight;
 
-var debug = true;
+var debug = false;
 var debugGrid = false;
 
 var selectedRegion = null;
@@ -160,7 +160,7 @@ function Region(id, owner, barracksXY, farmXY, troopXY, cap, capXY, territory, n
 function Player(ID, type) {
     this.ID = ID;
     this.foodCount = 0,
-    this.upgradeLevel = 0;
+        this.upgradeLevel = 0;
     this.type = type;
 }
 // ===================================================================
@@ -174,7 +174,12 @@ function Player(ID, type) {
 // ===================================================================\
 
 function toggleTurn() {
-    currentPlayerTurn = currentPlayerTurn % 2;
+    for(var i = 0; i < regionsList.length; i++){
+        if(regionsList[i] != null && regionsList[i].owner == currentPlayerTurn && regionsList["farm"] != null){
+            players[currentPlayerTurn].foodCount += 1;
+        }
+    }
+    currentPlayerTurn = turnCount % 2;
     turnCount++;
 }
 
@@ -191,7 +196,7 @@ function addCaptainToRegion(region) {
 
 function buildFarm(region) {
     var newFarm;
-    region.owner === 0 ? newFarm = new Farm(gameEngine, 0, region.farmXY[0], region.farmXY[1]) :newFarm = new Farm(gameEngine, 1, region.farmXY[0], region.farmXY[1]);
+    region.owner === 0 ? newFarm = new Farm(gameEngine, 0, region.farmXY[0], region.farmXY[1]) : newFarm = new Farm(gameEngine, 1, region.farmXY[0], region.farmXY[1]);
     region.bldg["farm"] = newFarm;
     gameEngine.addEntity(newFarm);
 }
@@ -272,7 +277,7 @@ function createArray(origin) {
  * @param {*} x x position of mouse click
  * @param {*} y y position of mouse click
  */
-function getClickedRegion(rects, x, y, owner) {
+function getClickedRegion(rects, x, y) {
     var tempRegion = null;
     for (var i = 0, len = rects.length; i < len; i++) {
         for (var j = 0, len2 = rects[i].length; j < len2; j++) {
@@ -291,17 +296,15 @@ function getClickedRegion(rects, x, y, owner) {
 
         }
     }
-    console.log(regionsList[tempRegion.name].owner == owner)
-
-    if (regionsList[tempRegion.name] != null && (regionsList[tempRegion.name].owner == owner || gameEngine.GUIEntities[2].destinationSelect)) {
-        if (selectedRegion != null) setSpritesToUnselected(selectedRegion);
-        selectedRegion = regionsList[tempRegion.name];
-        setSpritesToSelected(selectedRegion);
+    // console.log(regionsList[tempRegion.name].owner == owner)
+    var region = null;
+    if (regionsList[tempRegion.name] != null) {
+        region = regionsList[tempRegion.name];
     } else {
-        if (selectedRegion != null) setSpritesToUnselected(selectedRegion);
-        selectedRegion = null;
+        region = null;
     }
 
+    return region;
 }
 
 function setSpritesToUnselected(region) {
@@ -440,8 +443,8 @@ function collectFood(player) {
 // Start - Menu Functions
 // ===================================================================
 function moveFight(source, destination) {
-    console.log(source)
-    console.log(destination)
+    // console.log(source)
+    // console.log(destination)
     var validMove = source.neighbors.includes(destination.id);
     var validSource = source.troop['soldier'] !== null;
 
@@ -459,7 +462,7 @@ function moveFight(source, destination) {
 
         source.troop = [];
 
-    } else if (validMove && validSource){
+    } else if (validMove && validSource) {
 
 
         var atkPow = 0;
@@ -500,7 +503,7 @@ function moveCap(source, destination) {
     console.log('valid');
 
     if (destination.owner === source.owner && validMove) {
-        
+
         destination.cap = source.cap;
         destination.cap.x = destination.capXY[0];
         destination.cap.y = destination.capXY[1];
@@ -536,11 +539,11 @@ ResourceDisplay.prototype.draw = function (ctx) {
 
     // Draw the Food Icon and Count
     ctx.drawImage(this.foodIcon, this.x + 30, this.y + 10);
-    ctx.fillText(this.foodCount, this.x + 70, this.y + 35);
+    ctx.fillText(players[currentPlayerTurn].foodCount, this.x + 70, this.y + 35);
 
     // Draw the Money Icon and Count
-    ctx.drawImage(this.moneyIcon, this.x + 130, this.y + 10);
-    ctx.fillText(this.moneyCount, this.x + 160, this.y + 35);
+    // ctx.drawImage(this.moneyIcon, this.x + 130, this.y + 10);
+    // ctx.fillText(this.moneyCount, this.x + 160, this.y + 35);
 }
 // ===================================================================
 // End - Resource Display
@@ -560,16 +563,30 @@ MapDisplay.prototype = new Entity();
 MapDisplay.prototype.constructor = MapDisplay;
 
 MapDisplay.prototype.update = function (ctx) {
+    for(var i = 0; i < regionsList.length; i++){
+        if(regionsList[i] != null){
+            setSpritesToUnselected(regionsList[i]);
+        }
+    }
     if (selectedRegion != null) {
         setSpritesToSelected(selectedRegion);
-    }
+    } 
     var isThereCaptainForPlayer0 = false;
     var isThereCaptainForPlayer1 = false;
 
     for (var i = 0; i < regionsList.length; i++) {
-        if(regionsList[i] != null) {
-            if(regionsList[i].cap != null) {
-                if(regionsList.owner == 0) {
+        if (regionsList[i] != null) {
+            if (regionsList[i].bldg["farm"] != null) {
+                regionsList[i].bldg["farm"].owner = regionsList[i].owner;
+            }
+            if (regionsList[i].bldg["barracks"] != null) {
+                regionsList[i].bldg["barracks"].owner = regionsList[i].owner;
+            }
+
+
+            // Check for winner
+            if (regionsList[i].cap != null) {
+                if (regionsList.owner == 0) {
                     isThereCaptainForPlayer0 = true;
                 } else {
                     isThereCaptainForPlayer1 = true;
@@ -620,7 +637,11 @@ MapDisplay.prototype.draw = function (ctx) {
         }
     }
 
-
+    // ctx.globalAlpha = 0.6;
+    ctx.fillStyle = "black";
+    ctx.font = "24px Arial";
+    ctx.fillText("Player " + currentPlayerTurn, (gameEngine.surfaceWidth / 2) - (50), 30);
+    // ctx.globalAlpha = 1;
 }
 // ===================================================================
 // End - Map Display
@@ -868,7 +889,7 @@ ControlDisplay.prototype.update = function (ctx) {
     // }
 
     if (selectedRegion != this.currentRegion) {
-        if (selectedRegion != null && selectedRegion.owner == currentPlayerTurn) {
+        if (selectedRegion != null && selectedRegion.owner != (turnCount % 2)) {
             toggleAllOff();
             toggleAllOffMega();
             toggleAllOnMega();
@@ -891,10 +912,7 @@ ControlDisplay.prototype.update = function (ctx) {
             // }
         }
     }
-    if (selectedRegion != null) {
-        this.currentRegion = selectedRegion;
-
-    }
+    this.currentRegion = selectedRegion;
 
     // Captain flag
     if (selectedRegion != null && selectedRegion.cap != null) {
@@ -944,23 +962,30 @@ ControlDisplay.prototype.update = function (ctx) {
 
     if (this.destinationSelect && this.moveDelay) {
         this.moveDestination = selectedRegion;
-        // var regionFound = false;
+        var regionFound = false;
 
-        // for (var i = 0; i < this.moveDestination.neighbors.length; i++) {
-        //     if (this.moveDestination.neighbors[i] == this.moveSource.id) {
-        //         regionFound = true;
-        //     }
-        // }
+        // Check for neighbors
+        if (this.moveDestination != null) {
+            for (var i = 0; i < this.moveDestination.neighbors.length; i++) {
+                if (this.moveDestination.neighbors[i] == this.moveSource.id) {
+                    regionFound = true;
+                }
+            }
+        }
 
-        // if (regionFound) {
-        //     
-        //     
-        // } else {
-        //     selectedRegion = null;
-        // }
+        // If region is a neighbor, we can moveFight
+        if (regionFound) {
+            moveFight(this.moveSource, this.moveDestination);
+            console.log("HELLLO!")
+            console.log(selectedRegion)
+            selectedRegion = null;
+            console.log("HELLLO!222")
+            console.log(selectedRegion)
+        } else {
+            selectedRegion = null;
+        }
 
-        moveFight(this.moveSource, this.moveDestination);
-        selectedRegion = this.moveDestination;
+
         this.destinationSelect = false;
         this.moveDelay = false;
         this.moveDestination = null;
@@ -969,13 +994,46 @@ ControlDisplay.prototype.update = function (ctx) {
 
     // console.log(selectedRegion)
     if (this.moveDelay && this.destinationSelectCaptain) {
-        console.log("Hello")
         this.moveDestination = selectedRegion;
-        moveCap(this.moveSource, this.moveDestination)
-        this.destinationSelect = false;
+        var regionFound = false;
+
+        // Check for neighbors
+        if (this.moveDestination != null) {
+            for (var i = 0; i < this.moveDestination.neighbors.length; i++) {
+                if (this.moveDestination.neighbors[i] == this.moveSource.id) {
+                    regionFound = true;
+                }
+            }
+        }
+
+        // If region is a neighbor, we can moveFight
+        if (regionFound) {
+            moveCap(this.moveSource, this.moveDestination);
+            console.log("HELLLO!")
+            console.log(selectedRegion)
+            selectedRegion = null;
+            console.log("HELLLO!222")
+            console.log(selectedRegion)
+        } else {
+            selectedRegion = null;
+        }
+
+
+        this.destinationSelectCaptain = false;
         this.moveDelay = false;
-        this.moveSource = null;
         this.moveDestination = null;
+        this.moveSource = null;
+
+
+
+
+        // console.log("Hello")
+        // this.moveDestination = selectedRegion;
+        // moveCap(this.moveSource, this.moveDestination)
+        // this.destinationSelect = false;
+        // this.moveDelay = false;
+        // this.moveSource = null;
+        // this.moveDestination = null;
     }
 
 
@@ -990,15 +1048,14 @@ ControlDisplay.prototype.update = function (ctx) {
 
             console.log()
             if (this.moveActive == true && actionItem.name == "moveFight") {
-
+                this.destinationSelectCaptain = false;
                 this.destinationSelect = true;
                 this.moveSource = selectedRegion;
                 console.log("pre click -- " + this.moveSource.id)
 
             }
             else if (this.capActive == true && actionItem.name == "moveCap") {
-
-                
+                this.destinationSelect = false;
                 this.destinationSelectCaptain = true;
                 this.moveSource = selectedRegion;
             }
@@ -1016,6 +1073,8 @@ ControlDisplay.prototype.update = function (ctx) {
         var troopItem = getClickedItem(this.troopMenu, click.x, click.y);
         if (troopItem != null) {
             if (this.soldierActive == true && troopItem.name == "troop1") {
+                this.destinationSelectCaptain = false;
+                this.destinationSelect = false;
                 var source = selectedRegion;
                 buildSoldier(source);
             }
@@ -1034,10 +1093,14 @@ ControlDisplay.prototype.update = function (ctx) {
         var buildingItem = getClickedItem(this.buildingMenu, click.x, click.y);
         if (buildingItem != null) {
             if (this.farmActive == true && buildingItem.name == "farm") {
+                this.destinationSelectCaptain = false;
+                this.destinationSelect = false;
                 var source = selectedRegion;
                 buildFarm(source);
 
             } else if (this.barracksActive == true && buildingItem.name == "barracks") {
+                this.destinationSelectCaptain = false;
+                this.destinationSelect = false;
                 var source = selectedRegion;
                 buildBarracks(source);
             }
@@ -1055,8 +1118,12 @@ ControlDisplay.prototype.update = function (ctx) {
         var endItem = getClickedItem(this.menu, click.x, click.y);
         if (endItem != null) {
             if (this.endTurnActive == true && endItem.name == "endTurn") {
+                this.destinationSelectCaptain = false;
+                this.destinationSelect = false;
                 // Ryan's function goes here
-
+                selectedRegion = null;
+                toggleTurn();
+                
             }
 
         }
@@ -1268,6 +1335,8 @@ InputHandler.prototype = new Entity();
 InputHandler.prototype.constructor = InputHandler;
 
 InputHandler.prototype.update = function (ctx) {
+    console.log("%c Current Region:", "background: #222; color: #bada55");
+    console.log(selectedRegion);
     // Control for WASD map movement
     var key = gameEngine.keyDown;
     if (key != null) {
@@ -1338,7 +1407,23 @@ InputHandler.prototype.update = function (ctx) {
     var click = gameEngine.click;
     if (click != null) {
 
-        getClickedRegion(onScreenRegions, click.x, click.y, currentPlayerTurn);
+        var tempRegion = getClickedRegion(onScreenRegions, click.x, click.y);
+
+        if (tempRegion != null &&
+            (tempRegion.owner == currentPlayerTurn ||
+                gameEngine.GUIEntities[2].destinationSelect ||
+                gameEngine.GUIEntities[2].destinationSelectCaptain)) {
+            //if (selectedRegion != null) setSpritesToUnselected(selectedRegion);
+            selectedRegion = tempRegion;
+            // setSpritesToSelected(selectedRegion);
+        } else {
+            //if (selectedRegion != null) setSpritesToUnselected(selectedRegion);
+            selectedRegion = null;
+        }
+
+
+        console.log("%c Clicked Region Below this:", "background: #222; color: #bada55");
+        console.log(selectedRegion);
 
         // console.log(gameEngine.GUIEntities[2].moveDelay)
         // console.log(gameEngine.GUIEntities[2].destinationSelect)
@@ -1346,23 +1431,23 @@ InputHandler.prototype.update = function (ctx) {
         if (gameEngine.GUIEntities[2].destinationSelect || gameEngine.GUIEntities[2].destinationSelectCaptain) {
 
             gameEngine.GUIEntities[2].moveDelay = true;
-            console.log("movedelay after moveDelay set " + gameEngine.GUIEntities[2].moveDelay)
+            // console.log("movedelay after moveDelay set " + gameEngine.GUIEntities[2].moveDelay)
         }
 
 
-        console.log("%c Region clicked below this:", "background: #222; color: #bada55");
-        console.log(click);
-        console.log(selectedRegion);
-        console.log("True Location --- " + (Number(dim * cameraOrigin.x) + Number(click.x)) + ", " +
-            (Number(dim * cameraOrigin.y) + Number(click.y)));
+        // console.log("%c Region clicked below this:", "background: #222; color: #bada55");
+        // console.log(click);
+        // console.log(selectedRegion);
+        // console.log("True Location --- " + (Number(dim * cameraOrigin.x) + Number(click.x)) + ", " +
+        //     (Number(dim * cameraOrigin.y) + Number(click.y)));
 
 
         var text = "[" + (Number(dim * cameraOrigin.x) + Number(click.x)) + ", " +
             (Number(dim * cameraOrigin.y) + Number(click.y)) + "]";
         navigator.clipboard.writeText(text).then(function () {
-            console.log('Async: Copying to clipboard was successful!');
+            // console.log('Async: Copying to clipboard was successful!');
         }, function (err) {
-            console.error('Async: Could not copy text: ', err);
+            // console.error('Async: Could not copy text: ', err);
         });
 
 
@@ -1503,6 +1588,10 @@ WelcomeScreen.prototype.update = function (ctx) {
         // Start captains
         addCaptainToRegion(regionsList[43]);
         addCaptainToRegion(regionsList[31]);
+
+        players.push(new Player(0, 0));
+        players.push(new Player(1, 0));
+
 
         // gameEngine.addEntity(new Alien(gameEngine, 300, 250));
 
