@@ -478,7 +478,9 @@ function moveFight(source, destination) {
     //Rebuild
     
     if (destination.owner === source.owner || destination.troops === []) {
-        while (source.troops.length() > 0) destination.troops.push(source.troops.pop()); // Pushes troops from one destination to the next.
+            destination.owner = source.owner;
+            destination.troops = source.troops;
+            source.troops = [];
     } else {
 
         var atkPow = 0;
@@ -933,13 +935,15 @@ ControlDisplay.prototype.update = function (ctx) {
         console.log("source " + this.moveSource.id)
         console.log("des " + this.moveDestination.id)
         // Ryan's function goes here
-
+        moveFight(this.moveSource, this.moveDestination);
     }
 
-    if (click != null && this.destinationSelectCaptain) {
+    if (this.moveDelay && this.destinationSelectCaptain) {
         this.moveDestination = selectedRegion;
+        this.destinationSelect = false;
+        this.moveDelay = false;
         // Ryan's function goes here
-
+        moveCap(this.moveSource, this.moveDestination)
     }
 
 
@@ -984,6 +988,7 @@ ControlDisplay.prototype.update = function (ctx) {
             if (this.soldierActive == true && troopItem.name == "troop1") {
                 var source = selectedRegion;
                 // Ryan's function goes here
+                buildSoldier(source);
             }
 
         }
@@ -1002,11 +1007,12 @@ ControlDisplay.prototype.update = function (ctx) {
             if (this.farmActive == true && buildingItem.name == "farm") {
                 var source = selectedRegion;
                 // Ryan's function goes here
-
+                buildFarm(source);
 
             } else if (this.barracksActive == true && buildingItem.name == "barracks") {
                 var source = selectedRegion;
                 // Ryan's function goes here
+                buildBarracks(source);
 
             }
 
