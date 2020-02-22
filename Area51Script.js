@@ -591,18 +591,12 @@ MapDisplay.prototype.update = function (ctx) {
 
     for (var i = 0; i < regionsList.length; i++) {
         if(regionsList[i] != null) {
-
-
             if(regionsList[i].cap != null) {
                 if(regionsList.owner == 0) {
                     isThereCaptainForPlayer0 = true;
                 } else {
                     isThereCaptainForPlayer1 = true;
                 }
-            }
-
-            if(isThereCaptainForPlayer0 && isThereCaptainForPlayer1) {
-                break;
             }
         }
     }
