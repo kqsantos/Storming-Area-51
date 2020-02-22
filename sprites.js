@@ -5,6 +5,7 @@ function SoldierCaptain(game, x, y) {
     this.animation = new Animation(AM.getAsset("./img/sprites/cap_soldier_animated.png"), 58, 80, 173, 0.2, 3, true, 1);
     this.standing = AM.getAsset("./img/sprites/cap_soldier_standing.png");
     this.selected = false;
+    this.hasMoved = false;
     this.x = x;
     this.y = y;
     Entity.call(this, game, this.x, this.y);
@@ -38,6 +39,7 @@ function AlienCaptain(game, x, y) {
     this.animation = new Animation(AM.getAsset("./img/sprites/cap_alien_animated.png"), 77, 80, 233, 0.2, 3, true, 1);
     this.standing = AM.getAsset("./img/sprites/cap_alien_standing.png");
     this.selected = false;
+    this.hasMoved = false;
     this.x = x;
     this.y = y;
     Entity.call(this, game, this.x, this.y);
