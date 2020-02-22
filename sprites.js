@@ -77,6 +77,7 @@ function Alien(game, x, y) {
     this.x = x;
     this.y = y;
     this.count = 1;
+    this.hasMoved = 0;
     this.cost = 1;
     Entity.call(this, game, this.x, this.y);
 }
@@ -139,6 +140,7 @@ function Soldier(game, x, y) {
     this.x = x;
     this.y = y;
     this.count = 1;
+    this.hasMoved = 0;
     this.cost = 1;
     Entity.call(this, game, this.x, this.y);
 }

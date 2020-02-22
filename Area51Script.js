@@ -188,6 +188,11 @@ function toggleTurn() {
             players[currentPlayerTurn].foodCount += 1;
 
         }
+
+        if (regionsList[i] != null && regionsList[i].troop["soldier"] != null) {
+            regionsList[i].troop["soldier"].hasMoved = 0;
+
+        }
     }
 
     currentPlayerTurn = turnCount % 2;
@@ -211,7 +216,7 @@ function buildFarm(region) {
     region.bldg["farm"] = newFarm;
     gameEngine.addEntity(newFarm);
 
-    players[currentPlayerTurn].foodCount -= new Farm(gameEngine,0, 0, 0).cost;
+    players[currentPlayerTurn].foodCount -= new Farm(gameEngine, 0, 0, 0).cost;
 }
 
 function buildBarracks(region) {
@@ -220,7 +225,7 @@ function buildBarracks(region) {
     region.bldg["barracks"] = newBarracks;
     gameEngine.addEntity(newBarracks);
 
-    players[currentPlayerTurn].foodCount -= new Barracks(gameEngine,0, 0, 0).cost;
+    players[currentPlayerTurn].foodCount -= new Barracks(gameEngine, 0, 0, 0).cost;
 }
 
 function buildSoldier(region) {
@@ -468,16 +473,44 @@ function moveFight(source, destination) {
     if ((destination.owner === -1 || destination.owner === source.owner || destination.troop === []) && validMove && validSource) {
         destination.owner = source.owner;
 
-        if (destination.troop['soldier'] != null) {
-            destination.troop['soldier'].count += source.troop['soldier'].count;
-            source.troop['soldier'].removeFromWorld = true;
-        } else {
-            destination.troop = source.troop;
-            destination.troop['soldier'].x = destination.troopXY[0];
-            destination.troop['soldier'].y = destination.troopXY[1];
+        if (destination.troop['soldier'] != null && source.troop['soldier'].count != 0) {
+
+            // Move all troops from allied territory to territory with troops
+            if (source.troop['soldier'].count - source.troop['soldier'].hasMoved == source.troop['soldier'].count) {
+                destination.troop['soldier'].count += source.troop['soldier'].count;
+                destination.troop['soldier'].hasMoved += source.troop['soldier'].count;
+                source.troop['soldier'].removeFromWorld = true;
+                source.troop = [];
+            }
+            // Move only the troops that hasn't moved from allied territory to territory with troops
+            else {
+                destination.troop['soldier'].count += source.troop['soldier'].count - source.troop['soldier'].hasMoved;
+                destination.troop['soldier'].hasMoved += source.troop['soldier'].count - source.troop['soldier'].hasMoved;
+                source.troop['soldier'].count = source.troop['soldier'].hasMoved;
+            }
+
+        } else if (source.troop['soldier'].count != 0) {
+            // Move all troops from allied territory to territory with no troops
+            if (source.troop['soldier'].count - source.troop['soldier'].hasMoved == source.troop['soldier'].count) {
+                destination.troop = source.troop;
+                destination.troop['soldier'].hasMoved = source.troop['soldier'].count;
+                destination.troop['soldier'].x = destination.troopXY[0];
+                destination.troop['soldier'].y = destination.troopXY[1];
+                source.troop = [];
+            } 
+            // Move only the troops that hasn't moved from allied territory to territory with no troops
+            else {
+                destination.troop["soldier"] = new Soldier(gameEngine, destination.troopXY[0], destination.troopXY[1]);
+                gameEngine.addEntity(destination.troop["soldier"]);
+                destination.troop['soldier'].count = source.troop['soldier'].count - source.troop['soldier'].hasMoved;
+                destination.troop['soldier'].hasMoved = source.troop['soldier'].count - source.troop['soldier'].hasMoved;
+                source.troop['soldier'].count = source.troop['soldier'].hasMoved;
+            }
+
+
         }
 
-        source.troop = [];
+        
 
     } else if (validMove && validSource) {
 
@@ -502,6 +535,7 @@ function moveFight(source, destination) {
             destination.troop['soldier'].count = atkPow;
             destination.troop['soldier'].x = destination.troopXY[0];
             destination.troop['soldier'].y = destination.troopXY[1];
+            destination.troop['soldier'].hasMoved = destination.troop['soldier'].count;
             source.troop = [];
             // Attacker won
         } else {
@@ -580,6 +614,8 @@ MapDisplay.prototype = new Entity();
 MapDisplay.prototype.constructor = MapDisplay;
 
 MapDisplay.prototype.update = function (ctx) {
+
+
     for (var i = 0; i < regionsList.length; i++) {
         if (regionsList[i] != null) {
             setSpritesToUnselected(regionsList[i]);
@@ -939,7 +975,8 @@ ControlDisplay.prototype.update = function (ctx) {
     }
 
     // Move flag
-    if (selectedRegion != null && selectedRegion.troop["soldier"] != null) {
+    if (selectedRegion != null && selectedRegion.troop["soldier"] != null &&
+        selectedRegion.troop["soldier"].hasMoved != selectedRegion.troop["soldier"].count) {
         this.moveActive = true;
     } else {
         this.moveActive = false;
@@ -955,7 +992,7 @@ ControlDisplay.prototype.update = function (ctx) {
 
     // Barracks flag
     if (selectedRegion != null && selectedRegion.bldg["barracks"] == null &&
-    players[currentPlayerTurn].foodCount >= (new Barracks(gameEngine,0, 0, 0).cost)) {
+        players[currentPlayerTurn].foodCount >= (new Barracks(gameEngine, 0, 0, 0).cost)) {
         this.barracksActive = true
     } else {
         this.barracksActive = false;
@@ -963,7 +1000,7 @@ ControlDisplay.prototype.update = function (ctx) {
 
     // Farm flag
     if (selectedRegion != null && selectedRegion.bldg["farm"] == null &&
-    players[currentPlayerTurn].foodCount >= (new Farm(gameEngine,0, 0, 0).cost)) {
+        players[currentPlayerTurn].foodCount >= (new Farm(gameEngine, 0, 0, 0).cost)) {
         this.farmActive = true;
     } else {
         this.farmActive = false;
@@ -996,11 +1033,11 @@ ControlDisplay.prototype.update = function (ctx) {
         // If region is a neighbor, we can moveFight
         if (regionFound) {
             moveFight(this.moveSource, this.moveDestination);
-            console.log("HELLLO!")
-            console.log(selectedRegion)
+            // console.log("HELLLO!")
+            // console.log(selectedRegion)
             selectedRegion = null;
-            console.log("HELLLO!222")
-            console.log(selectedRegion)
+            // console.log("HELLLO!222")
+            // console.log(selectedRegion)
         } else {
             selectedRegion = null;
         }
@@ -1356,8 +1393,10 @@ InputHandler.prototype = new Entity();
 InputHandler.prototype.constructor = InputHandler;
 
 InputHandler.prototype.update = function (ctx) {
-    //console.log("%c Current Region:", "background: #222; color: #bada55");
-    //console.log(selectedRegion);
+    // console.log("%c Current Region:", "background: #222; color: #bada55");
+    // console.log(selectedRegion);
+    // console.log("%c All Region:", "background: #222; color: #bada55");
+    // console.log(regionsList);
     // Control for WASD map movement
     var key = gameEngine.keyDown;
     if (key != null) {
