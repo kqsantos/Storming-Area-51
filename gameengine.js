@@ -136,19 +136,24 @@ GameEngine.prototype.update = function () {
         }
     }
 
-
-
-    for (var i = this.entities.length - 1; i >= 0; --i) {
-        if (this.entities[i].removeFromWorld) {
-            this.entities.splice(i, 1);
-        }
-    }
-
+    
     for (var i = this.GUIEntities.length - 1; i >= 0; --i) {
         if (this.GUIEntities[i].removeFromWorld) {
             this.GUIEntities.splice(i, 1);
+            
         }
     }
+    for (var i = this.entities.length - 1; i >= 0; --i) {
+        if (this.entities[i].removeFromWorld) {
+            // console.log("Splicing")
+            // console.log(this.entities);
+            // console.log(this.entities[i]);
+            this.entities.splice(i, 1);
+            // console.log(this.entities);
+            
+        }
+    }
+
 }
 
 GameEngine.prototype.loop = function () {
