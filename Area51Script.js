@@ -490,6 +490,9 @@ function moveFight(source, destination) {
     // console.log(destination)
     var validMove = source.neighbors.includes(destination.id);
     var validSource = source.troop['soldier'] !== null;
+    console.log("HERRO")
+    console.log(destination)
+    console.log("Hello " + destination.troop === [])
 
     if ((destination.owner === -1 || destination.owner === source.owner || destination.troop === []) && validMove && validSource) {
         destination.owner = source.owner;
@@ -530,12 +533,14 @@ function moveFight(source, destination) {
 
 
         }
-
-
-
-    } else if (validMove && validSource) {
-
-
+    } else if (validMove && validSource && destination.troop["soldier"] == null){
+        destination.owner = source.owner;
+        destination.troop = source.troop;
+        destination.troop['soldier'].x = destination.troopXY[0];
+        destination.troop['soldier'].y = destination.troopXY[1];
+        destination.troop['soldier'].hasMoved = destination.troop['soldier'].count;
+        source.troop = [];
+    }else if (validMove && validSource) {
         var atkPow = 0;
 
         atkPow += source.troop['soldier'].count * source.troop['soldier'].atk;
