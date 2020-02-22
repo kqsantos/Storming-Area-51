@@ -174,8 +174,24 @@ function Player(ID, type, cameraXY) {
 // Start - Utility Functions
 // ===================================================================\
 
+function deleteEverything(str) {
+    var entitiesCount = gameEngine.entities.length;
+    var GUIentitiesCount = gameEngine.GUIEntities.length;
+
+
+    for (var i = 0; i < GUIentitiesCount; i++) {
+        gameEngine.GUIEntities[i].removeFromWorld = true;
+    }
+
+    for (var i = 1; i < entitiesCount; i++) {
+        gameEngine.entities[i].removeFromWorld = true;
+    }
+
+    gameEngine.entities[0].endGame = str;
+}
+
 function toggleTurn() {
-    players[currentPlayerTurn].cameraCoord = {x: cameraOrigin.x, y: cameraOrigin.y}
+    players[currentPlayerTurn].cameraCoord = { x: cameraOrigin.x, y: cameraOrigin.y }
 
     for (var i = 0; i < regionsList.length; i++) {
 
@@ -193,14 +209,14 @@ function toggleTurn() {
 
         }
 
-        
+
     }
 
     currentPlayerTurn = turnCount % 2;
     turnCount++;
 
     console.log("GOING TO " + players[currentPlayerTurn].cameraCoord.x + " " + players[currentPlayerTurn].cameraCoord.y)
-    changeCameraOrigin(players[currentPlayerTurn].cameraCoord.x, players[currentPlayerTurn].cameraCoord. y);
+    changeCameraOrigin(players[currentPlayerTurn].cameraCoord.x, players[currentPlayerTurn].cameraCoord.y);
     createArray(cameraOrigin);
 }
 
@@ -502,7 +518,7 @@ function moveFight(source, destination) {
                 destination.troop['soldier'].x = destination.troopXY[0];
                 destination.troop['soldier'].y = destination.troopXY[1];
                 source.troop = [];
-            } 
+            }
             // Move only the troops that hasn't moved from allied territory to territory with no troops
             else {
                 destination.troop["soldier"] = new Soldier(gameEngine, destination.troopXY[0], destination.troopXY[1]);
@@ -515,7 +531,7 @@ function moveFight(source, destination) {
 
         }
 
-        
+
 
     } else if (validMove && validSource) {
 
@@ -534,6 +550,10 @@ function moveFight(source, destination) {
         console.log('ATTACK = ' + atkPow);
 
         if (atkPow > defPow) {
+            if (destination.cap != null) {
+                destination.cap.removeFromWorld = true;
+                destination.cap = null;
+            }
             destination.troop['soldier'].removeFromWorld = true;
             destination.owner = source.owner;
             destination.troop = source.troop;
@@ -542,6 +562,7 @@ function moveFight(source, destination) {
             destination.troop['soldier'].y = destination.troopXY[1];
             destination.troop['soldier'].hasMoved = destination.troop['soldier'].count;
             source.troop = [];
+
             // Attacker won
         } else {
             destination.troop.count = atkPow;
@@ -613,6 +634,7 @@ ResourceDisplay.prototype.draw = function (ctx) {
 // ===================================================================
 function MapDisplay(game) {
     this.border = AM.getAsset("./img/map/map_master4.png");
+    this.endGame = null;
     Entity.call(this, game, 0, 0);
 }
 
@@ -620,7 +642,7 @@ MapDisplay.prototype = new Entity();
 MapDisplay.prototype.constructor = MapDisplay;
 
 MapDisplay.prototype.update = function (ctx) {
-    console.log(players[0].cameraCoord);
+    // console.log(players[0].cameraCoord);
 
     for (var i = 0; i < regionsList.length; i++) {
         if (regionsList[i] != null && regionsList[i] != selectedRegion) {
@@ -646,24 +668,27 @@ MapDisplay.prototype.update = function (ctx) {
 
             // Check for winner
             if (regionsList[i].cap != null) {
-                if (regionsList.owner == 0) {
+                if (regionsList[i].owner == 0) {
                     isThereCaptainForPlayer0 = true;
                 } else {
                     isThereCaptainForPlayer1 = true;
                 }
             }
+
         }
     }
 
-    // if(!isThereCaptainForPlayer1) {
-    //     console.log("PLAYER 0 WINS");
-    //     // TRIGGER GAME OVER SCREEN
-    // }
+    if (!isThereCaptainForPlayer1) {
+        // console.log("PLAYER 0 WINS");
+        deleteEverything("0");
+        // TRIGGER GAME OVER SCREEN
+    }
 
-    // if(!isThereCaptainForPlayer0) {
-    //     console.log("PLAYER 1 WINS");
-    //     // TRIGGER GAME OVER SCREEN
-    // }
+    if (!isThereCaptainForPlayer0) {
+        // console.log("PLAYER 1 WINS");
+        deleteEverything("1");
+        // TRIGGER GAME OVER SCREEN
+    }
 
 }
 
@@ -697,11 +722,22 @@ MapDisplay.prototype.draw = function (ctx) {
         }
     }
 
-    // ctx.globalAlpha = 0.6;
-    ctx.fillStyle = "black";
-    ctx.font = "24px Arial";
-    ctx.fillText("Player " + currentPlayerTurn, (gameEngine.surfaceWidth / 2) - (50), 30);
-    // ctx.globalAlpha = 1;
+    if (this.endGame != null) {
+        ctx.fillStyle = "black";
+        ctx.font = "150px Arial";
+        ctx.fillText("PLAYER " + this.endGame + " WINS", (gameEngine.surfaceWidth / 2) - (570), 430);
+
+        ctx.fillStyle = "white";
+        ctx.font = "150px Arial";
+        ctx.fillText("PLAYER " + this.endGame + " WINS", (gameEngine.surfaceWidth / 2) - (570) + 3, 430+ 3);
+    } else {
+        // ctx.globalAlpha = 0.6;
+        ctx.fillStyle = "black";
+        ctx.font = "24px Arial";
+        ctx.fillText("Player " + currentPlayerTurn, (gameEngine.surfaceWidth / 2) - (50), 30);
+        // ctx.globalAlpha = 1;     
+    }
+
 }
 // ===================================================================
 // End - Map Display
@@ -1187,7 +1223,7 @@ ControlDisplay.prototype.update = function (ctx) {
                 this.destinationSelect = false;
                 // Ryan's function goes here
                 selectedRegion = null;
-                
+
                 toggleTurn();
 
             }
@@ -1644,9 +1680,9 @@ WelcomeScreen.prototype.update = function (ctx) {
         // Initial player values
         changeCameraOrigin(59, 0);
         createArray(cameraOrigin);
-        players.push(new Player(0, 0, {x: 59, y: 0}));
+        players.push(new Player(0, 0, { x: 59, y: 0 }));
         players[0].foodCount = 245;
-        players.push(new Player(1, 0, {x: 0, y: 90}));
+        players.push(new Player(1, 0, { x: 0, y: 90 }));
         players[1].foodCount = 3;
 
         // Start buildings, troops
@@ -1662,7 +1698,7 @@ WelcomeScreen.prototype.update = function (ctx) {
         }
 
         // Start captains
-        addCaptainToRegion(regionsList[43]);
+        // addCaptainToRegion(regionsList[43]);
         addCaptainToRegion(regionsList[31]);
 
 
