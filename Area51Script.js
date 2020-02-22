@@ -254,14 +254,17 @@ function buildSoldier(region) {
 
     if (region.troop["soldier"] != null) {
         region.troop["soldier"].count++;
+        region.troop["soldier"].hasMoved++;
     }
     else if (region.owner == 0) {
         newTroop = new Soldier(gameEngine, region.troopXY[0], region.troopXY[1]);
+        newTroop.hasMoved = 1;
         region.troop["soldier"] = newTroop;
         gameEngine.addEntity(region.troop["soldier"]);
     }
     else {
         newTroop = new Alien(gameEngine, region.troopXY[0], region.troopXY[1]);
+        newTroop.hasMoved = 1;
         region.troop["soldier"] = newTroop;
         gameEngine.addEntity(region.troop["soldier"]);
     }
@@ -1695,6 +1698,7 @@ WelcomeScreen.prototype.update = function (ctx) {
             if (regionsList[i] != undefined) {
                 if ((i >= 40 && i <= 50) || (i >= 29 && i <= 39)) {
                     buildSoldier(regionsList[i]);
+                    regionsList[i].troop["soldier"].hasMoved = 0;
                     buildFarm(regionsList[i]);
                     buildBarracks(regionsList[i]);
                 }
