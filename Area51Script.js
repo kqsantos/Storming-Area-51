@@ -492,8 +492,6 @@ function BuildRegions() {
     regionsList[67] = new Region(67, -1, [1225, 1940], [1377, 1940], [1383, 2088], null, [1313, 2030], 'grassland', [66, 29], [[66, 106], [82, 106], [82, 122], [66, 122], [66, 116], [62, 116], [62, 117], [61, 117], [61, 113], [62, 113], [62, 114], [66, 114]], [1256, 2056], [1458, 2149]);
     regionsList[68] = new Region(68, -1, [1643, 2002], [1767, 2022], [1623, 2122], null, [1697, 2106], 'grassland', [69, 63], [[87, 107], [96, 107], [96, 108], [103, 108], [103, 124], [87, 124]], [1785, 2129], [1691, 2168]);
     regionsList[69] = new Region(69, -1, [2007, 2126], [2111, 2136], [2105, 2016], null, [2051, 1958], 'grassland', [63, 68], [[110, 107], [123, 107], [123, 122], [104, 122], [104, 115], [110, 115]], [2169, 2016], [2066, 2054]);
-
-
 }
 
 
@@ -1376,6 +1374,8 @@ function ControlDisplay(game) {
     this.troopIconOff = AM.getAsset("./img/control/knight_off.png")
     this.soldierIconOn = AM.getAsset("./img/control/troop_on.png")
     this.soldierIconOff = AM.getAsset("./img/control/troop_off.png")
+    this.archerIconOn = AM.getAsset("./img/control/archer_on.png")
+    this.archerIconOff = AM.getAsset("./img/control/archer_off.png")
 
     this.endTurnIconOn = AM.getAsset("./img/control/end_turn_on.png")
     this.endTurnIconOff = AM.getAsset("./img/control/end_turn_off.png")
@@ -1392,6 +1392,7 @@ function ControlDisplay(game) {
     this.a_moveBtn = { x: w - this.btnDim * 4, y: h - this.btnDim * 2 };
     this.a_capBtn = { x: w - this.btnDim * 5, y: h - this.btnDim * 2 };
     this.t_infBtn = { x: w - this.btnDim * 3, y: h - this.btnDim * 2 };
+    this.t_arcBtn = { x: w - this.btnDim * 4, y: h - this.btnDim * 2 };
     this.b_farmBtn = { x: w - this.btnDim * 2, y: h - this.btnDim * 2 };
     this.b_barBtn = { x: w - this.btnDim * 3, y: h - this.btnDim * 2 };
 
@@ -1403,7 +1404,8 @@ function ControlDisplay(game) {
     this.actionMenu = [{ name: "moveCap", x: this.a_capBtn.x, y: this.a_capBtn.y, w: this.btnDim, h: this.btnDim },
     { name: "moveFight", x: this.a_moveBtn.x, y: this.a_moveBtn.y, w: this.btnDim, h: this.btnDim }];
 
-    this.troopMenu = [{ name: "troop1", x: this.t_infBtn.x, y: this.t_infBtn.y, w: this.btnDim, h: this.btnDim }];
+    this.troopMenu = [{ name: "troop1", x: this.t_infBtn.x, y: this.t_infBtn.y, w: this.btnDim, h: this.btnDim },
+    {name: "troop2", x: this.t_arcBtn.x, y: this.t_arcBtn.y, w: this.btnDim, h: this.btnDim}];
 
     this.buildingMenu = [{ name: "farm", x: this.b_farmBtn.x, y: this.b_farmBtn.y, w: this.btnDim, h: this.btnDim },
     { name: "barracks", x: this.b_barBtn.x, y: this.b_barBtn.y, w: this.btnDim, h: this.btnDim }];
@@ -1430,6 +1432,7 @@ function ControlDisplay(game) {
     this.moveActive = false;
     this.capActive = false;
     this.soldierActive = false;
+    this.archerActive = false;
     this.barracksActive = false;
     this.farmActive = false;
 
@@ -1500,8 +1503,10 @@ ControlDisplay.prototype.update = function (ctx) {
     if (selectedRegion != null && selectedRegion.bldg["barracks"] != null &&
         players[currentPlayerTurn].foodCount >= (new Soldier(gameEngine, 0, 0).cost)) {
         this.soldierActive = true;
+        this.archerActive = true;
     } else {
         this.soldierActive = false;
+        this.archerActive = false;
     }
 
     // Barracks flag
@@ -1855,6 +1860,16 @@ ControlDisplay.prototype.draw = function (ctx) {
             ctx.drawImage(this.soldierIconOff, this.t_infBtn.x + 10, this.t_infBtn.y + 10, this.btnDim - 20, this.btnDim - 20);
 
         }
+        if (this.archerActive) {
+            ctx.drawImage(this.buttonIcon, this.t_arcBtn.x, this.t_arcBtn.y, this.btnDim, this.btnDim);
+            ctx.drawImage(this.archerIconOn, this.t_arcBtn.x + 10, this.t_arcBtn.y + 10, this.btnDim - 20, this.btnDim - 20);
+
+        } else {
+            ctx.drawImage(this.buttonIcon, this.t_arcBtn.x, this.t_arcBtn.y, this.btnDim, this.btnDim);
+            ctx.drawImage(this.archerIconOff, this.t_arcBtn.x + 10, this.t_arcBtn.y + 10, this.btnDim - 20, this.btnDim - 20);
+
+        }
+
 
         // if (debug) {
         //     console.log("ac" + this.actionFlag);
@@ -2330,7 +2345,7 @@ WelcomeScreen.prototype.update = function (ctx) {
         // Start buildings, troops
         for (var i = 0; i < regionsList.length; i++) {
             if (regionsList[i] != undefined) {
-                if ((i >= 40 && i <= 50) || (i >= 29 && i <= 39)) {
+                //if ((i >= 40 && i <= 50) || (i >= 29 && i <= 39)) {
                     buildSoldier(regionsList[i]);
                     regionsList[i].troop["soldier"].hasMoved = 0;
                     buildSoldierRanged(regionsList[i]);
@@ -2340,7 +2355,7 @@ WelcomeScreen.prototype.update = function (ctx) {
 
                     buildFarm(regionsList[i]);
                     buildBarracks(regionsList[i]);
-                }
+               // }
 
             }
         }
@@ -2461,7 +2476,9 @@ function Main() {
     AM.queueDownload("./img/control/troop_on.png");
     AM.queueDownload("./img/control/troop_off.png");
     AM.queueDownload("./img/control/king_on.png");
-    AM.queueDownload("./img/control/king_off.png");
+    AM.queueDownload("./img/control/archer_on.png");
+    AM.queueDownload("./img/control/archer_off.png");
+
 
     // Map
     AM.queueDownload("./img/fog_of_war/10.png");
@@ -2507,9 +2524,6 @@ function Main() {
     AM.queueDownload("./img/fog_of_war/68.png");
     AM.queueDownload("./img/fog_of_war/68.png");
     AM.queueDownload("./img/fog_of_war/69.png");
-
-
-
 
 
 
