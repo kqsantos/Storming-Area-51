@@ -2463,55 +2463,6 @@ function Main() {
     AM.queueDownload("./img/control/king_on.png");
     AM.queueDownload("./img/control/king_off.png");
 
-    // Map
-    AM.queueDownload("./img/fog_of_war/10.png");
-    AM.queueDownload("./img/fog_of_war/11.png");
-    AM.queueDownload("./img/fog_of_war/12.png");
-    AM.queueDownload("./img/fog_of_war/13.png");
-    AM.queueDownload("./img/fog_of_war/14.png");
-    AM.queueDownload("./img/fog_of_war/15.png");
-    AM.queueDownload("./img/fog_of_war/16.png");
-    AM.queueDownload("./img/fog_of_war/17.png");
-    AM.queueDownload("./img/fog_of_war/18.png");
-    AM.queueDownload("./img/fog_of_war/19.png");
-    AM.queueDownload("./img/fog_of_war/29.png");
-    AM.queueDownload("./img/fog_of_war/30.png");
-    AM.queueDownload("./img/fog_of_war/31.png");
-    AM.queueDownload("./img/fog_of_war/32.png");
-    AM.queueDownload("./img/fog_of_war/33.png");
-    AM.queueDownload("./img/fog_of_war/34.png");
-    AM.queueDownload("./img/fog_of_war/35.png");
-    AM.queueDownload("./img/fog_of_war/36.png");
-    AM.queueDownload("./img/fog_of_war/37.png");
-    AM.queueDownload("./img/fog_of_war/38.png");
-    AM.queueDownload("./img/fog_of_war/39.png");
-    AM.queueDownload("./img/fog_of_war/40.png");
-    AM.queueDownload("./img/fog_of_war/41.png");
-    AM.queueDownload("./img/fog_of_war/42.png");
-    AM.queueDownload("./img/fog_of_war/43.png");
-    AM.queueDownload("./img/fog_of_war/44.png");
-    AM.queueDownload("./img/fog_of_war/45.png");
-    AM.queueDownload("./img/fog_of_war/46.png");
-    AM.queueDownload("./img/fog_of_war/47.png");
-    AM.queueDownload("./img/fog_of_war/48.png");
-    AM.queueDownload("./img/fog_of_war/49.png");
-    AM.queueDownload("./img/fog_of_war/50.png");
-    AM.queueDownload("./img/fog_of_war/60.png");
-    AM.queueDownload("./img/fog_of_war/61.png");
-    AM.queueDownload("./img/fog_of_war/62.png");
-    AM.queueDownload("./img/fog_of_war/63.png");
-    AM.queueDownload("./img/fog_of_war/64.png");
-    AM.queueDownload("./img/fog_of_war/65.png");
-    AM.queueDownload("./img/fog_of_war/66.png");
-    AM.queueDownload("./img/fog_of_war/67.png");
-    AM.queueDownload("./img/fog_of_war/68.png");
-    AM.queueDownload("./img/fog_of_war/68.png");
-    AM.queueDownload("./img/fog_of_war/69.png");
-
-
-
-
-
 
     AM.downloadAll(function () {
         gameEngine.addEntity(new WelcomeScreen(gameEngine));
