@@ -144,7 +144,7 @@ function Building(name, cost) {
  * @param {*} neighbors array of neighbor IDs
  */
 function Region(id, owner, barracksXY, farmXY, troopXY, cap, capXY, territory, neighbors) {
-    this.id = id,
+        this.id = id,
         this.owner = owner,
         this.bldg = [],
         this.barracksXY = barracksXY,
@@ -160,7 +160,7 @@ function Region(id, owner, barracksXY, farmXY, troopXY, cap, capXY, territory, n
 function Player(ID, type, cameraXY) {
     this.ID = ID;
     this.foodCount = 0,
-        this.upgradeLevel = 0;
+    this.upgradeLevel = 0;
     this.type = type;
     this.cameraCoord = cameraXY;
 }
@@ -218,6 +218,10 @@ function toggleTurn() {
     console.log("GOING TO " + players[currentPlayerTurn].cameraCoord.x + " " + players[currentPlayerTurn].cameraCoord.y)
     changeCameraOrigin(players[currentPlayerTurn].cameraCoord.x, players[currentPlayerTurn].cameraCoord.y);
     createArray(cameraOrigin);
+
+    if(currentPlayerTurn = 1){
+        DefenceAiTurn(players[1], regionsList);
+    }
 }
 
 function addCaptainToRegion(region) {
@@ -493,11 +497,8 @@ function moveFight(source, destination) {
     // console.log(destination)
     var validMove = source.neighbors.includes(destination.id);
     var validSource = source.troop['soldier'] !== null;
-    console.log("HERRO")
-    console.log(destination)
-    console.log("Hello " + destination.troop === [])
 
-    if ((destination.owner === -1 || destination.owner === source.owner || destination.troop === []) && validMove && validSource) {
+    if ((destination.owner === source.owner) && validMove && validSource) {
         destination.owner = source.owner;
 
         if (destination.troop['soldier'] != null && source.troop['soldier'].count != 0) {
@@ -607,6 +608,7 @@ function moveFight(source, destination) {
     }
 }
 
+
 function moveCap(source, destination) {
 
     var validMove = source.neighbors.includes(destination.id);
@@ -627,6 +629,242 @@ function moveCap(source, destination) {
 // ===================================================================
 // End - Menu Functions
 // ===================================================================
+
+// ===================================================================
+// Start - AI
+// ===================================================================
+
+// Basic Defence Logic:
+//  * Bolster defences that neighbor a player. Try to have equal troops on border as opponent. If defence = 0; attack.
+//  * If defences are equal, fill the cells that aren't borders with 3 troops at max.
+//  * If both conditions are satisfied, add troops to to fight weakest opponent border. 
+// Basic Attack Logic:
+// * Stack all troops on one border and attack from the border cell
+
+/**
+ * Basic Attack Logic:
+ * Stack all troops on one border and attack from the border cell
+ */
+
+
+//Start Defence
+
+/**
+ * Basic Defence Logic:
+ * Bolster defences that neighbor a player. Try to have equal troops on border as opponent. If defence = 0; attack.
+ * If defences are equal, fill the cells that aren't borders with 3 troops at max.
+ * If both conditions are satisfied, add troops to to fight weakest opponent border. 
+ * 
+ * @param {*} player : Player Object
+ * @param {*} inputRegions : Total Regions
+ */
+
+function DefenceAiTurn(aiplayer, inputRegions) {
+
+    console.log('<<<<<<<<<<<<<<<AI TIME>>>>>>>>>>>>>>>>>>>>')
+
+    /*
+     * Initial Data Collection
+     */
+
+    const regions = inputRegions.filter(Boolean);
+
+    var aiOwnedRegions = [];
+
+    for (var i = 0; i < regions.length; i++){
+        if (regions[i].owner === aiplayer.ID){
+            aiOwnedRegions.push(regions[i]);
+        }
+    }
+
+    // console.log(aiOwnedRegions);
+
+    var borderRegions = [];
+    var needsUpgrade = [];
+    var zeroTroopAttack = [];                                                                   // Stores objects {sourceID, barracks, farm}
+
+    for (var i = 0; i < aiOwnedRegions.length; i++){                                            // Iterates through owned regions
+        for(var neigh = 0; neigh < aiOwnedRegions[i].neighbors.length; neigh++){                // Iterates through owned neighbors
+            // console.log(aiOwnedRegions[i].neighbor[neigh]);
+            let potentialEnemy = aiOwnedRegions[i].neighbors[neigh];
+
+            zeroTroopAttack.push(checkZeroEnemies(aiOwnedRegions[i], potentialEnemy, inputRegions));
+
+            function checkZeroEnemies (sourceRegion, potentialDestination, regionData){
+                // console.log('ENEMY CHECK '+ potentialDestination)
+                // console.log('Destination is' + (regionData[potentialDestination].ID !== 1))
+                if(regionData[potentialDestination].owner !== 1) {                                         // Checks if neighbor is enemy
+                    // console.log('<<<<<<<<<<<<<<<ADD ENEMIES>>>>>>>>>>>>>>>>>>>>');
+                    //return {destination: potentialDestination, source: [sourceRegion.id]};      // Stores destination as the index of the zeroTroopAttack array and the source as an array
+
+                    if (!regionData[potentialDestination].troop['soldier'] || (sourceRegion.troop['soldier'] && 
+                        regionData[potentialDestination].troop['soldier'].count / 2 < sourceRegion.troop['soldier'].count / 2)){
+
+                        return {destination: potentialDestination, source: sourceRegion.id}; 
+                    }
+                                                                 
+                }
+            }
+        
+        }
+
+        let farm, barracks, soldier;
+
+        //console.log(aiOwnedRegions);
+
+        if (!aiOwnedRegions[i].bldg['farm']){                                                   // Checks if there is a farm
+            farm = true;
+        } else {
+            farm = false;
+        }
+
+        if (!aiOwnedRegions[i].bldg['barracks']){                                                   // Checks if there is a barracks
+            barracks = true;
+        } else {
+            barracks = false;
+        }
+
+        // console.log('AI Troops');
+        // console.log(aiOwnedRegions[i].troop);
+        // console.log(aiOwnedRegions[i].troop);
+        
+
+        if (!aiOwnedRegions[i].troop || !aiOwnedRegions[i].troop['soldier']) {                  // Checks is region has troops
+            soldier = 10;
+        } else if (aiOwnedRegions[i].troop['soldier'].count < 15) {  
+            // console.log(3 - aiOwnedRegions[i].troop['soldier'].count);                              
+            soldier = 15 - aiOwnedRegions[i].troop['soldier'].count;
+        } else {
+            soldier = 0;
+        }
+
+        if (farm || barracks || soldier){
+            needsUpgrade.push({id: aiOwnedRegions[i].id, bar: barracks, 
+                farm: farm, sold: soldier})                                                     // Stores easy access call so that if a barracks/farm needs to be built.
+        }
+
+    }
+
+    // console.log(needsUpgrade);
+
+    borderRegions = borderRegions.filter(Boolean);                                              // Removes null values from border Region Array
+    zeroTroopAttack = zeroTroopAttack.filter(Boolean);                                          // Removes null values from zerTroopAttack Array
+
+    // console.log('ZERO TROOP = ');
+    // console.log(zeroTroopAttack);
+
+    /*
+     * Initial Attack Phase
+     * 
+     * Iterate through all possible 0 unit attacks. If there is more than one way for a region to attack, wait. 
+     * Have all single attack regions attack and then have multi-attack regions attack with the reduced options.
+     */
+
+    for (var i = 0; i < zeroTroopAttack.length; i++){
+
+        let sourcesUsed = [-1];                                                                 // Makes the first element not null
+
+        for (var b = 0; b < zeroTroopAttack.length; b++){                                       // Removes all sources that have already attacked
+            // console.log(sourcesUsed.includes(zeroTroopAttack[b].source));
+            if (sourcesUsed.includes(zeroTroopAttack[b].source)){
+                zeroTroopAttack.pop(zeroTroopAttack[b]);
+                b--;
+            }
+        }       
+        // console.log(zeroTroopAttack[i].source);
+        sourcesUsed.push(zeroTroopAttack[i].source);                                            // Attacks if only one source can reach destination
+
+        if (inputRegions[zeroTroopAttack[i].source].troop['soldier'] !== undefined){
+            moveFight(inputRegions[zeroTroopAttack[i].source], inputRegions[zeroTroopAttack[i].destination]); 
+        }        
+
+    }
+
+
+    /**
+     * Troop build stage
+     */
+
+    var temp = needsUpgrade;
+    var count = 0;
+
+
+
+    while (players[1].foodCount > 0 && count < temp.length) {                                       // Foodcount is not zero and there is a soldier upgrade still needed
+        for (var i = 0; i < temp.length; i++){
+            // console.log('Sold ' + temp[i].sold);
+            if (temp[i].sold != 0 && players[1].foodCount > 5){                     // If the soldiers needed is not zero, the player has food and the player does not need a barracks.
+                if (inputRegions[temp[i].id].bldg['barracks']){
+                    buildSoldier(inputRegions[temp[i].id]);
+                    if (temp[i].sold != 0){
+                        buildSoldier(inputRegions[temp[i].id]);
+                    }
+                }
+                temp[i].sold--;
+                count = 0;
+            } else if (needsUpgrade[i].farm){
+                buildFarm(inputRegions[temp[i].id]);
+                //console.log('FARM BUILT');
+                temp[i].farm = false;
+                count = 0;
+            } else if (needsUpgrade[i].bar){
+                buildBarracks(inputRegions[temp[i].id]);
+                //console.log('FARM BUILT');
+                temp[i].bar = false;
+                count = 0;
+            } else {
+                count++;
+            }
+        }
+
+
+    }
+    
+
+    /**
+     * End Turn
+     */
+
+    //toggleTurn();
+
+    players[currentPlayerTurn].cameraCoord = { x: cameraOrigin.x, y: cameraOrigin.y }
+
+    for (var i = 0; i < regionsList.length; i++) {
+
+        if (regionsList[i] != null && regionsList[i].owner == currentPlayerTurn && regionsList[i].bldg["farm"] != null) {
+            players[currentPlayerTurn].foodCount += 1;
+
+        }
+
+        if (regionsList[i] != null && regionsList[i].troop["soldier"] != null) {
+            regionsList[i].troop["soldier"].hasMoved = 0;
+        }
+
+        if (regionsList[i] != null && regionsList[i].cap != null) {
+            regionsList[i].cap.hasMoved = false;
+
+        }
+
+
+    }
+
+    currentPlayerTurn = turnCount % 2;
+    turnCount++;
+
+    changeCameraOrigin(players[currentPlayerTurn].cameraCoord.x, players[currentPlayerTurn].cameraCoord.y);
+    createArray(cameraOrigin);
+
+
+
+}
+
+
+
+
+// ===================================================================
+// End - Menu Functions
+// ===================================================================
+
 
 
 // ===================================================================
@@ -1157,9 +1395,6 @@ ControlDisplay.prototype.update = function (ctx) {
         this.moveDelay = false;
         this.moveDestination = null;
         this.moveSource = null;
-
-
-
 
         // console.log("Hello")
         // this.moveDestination = selectedRegion;
