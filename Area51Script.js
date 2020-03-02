@@ -31,6 +31,7 @@ console.log(Object.keys(regionsList).length);
 // }
 
 var onScreenRegions = []; // This is the overlay used for the click event
+var visibleRegions = [];
 createArray(cameraOrigin);
 console.log("%c onScreenRegions below this:", "background: #222; color: #bada55");
 console.log(onScreenRegions);
@@ -114,11 +115,11 @@ Animation.prototype.isDone = function () {
  * @param {int} move defines how far the troop can move
  */
 function Troop(name, atk, def, cost, move) {
-    this.name = name,
-        this.atk = atk,
-        this.def = def,
-        this.cost = cost,
-        this.move = move
+    this.name = name;
+    this.atk = atk;
+    this.def = def;
+    this.cost = cost;
+    this.move = move;
 }
 
 /**
@@ -128,8 +129,8 @@ function Troop(name, atk, def, cost, move) {
  * @param {int} cost cost value of the building
  */
 function Building(name, cost) {
-    this.name = name,
-        this.cost = cost
+    this.name = name;
+    this.cost = cos;
 }
 
 /**
@@ -143,24 +144,29 @@ function Building(name, cost) {
  * @param {*} territory Territory for the region
  * @param {*} neighbors array of neighbor IDs
  */
-function Region(id, owner, barracksXY, farmXY, troopXY, cap, capXY, territory, neighbors) {
-    this.id = id,
-        this.owner = owner,
-        this.bldg = [],
-        this.barracksXY = barracksXY,
-        this.farmXY = farmXY,
-        this.troop = [],
-        this.troopXY = troopXY,
-        this.captain = cap,
-        this.capXY = capXY,
-        this.territory = territory,
-        this.neighbors = neighbors
+function Region(id, owner, barracksXY, farmXY, troopXY, cap, capXY, territory, neighbors, outline, rangedXY, flagXY) {
+    this.id = id;
+    this.owner = owner;
+    this.bldg = [];
+    this.barracksXY = barracksXY;
+    this.farmXY = farmXY;
+    this.troop = [];
+    this.troopXY = troopXY;
+    this.captain = cap;
+    this.capXY = capXY;
+    this.territory = territory;
+    this.neighbors = neighbors;
+    this.outline = outline;
+    this.rangedXY = rangedXY;
+    this.flagXY = flagXY;
+    this.flag = [];
 }
 
 function Player(ID, type, cameraXY) {
     this.ID = ID;
-    this.foodCount = 0,
-        this.upgradeLevel = 0;
+    this.foodCount = 0;
+    this.goldCount = 0;
+    this.upgradeLevel = 0;
     this.type = type;
     this.cameraCoord = cameraXY;
 }
@@ -195,9 +201,11 @@ function toggleTurn() {
 
     for (var i = 0; i < regionsList.length; i++) {
 
+        if (regionsList[i] != null && regionsList[i].owner == currentPlayerTurn) {
+            players[currentPlayerTurn].goldCount += 1;
+        }
         if (regionsList[i] != null && regionsList[i].owner == currentPlayerTurn && regionsList[i].bldg["farm"] != null) {
             players[currentPlayerTurn].foodCount += 1;
-
         }
 
         if (regionsList[i] != null && regionsList[i].troop["soldier"] != null) {
@@ -218,6 +226,10 @@ function toggleTurn() {
     console.log("GOING TO " + players[currentPlayerTurn].cameraCoord.x + " " + players[currentPlayerTurn].cameraCoord.y)
     changeCameraOrigin(players[currentPlayerTurn].cameraCoord.x, players[currentPlayerTurn].cameraCoord.y);
     createArray(cameraOrigin);
+  
+      if(currentPlayerTurn = 1){
+        DefenceAiTurn(players[1], regionsList);
+    }
 }
 
 function addCaptainToRegion(region) {
@@ -272,6 +284,52 @@ function buildSoldier(region) {
     players[currentPlayerTurn].foodCount -= new Soldier(gameEngine, 0, 0).cost;
 }
 
+function buildSoldierRanged(region) {
+    var newTroop;
+
+    if (region.troop["soldierRanged"] != null) {
+        region.troop["soldierRanged"].count++;
+        region.troop["soldierRanged"].hasMoved++;
+    }
+    else if (region.owner == 0) {
+        newTroop = new SoldierRanged(gameEngine, region.rangedXY[0], region.rangedXY[1]);
+        newTroop.hasMoved = 1;
+        region.troop["soldierRanged"] = newTroop;
+        gameEngine.addEntity(region.troop["soldierRanged"]);
+    }
+    else {
+        newTroop = new AlienRanged(gameEngine, region.rangedXY[0], region.rangedXY[1]);
+        newTroop.hasMoved = 1;
+        region.troop["soldierRanged"] = newTroop;
+        gameEngine.addEntity(region.troop["soldierRanged"]);
+    }
+
+    players[currentPlayerTurn].foodCount -= new SoldierRanged(gameEngine, 0, 0).cost;
+}
+
+function updateFlag(region) {
+    var newFlag;
+    // console.log("ADD FLAG");
+
+    if (region.flag[0] != null) {
+        region.flag[0].removeFromWorld = true;
+        region.flag[0] = null;
+    }
+
+    if (region.owner == 0) {
+        newFlag = new BlueFlag(gameEngine, region.flagXY[0], region.flagXY[1]);
+        region.flag[0] = newFlag;
+        gameEngine.addEntity(region.flag[0]);
+    }
+    else if (region.owner == 1) {
+
+        newFlag = new RedFlag(gameEngine, region.flagXY[0], region.flagXY[1]);
+        region.flag[0] = newFlag;
+        gameEngine.addEntity(region.flag[0]);
+    }
+
+}
+
 /**
  * Creates array of region IDs on screen
  * @param {*} origin 
@@ -293,7 +351,7 @@ function createArray(origin) {
 
     for (var i = 0; i < arrWidth; i++) {
         onScreenRegions[i] = new Array(arrHeigth);
-        console.log("width of onScreenArray --- " + arrWidth);
+        // console.log("width of onScreenArray --- " + arrWidth);
     }
 
     // update the value of the array
@@ -315,6 +373,11 @@ function createArray(origin) {
             }
 
         }
+    }
+
+    if (gameEngine.GUIEntities[0] != null) {
+        gameEngine.GUIEntities[0].displays = getFogOfWar();
+        console.log(gameEngine.GUIEntities[0].displays)
     }
 }
 /**
@@ -355,11 +418,15 @@ function getClickedRegion(rects, x, y) {
 
 function setSpritesToUnselected(region) {
     if (region.troop["soldier"] != null) region.troop["soldier"].selected = false;
+    if (region.troop["soldierRanged"] != null) region.troop["soldierRanged"].selected = false;
+    // if (region.flag[0] != null) region.flag[0].selected = false;
     if (region.cap != null) region.cap.selected = false;
 }
 
 function setSpritesToSelected(region) {
     if (region.troop["soldier"] != null) region.troop["soldier"].selected = true;
+    if (region.troop["soldierRanged"] != null) region.troop["soldierRanged"].selected = true;
+    // if (region.flag[0] != null) region.flag[0].selected = true;
     if (region.cap != null) region.cap.selected = true;
 }
 
@@ -380,52 +447,51 @@ function getClickedItem(items, x, y) {
 
 
 function BuildRegions() {
-    regionsList[10] = new Region(10, -1, [1025, 568], [949, 745], [1121, 665], null, [963, 604], 'plains', [11, 12, 46, 47],[[51,30],[65,30],[65,44],[74,44],[74,45],[51,45]]);
-    regionsList[11] = new Region(11, -1, [1040, 990], [1100, 1050], [1225, 997], null, [1125, 904], 'plains', [10, 12, 50, 60],[[51,46],[74,46],[74,62],[51,62]]);
-    regionsList[12] = new Region(12, -1, [750, 800], [752, 1044], [810, 898], null, [842, 920], 'plains', [10, 11, 13, 18, 36],[[31,47],[40,47],[40,35],[50,35],[50,62],[47,62],[47,63],[40,63],[40,51],[31,51]]);
-    regionsList[13] = new Region(13, -1, [479, 1013], [481, 1090], [509, 951], null, [643, 1053], 'plains', [12, 14, 36],[[25,47],[30,47],[30,52],[39,52],[39,63],[25,63]]);
-    regionsList[14] = new Region(14, -1, [189, 811], [199, 991], [233, 913], null, [291, 997], 'plains', [13, 36, 35, 19],[[6,43],[20,43],[20,46],[24,46],[24,63],[23,63],[23,66],[6,66]]);
-    regionsList[15] = new Region(15, -1, [145, 260], [230, 180], [480, 241], null, [384, 217], 'plains', [16, 17],[[6,4],[29,4],[29,16],[22,16],[22,20],[6,20]]);
-    regionsList[16] = new Region(16, -1, [442, 329], [446, 403], [310, 400], null, [220, 371], 'plains', [15, 17, 18, 19],[[6,21], [23,21], [23,17],[29,17],[29,25],[6,25]]);
-    regionsList[17] = new Region(17, -1, [575, 163], [575, 255], [620, 399], null, [706, 229], 'plains', [15, 16, 18, 45, 46],[[30,4],[43,4],[43,22],[40,22],[40,25],[30,25]]);
-    regionsList[18] = new Region(18, -1, [675, 490], [695, 555], [590, 510], null, [585, 575], 'plains', [12, 19, 16, 17, 46],[[26,26],[41,26],[41,23],[43,23],[43,34],[39,34],[39,37],[31,37],[31,32],[26,32]]);
-    regionsList[19] = new Region(19, -1, [290, 633], [215, 705], [138, 635], null, [210, 603], 'plains', [16, 18, 14],[[6, 26], [25,26], [25,32],[20,32],[20,42],[6,42]]);
+    regionsList[10] = new Region(10, -1, [1025, 568], [949, 745], [1121, 665], null, [963, 604], 'plains', [11, 12, 46, 47], [[51, 30], [65, 30], [65, 44], [74, 44], [74, 45], [51, 45]], [1069, 703], [1058, 660]);
+    regionsList[11] = new Region(11, -1, [1040, 990], [1100, 1050], [1225, 997], null, [1125, 904], 'plains', [10, 12, 50, 60], [[51, 46], [74, 46], [74, 62], [51, 62]], [1293, 1001], [1154, 991]);
+    regionsList[12] = new Region(12, -1, [750, 800], [752, 1044], [810, 898], null, [842, 920], 'plains', [10, 11, 13, 18, 36], [[31, 47], [40, 47], [40, 35], [50, 35], [50, 62], [47, 62], [47, 63], [40, 63], [40, 51], [31, 51]], [753, 884], [853, 862]);
+    regionsList[13] = new Region(13, -1, [479, 1013], [481, 1090], [509, 951], null, [643, 1053], 'plains', [12, 14, 36], [[25, 47], [30, 47], [30, 52], [39, 52], [39, 63], [25, 63]], [576, 961], [481, 930]);
+    regionsList[14] = new Region(14, -1, [189, 811], [199, 991], [233, 913], null, [291, 997], 'plains', [13, 36, 35, 19], [[6, 43], [20, 43], [20, 46], [24, 46], [24, 63], [23, 63], [23, 66], [6, 66], [6, 57], [9, 57], [9, 46], [6, 46]], [304, 918], [194, 961]);
+    regionsList[15] = new Region(15, -1, [145, 260], [230, 180], [480, 241], null, [384, 217], 'plains', [16, 17], [[6, 4], [29, 4], [29, 16], [22, 16], [22, 20], [6, 20]], [404, 240], [457, 263]);
+    regionsList[16] = new Region(16, -1, [442, 329], [446, 403], [310, 400], null, [220, 371], 'plains', [15, 17, 18, 19], [[6, 21], [23, 21], [23, 17], [29, 17], [29, 25], [6, 25]], [368, 400], [260, 432]);
+    regionsList[17] = new Region(17, -1, [575, 163], [575, 255], [620, 399], null, [706, 229], 'plains', [15, 16, 18, 45, 46], [[30, 4], [43, 4], [43, 22], [40, 22], [40, 25], [30, 25]], [623, 339], [671, 381]);
+    regionsList[18] = new Region(18, -1, [675, 490], [695, 555], [590, 510], null, [585, 575], 'plains', [12, 19, 16, 17, 46], [[26, 26], [41, 26], [41, 23], [43, 23], [43, 34], [39, 34], [39, 37], [31, 37], [31, 32], [26, 32]], [538, 536], [624, 578]);
+    regionsList[19] = new Region(19, -1, [290, 633], [215, 705], [138, 635], null, [210, 603], 'plains', [16, 18, 14], [[6, 26], [25, 26], [25, 32], [20, 32], [20, 42], [6, 42]], [148, 704], [219, 668]);
 
-    regionsList[40] = new Region(40, 0, [1759, 731], [1773, 845], [1635, 1109], null, [1721, 1139], 'tundra', [60, 61, 41, 50, 42, 44],[[96,39],[103,39],[103,41],[105,41],[105,52],[100,52],[100,67],[89,67],[89,51],[96,51]]);
-    regionsList[41] = new Region(41, 0, [1957, 881], [2083, 1061], [2117, 767], null, [2033, 771], 'tundra', [42, 40, 61],[[106,41],[125,41],[125,45],[117,45],[117,50],[125,50],[125,57],[124,57],[124,64],[106,64]]);
-    regionsList[42] = new Region(42, 0, [2073, 653], [2161, 653], [2015, 655], null, [1907, 649], 'tundra', [41, 40, 44, 43],[[104,32],[125,32],[125,40],[104,40]]);
-    regionsList[43] = new Region(43, 0, [2051, 491], [2049, 389], [2141, 223], null, [2065, 273], 'tundra', [42, 49],[[112,4],[125,4],[125,31],[112,31]]);
-    regionsList[44] = new Region(44, 0, [1675, 607], [1773, 617], [1685, 523], null, [1781, 515], 'tundra', [42, 40, 50, 48, 49],[[92,21],[103,21],[103,38],[92,38]]);
-    regionsList[45] = new Region(45, 0, [1011, 99], [1071, 170], [953, 177], null, [831, 145], 'tundra', [17, 46, 47],[[44,4],[65,4],[65,12],[44,12]]);
-    regionsList[46] = new Region(46, 0, [835, 435], [989, 429], [1017, 339], null, [849, 313], 'tundra', [17, 18, 10, 47, 45],[[44,13],[65,13],[65,29],[44,29]]);
-    regionsList[47] = new Region(47, 0, [1221, 99], [1307, 395], [1281, 201], null, [1229, 311], 'tundra', [45, 46, 10, 48, 50],[[66,4],[77,4],[77,43],[66,43]]);
-    regionsList[48] = new Region(48, 0, [1445, 345], [1443, 549], [1565, 289], null, [1549, 597], 'tundra', [47, 50, 44, 49],[[78,4],[82,4],[82,10],[89,10],[89,4],[99,4],[99,12],[91,12],[91,38],[78,38]]);
-    regionsList[49] = new Region(49, 0, [1831, 101], [1903, 301], [1823, 201], null, [1761, 291], 'tundra', [48, 44, 43],[[100,4],[111,4],[111,20],[92,20],[92,13],[100,13]]);
-    regionsList[50] = new Region(50, 0, [1375, 819], [1371, 969], [1559, 765], null, [1649, 767], 'tundra', [10, 11, 60, 40, 44, 48, 47],[[75,44],[78,44],[78,39],[95,39],[95,50],[88,50],[88,62],[75,62]]);
+    regionsList[40] = new Region(40, 0, [1759, 731], [1773, 845], [1635, 1109], null, [1721, 1139], 'tundra', [60, 61, 41, 50, 42, 44], [[96, 39], [103, 39], [103, 41], [105, 41], [105, 52], [100, 52], [100, 67], [89, 67], [89, 51], [96, 51]], [1706, 1072], [1689, 1055]);
+    regionsList[41] = new Region(41, 0, [1957, 881], [2083, 1061], [2117, 767], null, [2033, 771], 'tundra', [42, 40, 61], [[106, 41], [125, 41], [125, 45], [117, 45], [117, 50], [125, 50], [125, 57], [124, 57], [124, 64], [106, 64]], [2206, 764], [2186, 792]);
+    regionsList[42] = new Region(42, 0, [2073, 653], [2161, 653], [2015, 655], null, [1907, 649], 'tundra', [41, 40, 44, 43], [[104, 32], [125, 32], [125, 40], [104, 40]], [2016, 606], [1987, 702]);
+    regionsList[43] = new Region(43, 0, [2051, 491], [2049, 389], [2141, 223], null, [2065, 273], 'tundra', [42, 49], [[112, 4], [125, 4], [125, 31], [112, 31]], [2127, 162], [2239, 234]);
+    regionsList[44] = new Region(44, 0, [1675, 607], [1773, 617], [1685, 523], null, [1781, 515], 'tundra', [42, 40, 50, 48, 49], [[92, 21], [103, 21], [103, 38], [92, 38]], [1793, 428], [1751, 537]);
+    regionsList[45] = new Region(45, 0, [1011, 99], [1071, 170], [953, 177], null, [831, 145], 'tundra', [17, 46, 47], [[44, 4], [65, 4], [65, 12], [44, 12]], [944, 100], [940, 174]);
+    regionsList[46] = new Region(46, 0, [835, 435], [989, 429], [1017, 339], null, [849, 313], 'tundra', [17, 18, 10, 47, 45], [[44, 13], [65, 13], [65, 29], [44, 29]], [959, 327], [1035, 318]);
+    regionsList[47] = new Region(47, 0, [1221, 99], [1307, 395], [1281, 201], null, [1229, 311], 'tundra', [45, 46, 10, 48, 50], [[66, 4], [77, 4], [77, 43], [66, 43]], [1228, 247], [1233, 234]);
+    regionsList[48] = new Region(48, 0, [1445, 345], [1443, 549], [1565, 289], null, [1549, 597], 'tundra', [47, 50, 44, 49], [[78, 4], [82, 4], [82, 10], [89, 10], [89, 4], [99, 4], [99, 12], [91, 12], [91, 38], [78, 38]], [1482, 263], [1516, 321]);
+    regionsList[49] = new Region(49, 0, [1831, 101], [1903, 301], [1823, 201], null, [1761, 291], 'tundra', [48, 44, 43], [[100, 4], [111, 4], [111, 20], [92, 20], [92, 13], [100, 13]], [1889, 205], [1870, 189]);
+    regionsList[50] = new Region(50, 0, [1375, 819], [1371, 969], [1559, 765], null, [1649, 767], 'tundra', [10, 11, 60, 40, 44, 48, 47], [[75, 44], [78, 44], [78, 39], [95, 39], [95, 50], [88, 50], [88, 62], [75, 62]], [1501, 751], [1645, 793]);
 
-    regionsList[29] = new Region(29, 1, [707, 1965], [703, 2051], [855, 2059], null, [899, 1971], 'sand', [30, 32, 39, 67],[[37,107],[54,107],[54,114],[58,114],[58,113],[60,113],[60,117],[58,117],[58,116],[54,116],[54,123],[37,123]]);
-    regionsList[30] = new Region(30, 1, [557, 2033], [553, 2115], [475, 2137], null, [447, 2027], 'sand', [29, 31, 32],[[23,111],[36,111],[36,123],[23,123],[23,123]]);
-    regionsList[31] = new Region(31, 1, [137, 2025], [277, 2027], [255, 2177], null, [247, 2095], 'sand', [30, 32, 33],[[6,111],[22,111],[22,124],[5,124],[5,122],[6,122]]);
-    regionsList[32] = new Region(32, 1, [363, 1917], [261, 1847], [569, 1855], null, [487, 1907], 'sand', [29, 30, 31, 33, 38],[[13,101],[36,101],[36,110],[13,110]]);
-    regionsList[33] = new Region(33, 1, [135, 1783], [137, 1715], [183, 1587], null, [147, 1901], 'sand', [31, 32, 38, 35],[[6,84],[12,84],[12,110],[6,110]]);
-    regionsList[34] = new Region(34, 1, [900, 1332], [884, 1532], [1089, 1427], null, [996, 1408], 'sand', [65, 60, 36, 39, 37],[[48,72],[63,72],[63,89],[47,89],[47,74],[48,74]]);
-    regionsList[35] = new Region(35, 1, [184, 1238], [276, 1432], [366, 1336], null, [270, 1324], 'sand', [14, 36, 37, 38, 33],[[6,67],[23,67],[23,74],[24,74],[24,83],[6,83]]);
-    regionsList[36] = new Region(36, 1, [466, 1252], [566, 1186], [672, 1184], null, [770, 1188], 'sand', [12, 13, 14, 35, 37, 34],[[24,64],[47,64],[47,73],[24,73]]);
-    regionsList[37] = new Region(37, 1, [554, 1432], [548, 1360], [702, 1362], null, [770, 1356], 'sand', [34, 36, 35, 38],[[25,74],[46,74],[46,83],[25,83]]);
-    regionsList[38] = new Region(38, 1, [542, 1550], [572, 1716], [490, 1642], null, [384, 1628], 'sand', [39, 32, 33, 35, 37],[[13,84],[36,84],[36,94],[39,94],[39,99],[36,99],[36,100],[13,100]]);
-    regionsList[39] = new Region(39, 1, [822, 1670], [824, 1752], [1024, 1752], null, [978, 1828], 'sand', [34, 38, 29, 65],[[43,90],[63,90],[63,93],[62,93],[62,106],[43,106],[43,99],[40,99],[40,94],[43,94]]);
+    regionsList[29] = new Region(29, 1, [707, 1965], [703, 2051], [855, 2059], null, [899, 1971], 'sand', [30, 32, 39, 67], [[37, 107], [54, 107], [54, 114], [58, 114], [58, 113], [60, 113], [60, 117], [58, 117], [58, 116], [54, 116], [54, 123], [37, 123]], [828, 1993], [820, 2092]);
+    regionsList[30] = new Region(30, 1, [557, 2033], [553, 2115], [475, 2137], null, [447, 2027], 'sand', [29, 31, 32], [[23, 111], [36, 111], [36, 123], [23, 123], [23, 123]], [470, 2048], [497, 2114]);
+    regionsList[31] = new Region(31, 1, [137, 2025], [277, 2027], [255, 2177], null, [247, 2095], 'sand', [30, 32, 33], [[6, 111], [22, 111], [22, 124], [5, 124], [5, 122], [6, 122]], [337, 2177], [210, 2196]);
+    regionsList[32] = new Region(32, 1, [363, 1917], [261, 1847], [569, 1855], null, [487, 1907], 'sand', [29, 30, 31, 33, 38], [[13, 101], [36, 101], [36, 110], [13, 110]], [462, 1837], [516, 1877]);
+    regionsList[33] = new Region(33, 1, [135, 1783], [137, 1715], [183, 1587], null, [147, 1901], 'sand', [31, 32, 38, 35], [[6, 84], [12, 84], [12, 110], [6, 110]], [135, 1636], [199, 1661]);
+    regionsList[34] = new Region(34, 1, [900, 1332], [884, 1532], [1089, 1427], null, [996, 1408], 'sand', [65, 60, 36, 39, 37], [[48, 72], [63, 72], [63, 89], [47, 89], [47, 74], [48, 74]], [1068, 1373], [1056, 1463]);
+    regionsList[35] = new Region(35, 1, [184, 1238], [276, 1432], [366, 1336], null, [270, 1324], 'sand', [14, 36, 37, 38, 33], [[6, 67], [23, 67], [23, 74], [24, 74], [24, 83], [6, 83]], [337, 1275], [316, 1373]);
+    regionsList[36] = new Region(36, 1, [466, 1252], [566, 1186], [672, 1184], null, [770, 1188], 'sand', [12, 13, 14, 35, 37, 34], [[24, 64], [47, 64], [47, 73], [24, 73]], [716, 1255], [756, 1210]);
+    regionsList[37] = new Region(37, 1, [554, 1432], [548, 1360], [702, 1362], null, [770, 1356], 'sand', [34, 36, 35, 38], [[25, 74], [46, 74], [46, 83], [25, 83]], [734, 1437], [778, 1388]);
+    regionsList[38] = new Region(38, 1, [542, 1550], [572, 1716], [490, 1642], null, [384, 1628], 'sand', [39, 32, 33, 35, 37], [[13, 84], [36, 84], [36, 94], [39, 94], [39, 99], [36, 99], [36, 100], [13, 100]], [465, 1597], [442, 1676]);
+    regionsList[39] = new Region(39, 1, [822, 1670], [824, 1752], [1024, 1752], null, [978, 1828], 'sand', [34, 38, 29, 65], [[43, 90], [63, 90], [63, 93], [62, 93], [62, 106], [43, 106], [43, 99], [40, 99], [40, 94], [43, 94]], [992, 1712], [987, 1788]);
 
-    regionsList[60] = new Region(60, -1, [1368, 1328], [1464, 1326], [1512, 1170], null, [1326, 1206], 'grassland', [40, 50, 11, 64, 65, 34],[[64,63],[88,63],[88,77],[64,78]]);
-    regionsList[61] = new Region(61, -1, [1930, 1214], [2052, 1326], [2198, 1218], null, [2084, 1208], 'grassland', [41, 40, 62],[[102,65],[124,65],[124,77],[121,77],[121,78],[102,78]]);
-    regionsList[62] = new Region(62, -1, [1838, 1587], [2012, 1559], [2118, 1515], null, [1910, 1479], 'grassland', [61, 64, 63],[[100,79],[121,79],[121,91],[113,91],[113,92],[100,92]]);
-    regionsList[63] = new Region(63, -1, [1678, 1705], [1988, 1801], [1910, 1807], null, [1964, 1715], 'grassland', [62, 64, 66, 68, 69],[[87,93],[113,93],[113,94],[123,94],[123,106],[111,106],[111,105],[96,105],[96,106],[87,106]]);
-    regionsList[64] = new Region(64, -1, [1494, 1463], [1590, 1543], [1706, 1517], null, [1726, 1443], 'grassland', [62, 63, 66, 65, 60],[[77,79],[99,79],[99,92],[87,92],[87,88],[80,88],[80,87],[77,87]]);
-    regionsList[65] = new Region(65, -1, [1174, 1602], [1182, 1449], [1336, 1471], null, [1222, 1497], 'grassland', [34, 39, 66, 60, 64],[[64,79],[76,79],[76,87],[69,87],[69,99],[63,99],[63,94],[64,94]]);
-    regionsList[66] = new Region(66, -1, [1361, 1646], [1369, 1728], [1477, 1628], null, [1487, 1708], 'grassland', [64, 65, 63, 67],[[70,88],[79,88],[79,89],[86,89],[86,105],[70,105]]);
-    regionsList[67] = new Region(67, -1, [1225, 1940], [1377, 1940], [1383, 2088], null, [1313, 2030], 'grassland', [66, 29],[[66,106],[82,106],[82,122],[66,122],[66,116],[62,116],[62,117],[61,117],[61,113],[62,113],[62,114],[66,114]]);
-    regionsList[68] = new Region(68, -1, [1643, 2002], [1767, 2022], [1623, 2122], null, [1697, 2106], 'grassland', [69, 63],[[87,107],[96,107],[96,108],[103,108],[103,124],[87,124]]);
-    regionsList[69] = new Region(69, -1, [2007, 2126], [2111, 2136], [2105, 2016], null, [2051, 1958], 'grassland', [63, 68],[[110,107],[123,107],[123,122],[104,122],[104,115],[110,115]]);
-
+    regionsList[60] = new Region(60, -1, [1368, 1328], [1464, 1326], [1512, 1170], null, [1326, 1206], 'grassland', [40, 50, 11, 64, 65, 34], [[64, 63], [88, 63], [88, 78], [64, 78]], [1460, 1246], [1506, 1265]);
+    regionsList[61] = new Region(61, -1, [1930, 1214], [2052, 1326], [2198, 1218], null, [2084, 1208], 'grassland', [41, 40, 62], [[102, 65], [124, 65], [124, 77], [121, 77], [121, 78], [102, 78]], [2150, 1253], [2188, 1308]);
+    regionsList[62] = new Region(62, -1, [1838, 1587], [2012, 1559], [2118, 1515], null, [1910, 1479], 'grassland', [61, 64, 63], [[100, 79], [121, 79], [121, 91], [113, 91], [113, 92], [100, 92]], [2075, 1479], [2166, 1499]);
+    regionsList[63] = new Region(63, -1, [1678, 1705], [1988, 1801], [1910, 1807], null, [1964, 1715], 'grassland', [62, 64, 66, 68, 69], [[87, 93], [113, 93], [113, 94], [123, 94], [123, 106], [110, 106], [110, 105], [96, 105], [96, 106], [87, 106]], [1854, 1847], [1966, 1762]);
+    regionsList[64] = new Region(64, -1, [1494, 1463], [1590, 1543], [1706, 1517], null, [1726, 1443], 'grassland', [62, 63, 66, 65, 60], [[77, 79], [99, 79], [99, 92], [87, 92], [87, 88], [80, 88], [80, 87], [77, 87]], [1742, 1587], [1752, 1483]);
+    regionsList[65] = new Region(65, -1, [1174, 1602], [1182, 1449], [1336, 1471], null, [1222, 1497], 'grassland', [34, 39, 66, 60, 64], [[64, 79], [76, 79], [76, 87], [69, 87], [69, 99], [63, 99], [63, 94], [64, 94]], [1300, 1518], [1289, 1496]);
+    regionsList[66] = new Region(66, -1, [1361, 1646], [1369, 1728], [1477, 1628], null, [1487, 1708], 'grassland', [64, 65, 63, 67], [[70, 88], [79, 88], [79, 89], [86, 89], [86, 105], [70, 105]], [1484, 1800], [1528, 1700]);
+    regionsList[67] = new Region(67, -1, [1225, 1940], [1377, 1940], [1383, 2088], null, [1313, 2030], 'grassland', [66, 29], [[66, 106], [82, 106], [82, 122], [66, 122], [66, 116], [62, 116], [62, 117], [61, 117], [61, 113], [62, 113], [62, 114], [66, 114]], [1256, 2056], [1458, 2149]);
+    regionsList[68] = new Region(68, -1, [1643, 2002], [1767, 2022], [1623, 2122], null, [1697, 2106], 'grassland', [69, 63], [[87, 107], [96, 107], [96, 108], [103, 108], [103, 124], [87, 124]], [1785, 2129], [1691, 2168]);
+    regionsList[69] = new Region(69, -1, [2007, 2126], [2111, 2136], [2105, 2016], null, [2051, 1958], 'grassland', [63, 68], [[110, 107], [123, 107], [123, 122], [104, 122], [104, 115], [110, 115]], [2169, 2016], [2066, 2054]);
 }
 
 
@@ -486,46 +552,297 @@ function collectFood(player) {
 // ===================================================================
 
 // ===================================================================
+// Start - AI
+// ===================================================================
+
+// Basic Defence Logic:
+//  * Bolster defences that neighbor a player. Try to have equal troops on border as opponent. If defence = 0; attack.
+//  * If defences are equal, fill the cells that aren't borders with 3 troops at max.
+//  * If both conditions are satisfied, add troops to to fight weakest opponent border. 
+// Basic Attack Logic:
+// * Stack all troops on one border and attack from the border cell
+
+/**
+ * Basic Attack Logic:
+ * Stack all troops on one border and attack from the border cell
+ */
+
+
+//Start Defence
+
+/**
+ * Basic Defence Logic:
+ * Bolster defences that neighbor a player. Try to have equal troops on border as opponent. If defence = 0; attack.
+ * If defences are equal, fill the cells that aren't borders with 3 troops at max.
+ * If both conditions are satisfied, add troops to to fight weakest opponent border. 
+ * 
+ * @param {*} player : Player Object
+ * @param {*} inputRegions : Total Regions
+ */
+
+function DefenceAiTurn(aiplayer, inputRegions) {
+
+    console.log('<<<<<<<<<<<<<<<AI TIME>>>>>>>>>>>>>>>>>>>>')
+
+    /*
+     * Initial Data Collection
+     */
+
+    const regions = inputRegions.filter(Boolean);
+
+    var aiOwnedRegions = [];
+
+    for (var i = 0; i < regions.length; i++){
+        if (regions[i].owner === aiplayer.ID){
+            aiOwnedRegions.push(regions[i]);
+        }
+    }
+
+    // console.log(aiOwnedRegions);
+
+    var borderRegions = [];
+    var needsUpgrade = [];
+    var zeroTroopAttack = [];                                                                   // Stores objects {sourceID, barracks, farm}
+
+    for (var i = 0; i < aiOwnedRegions.length; i++){                                            // Iterates through owned regions
+        for(var neigh = 0; neigh < aiOwnedRegions[i].neighbors.length; neigh++){                // Iterates through owned neighbors
+            // console.log(aiOwnedRegions[i].neighbor[neigh]);
+            let potentialEnemy = aiOwnedRegions[i].neighbors[neigh];
+
+            zeroTroopAttack.push(checkZeroEnemies(aiOwnedRegions[i], potentialEnemy, inputRegions));
+
+            function checkZeroEnemies (sourceRegion, potentialDestination, regionData){
+                // console.log('ENEMY CHECK '+ potentialDestination)
+                // console.log('Destination is' + (regionData[potentialDestination].ID !== 1))
+                if(regionData[potentialDestination].owner !== 1) {                                         // Checks if neighbor is enemy
+                    // console.log('<<<<<<<<<<<<<<<ADD ENEMIES>>>>>>>>>>>>>>>>>>>>');
+                    //return {destination: potentialDestination, source: [sourceRegion.id]};      // Stores destination as the index of the zeroTroopAttack array and the source as an array
+
+                    if (!regionData[potentialDestination].troop['soldier'] || (sourceRegion.troop['soldier'] && 
+                        regionData[potentialDestination].troop['soldier'].count / 2 < sourceRegion.troop['soldier'].count / 2)){
+
+                        return {destination: potentialDestination, source: sourceRegion.id}; 
+                    }
+                                                                 
+                }
+            }
+        
+        }
+
+        let farm, barracks, soldier;
+
+        //console.log(aiOwnedRegions);
+
+        if (!aiOwnedRegions[i].bldg['farm']){                                                   // Checks if there is a farm
+            farm = true;
+        } else {
+            farm = false;
+        }
+
+        if (!aiOwnedRegions[i].bldg['barracks']){                                                   // Checks if there is a barracks
+            barracks = true;
+        } else {
+            barracks = false;
+        }
+
+        // console.log('AI Troops');
+        // console.log(aiOwnedRegions[i].troop);
+        // console.log(aiOwnedRegions[i].troop);
+        
+
+        if (!aiOwnedRegions[i].troop || !aiOwnedRegions[i].troop['soldier']) {                  // Checks is region has troops
+            soldier = 10;
+        } else if (aiOwnedRegions[i].troop['soldier'].count < 15) {  
+            // console.log(3 - aiOwnedRegions[i].troop['soldier'].count);                              
+            soldier = 15 - aiOwnedRegions[i].troop['soldier'].count;
+        } else {
+            soldier = 0;
+        }
+
+        if (farm || barracks || soldier){
+            needsUpgrade.push({id: aiOwnedRegions[i].id, bar: barracks, 
+                farm: farm, sold: soldier})                                                     // Stores easy access call so that if a barracks/farm needs to be built.
+        }
+
+    }
+
+    // console.log(needsUpgrade);
+
+    borderRegions = borderRegions.filter(Boolean);                                              // Removes null values from border Region Array
+    zeroTroopAttack = zeroTroopAttack.filter(Boolean);                                          // Removes null values from zerTroopAttack Array
+
+    // console.log('ZERO TROOP = ');
+    // console.log(zeroTroopAttack);
+
+    /*
+     * Initial Attack Phase
+     * 
+     * Iterate through all possible 0 unit attacks. If there is more than one way for a region to attack, wait. 
+     * Have all single attack regions attack and then have multi-attack regions attack with the reduced options.
+     */
+
+    for (var i = 0; i < zeroTroopAttack.length; i++){
+
+        let sourcesUsed = [-1];                                                                 // Makes the first element not null
+
+        for (var b = 0; b < zeroTroopAttack.length; b++){                                       // Removes all sources that have already attacked
+            // console.log(sourcesUsed.includes(zeroTroopAttack[b].source));
+            if (sourcesUsed.includes(zeroTroopAttack[b].source)){
+                zeroTroopAttack.pop(zeroTroopAttack[b]);
+                b--;
+            }
+        }       
+        // console.log(zeroTroopAttack[i].source);
+        sourcesUsed.push(zeroTroopAttack[i].source);                                            // Attacks if only one source can reach destination
+
+        if (inputRegions[zeroTroopAttack[i].source].troop['soldier'] !== undefined){
+            moveFight(inputRegions[zeroTroopAttack[i].source], inputRegions[zeroTroopAttack[i].destination]); 
+        }        
+
+    }
+
+
+    /**
+     * Troop build stage
+     */
+
+    var temp = needsUpgrade;
+    var count = 0;
+
+
+
+    while (players[1].foodCount > 0 && count < temp.length) {                                       // Foodcount is not zero and there is a soldier upgrade still needed
+        for (var i = 0; i < temp.length; i++){
+            // console.log('Sold ' + temp[i].sold);
+            if (temp[i].sold != 0 && players[1].foodCount > 5){                     // If the soldiers needed is not zero, the player has food and the player does not need a barracks.
+                if (inputRegions[temp[i].id].bldg['barracks']){
+                    buildSoldier(inputRegions[temp[i].id]);
+                    if (temp[i].sold != 0){
+                        buildSoldier(inputRegions[temp[i].id]);
+                    }
+                }
+                temp[i].sold--;
+                count = 0;
+            } else if (needsUpgrade[i].farm){
+                buildFarm(inputRegions[temp[i].id]);
+                //console.log('FARM BUILT');
+                temp[i].farm = false;
+                count = 0;
+            } else if (needsUpgrade[i].bar){
+                buildBarracks(inputRegions[temp[i].id]);
+                //console.log('FARM BUILT');
+                temp[i].bar = false;
+                count = 0;
+            } else {
+                count++;
+            }
+        }
+
+
+    }
+    
+
+    /**
+     * End Turn
+     */
+
+    //toggleTurn();
+
+    players[currentPlayerTurn].cameraCoord = { x: cameraOrigin.x, y: cameraOrigin.y }
+
+    for (var i = 0; i < regionsList.length; i++) {
+
+        if (regionsList[i] != null && regionsList[i].owner == currentPlayerTurn && regionsList[i].bldg["farm"] != null) {
+            players[currentPlayerTurn].foodCount += 1;
+
+        }
+
+        if (regionsList[i] != null && regionsList[i].troop["soldier"] != null) {
+            regionsList[i].troop["soldier"].hasMoved = 0;
+        }
+
+        if (regionsList[i] != null && regionsList[i].cap != null) {
+            regionsList[i].cap.hasMoved = false;
+
+        }
+
+
+    }
+
+    currentPlayerTurn = turnCount % 2;
+    turnCount++;
+
+    changeCameraOrigin(players[currentPlayerTurn].cameraCoord.x, players[currentPlayerTurn].cameraCoord.y);
+    createArray(cameraOrigin);
+
+
+
+}
+
+
+
+
+// ===================================================================
+// End - AI
+// ===================================================================
+
+
+// ===================================================================
 // Start - Menu Functions
 // ===================================================================
 function moveFight(source, destination) {
+    // selectedRegion = null;
     // console.log(source)
     // console.log(destination)
     var validMove = source.neighbors.includes(destination.id);
     var validSource = source.troop['soldier'] !== null;
-    console.log("HERRO")
-    console.log(destination)
-    console.log("Hello " + destination.troop === [])
+    // console.log("HERRO")
+    // console.log(destination)
+    // console.log("Hello " + destination.troop === [])
 
     if ((destination.owner === -1 || destination.owner === source.owner || destination.troop === []) && validMove && validSource) {
         destination.owner = source.owner;
 
         if (destination.troop['soldier'] != null && source.troop['soldier'].count != 0) {
 
-            // Move all troops from allied territory to territory with troops
+            // Move all troops from allied region to region with troops
             if (source.troop['soldier'].hasMoved == 0) {
                 destination.troop['soldier'].count += source.troop['soldier'].count;
                 destination.troop['soldier'].hasMoved += source.troop['soldier'].count;
                 source.troop['soldier'].removeFromWorld = true;
-                source.troop = [];
+                source.troop['soldier'] = null;
             }
-            // Move only the troops that hasn't moved from allied territory to territory with troops
+            // Move only the troops that hasn't moved from allied region to region with troops
             else {
                 destination.troop['soldier'].count += source.troop['soldier'].count - source.troop['soldier'].hasMoved;
                 destination.troop['soldier'].hasMoved += source.troop['soldier'].count - source.troop['soldier'].hasMoved;
                 source.troop['soldier'].count = source.troop['soldier'].hasMoved;
             }
 
+            // Move all troops from allied region to region with troops
+            if (source.troop['soldierRanged'].hasMoved == 0) {
+                destination.troop['soldierRanged'].count += source.troop['soldierRanged'].count;
+                destination.troop['soldierRanged'].hasMoved += source.troop['soldierRanged'].count;
+                source.troop['soldierRanged'].removeFromWorld = true;
+                source.troop['soldierRanged'] = null;
+            }
+            // Move only the troops that hasn't moved from allied region to region with troops
+            else {
+                destination.troop['soldierRanged'].count += source.troop['soldierRanged'].count - source.troop['soldierRanged'].hasMoved;
+                destination.troop['soldierRanged'].hasMoved += source.troop['soldierRanged'].count - source.troop['soldierRanged'].hasMoved;
+                source.troop['soldierRanged'].count = source.troop['soldierRanged'].hasMoved;
+            }
+
         } else if (source.troop['soldier'].count != 0) {
-            // Move all troops from allied territory to territory with no troops
+            // Move all troops from allied region to region with no troops
             if (source.troop['soldier'].hasMoved == 0) {
                 destination.troop = source.troop;
                 destination.troop['soldier'].hasMoved = source.troop['soldier'].count;
                 destination.troop['soldier'].x = destination.troopXY[0];
                 destination.troop['soldier'].y = destination.troopXY[1];
-                source.troop = [];
+                source.troop['soldier'] = null;
             }
-            // Move only the troops that hasn't moved from allied territory to territory with no troops
+            // Move only the troops that hasn't moved from allied region to region with no troops
             else {
                 if (source.owner == 0) {
                     destination.troop["soldier"] = new Soldier(gameEngine, destination.troopXY[0], destination.troopXY[1]);
@@ -539,14 +856,41 @@ function moveFight(source, destination) {
                 source.troop['soldier'].count = source.troop['soldier'].hasMoved;
             }
 
+            // Move all troops from allied region to region with no troops
+            if (source.troop['soldierRanged'].hasMoved == 0) {
+                destination.troop = source.troop;
+                destination.troop['soldierRanged'].hasMoved = source.troop['soldierRanged'].count;
+                destination.troop['soldierRanged'].x = destination.troopXY[0];
+                destination.troop['soldierRanged'].y = destination.troopXY[1];
+                source.troop['soldierRanged'] = null;
+            }
+            // Move only the troops that hasn't moved from allied region to region with no troops
+            else {
+                if (source.owner == 0) {
+                    destination.troop["soldierRanged"] = new soldierRanged(gameEngine, destination.troopXY[0], destination.troopXY[1]);
+                } else {
+                    destination.troop["soldierRanged"] = new Alien(gameEngine, destination.troopXY[0], destination.troopXY[1]);
+                }
+
+                gameEngine.addEntity(destination.troop["soldierRanged"]);
+                destination.troop['soldierRanged'].count = source.troop['soldierRanged'].count - source.troop['soldierRanged'].hasMoved;
+                destination.troop['soldierRanged'].hasMoved = source.troop['soldierRanged'].count - source.troop['soldierRanged'].hasMoved;
+                source.troop['soldierRanged'].count = source.troop['soldierRanged'].hasMoved;
+            }
+
 
         }
-    } else if (validMove && validSource && destination.troop["soldier"] == null) {
+    } 
+    // This is moving to an empty region
+    else if (validMove && validSource && destination.troop["soldier"] == null) {
         destination.owner = source.owner;
         destination.troop = source.troop;
         destination.troop['soldier'].x = destination.troopXY[0];
         destination.troop['soldier'].y = destination.troopXY[1];
         destination.troop['soldier'].hasMoved = destination.troop['soldier'].count;
+        destination.troop['soldierRanged'].x = destination.troopXY[0];
+        destination.troop['soldierRanged'].y = destination.troopXY[1];
+        destination.troop['soldierRanged'].hasMoved = destination.troop['soldierRanged'].count;
         source.troop = [];
     } else if (validMove && validSource) {
         var atkPow = 0;
@@ -605,6 +949,12 @@ function moveFight(source, destination) {
             // Defender won
         }
     }
+
+    // Updates fog of war
+    if (gameEngine.GUIEntities[0] != null) {
+        gameEngine.GUIEntities[0].displays = getFogOfWar();
+        console.log(gameEngine.GUIEntities[0].displays)
+    }
 }
 
 function moveCap(source, destination) {
@@ -635,7 +985,7 @@ function moveCap(source, destination) {
 function ResourceDisplay(game) {
     this.border = AM.getAsset("./img/sidebar/resource_display.png");
     this.foodIcon = AM.getAsset("./img/sidebar/food_icon.png")
-    this.moneyIcon = AM.getAsset("./img/sidebar/money_icon.png")
+    this.goldIcon = AM.getAsset("./img/sidebar/gold_icon.png")
     GUIEntity.call(this, game, gameEngine.surfaceWidth - 380, 0);
 }
 
@@ -650,12 +1000,12 @@ ResourceDisplay.prototype.draw = function (ctx) {
     ctx.drawImage(this.border, this.x, this.y);
 
     // Draw the Food Icon and Count
-    ctx.drawImage(this.foodIcon, this.x + 30, this.y + 10);
-    ctx.fillText(players[currentPlayerTurn].foodCount, this.x + 70, this.y + 35);
+    ctx.drawImage(this.foodIcon, this.x + 60, this.y + 10);
+    ctx.fillText(players[currentPlayerTurn].foodCount, this.x + 100, this.y + 35);
 
-    // Draw the Money Icon and Count
-    // ctx.drawImage(this.moneyIcon, this.x + 130, this.y + 10);
-    // ctx.fillText(this.moneyCount, this.x + 160, this.y + 35);
+    //Draw the Money Icon and Count
+    ctx.drawImage(this.goldIcon, this.x + 200, this.y + 10);
+    ctx.fillText(players[currentPlayerTurn].goldCount, this.x + 230, this.y + 35);
 }
 // ===================================================================
 // End - Resource Display
@@ -692,6 +1042,8 @@ MapDisplay.prototype.update = function (ctx) {
     // Hard worker
     for (var i = 0; i < regionsList.length; i++) {
         if (regionsList[i] != null) {
+            updateFlag(regionsList[i]);
+
             if (regionsList[i].bldg["farm"] != null) {
                 regionsList[i].bldg["farm"].owner = regionsList[i].owner;
             }
@@ -699,6 +1051,10 @@ MapDisplay.prototype.update = function (ctx) {
                 regionsList[i].bldg["barracks"].owner = regionsList[i].owner;
             }
 
+            // gameEngine.GUIEntities[0].displays = new Set();
+            // if (regionsList[i] != null && regionsList[i].owner != currentPlayerTurn) {
+            //     gameEngine.GUIEntities[0].displays.add(i);
+            // }
 
             // Check for winner
             if (regionsList[i].cap != null) {
@@ -727,6 +1083,9 @@ MapDisplay.prototype.update = function (ctx) {
 }
 
 MapDisplay.prototype.draw = function (ctx) {
+
+
+
     ctx.drawImage(this.border, cameraOrigin.x * dim, cameraOrigin.y * dim,
         bgWidth, bgHeight,
         0, 0,
@@ -770,6 +1129,78 @@ MapDisplay.prototype.draw = function (ctx) {
         ctx.font = "24px Arial";
         ctx.fillText("Player " + currentPlayerTurn, (gameEngine.surfaceWidth / 2) - (50), 30);
         // ctx.globalAlpha = 1;     
+    }
+
+    // Selected Region Highlight
+    if (selectedRegion != null && selectedRegion != 0 && selectedRegion != -1
+        && gameEngine.GUIEntities[3].destinationSelectCaptain != undefined && !gameEngine.GUIEntities[3].destinationSelectCaptain
+        && gameEngine.GUIEntities[3].destinationSelect != null && !gameEngine.GUIEntities[3].destinationSelect) {
+        // console.log("selectedRegion");
+        // console.log(selectedRegion);
+
+        ctx.strokeStyle = '#00ff15';
+        ctx.lineWidth = 6;
+        highlightRegion(ctx, selectedRegion);
+    }
+    else if (selectedRegion != null && (gameEngine.GUIEntities[3].destinationSelectCaptain != undefined || gameEngine.GUIEntities[3].destinationSelectCaptain)
+        && (gameEngine.GUIEntities[3].destinationSelect != null || gameEngine.GUIEntities[3].destinationSelect)) {
+
+        ctx.strokeStyle = '#00ff15';
+        ctx.lineWidth = 6;
+        highlightRegion(ctx, selectedRegion);
+
+
+        // console.log(selectedRegion)
+        for (var i = 0; i < selectedRegion.neighbors.length; i++) {
+            if (regionsList[selectedRegion.neighbors[i]].owner == currentPlayerTurn
+                || regionsList[selectedRegion.neighbors[i]].owner == -1) {
+                ctx.strokeStyle = 'blue';
+            } else {
+                ctx.strokeStyle = 'red';
+            }
+
+            // console.log(selectedRegion.neighbors)
+            highlightRegion(ctx, regionsList[selectedRegion.neighbors[i]])
+        }
+    }
+
+
+}
+
+function highlightRegion(ctx, region) {
+    if (region != null) {
+
+        ctx.beginPath();
+        ctx.moveTo(((region.outline[0][0] + 1) * dim) - (cameraOrigin.x * dim),
+            ((region.outline[0][1] + 1) * dim) - (cameraOrigin.y * dim));
+
+        for (var i = 1; i < region.outline.length; i++) {
+            ctx.lineTo(((region.outline[i][0] + 1) * dim) - (cameraOrigin.x * dim),
+                ((region.outline[i][1] + 1) * dim) - (cameraOrigin.y * dim));
+        }
+
+        ctx.lineTo(((region.outline[0][0] + 1) * dim) - (cameraOrigin.x * dim),
+            ((region.outline[0][1] + 1) * dim) - (cameraOrigin.y * dim));
+        ctx.stroke();
+    }
+
+}
+
+function fillRegion(ctx, region) {
+    if (region != null) {
+
+        ctx.beginPath();
+        ctx.moveTo(((region.outline[0][0] + 1) * dim) - (cameraOrigin.x * dim),
+            ((region.outline[0][1] + 1) * dim) - (cameraOrigin.y * dim));
+
+        for (var i = 1; i < region.outline.length; i++) {
+            ctx.lineTo(((region.outline[i][0] + 1) * dim) - (cameraOrigin.x * dim),
+                ((region.outline[i][1] + 1) * dim) - (cameraOrigin.y * dim));
+        }
+
+        ctx.lineTo(((region.outline[0][0] + 1) * dim) - (cameraOrigin.x * dim),
+            ((region.outline[0][1] + 1) * dim) - (cameraOrigin.y * dim));
+        ctx.fill();
     }
 
 }
@@ -818,6 +1249,7 @@ MinimapDisplay.prototype = new GUIEntity();
 MinimapDisplay.prototype.constructor = MinimapDisplay;
 
 MinimapDisplay.prototype.update = function (ctx) {
+
     var click = gameEngine.click;
     if (click != null &&
         click.x >= this.originX &&
@@ -887,6 +1319,7 @@ MinimapDisplay.prototype.update = function (ctx) {
 }
 
 MinimapDisplay.prototype.draw = function (ctx) {
+    ctx.lineWidth = 1;
     ctx.fillStyle = "black";
     ctx.strokeStyle = "white";
 
@@ -1023,6 +1456,8 @@ ControlDisplay.prototype.update = function (ctx) {
     //     console.log("select"+selectedRegion.id);
     // }
 
+
+
     if (selectedRegion != this.currentRegion) {
         if (selectedRegion != null && selectedRegion.owner != (turnCount % 2)) {
             toggleAllOff();
@@ -1102,9 +1537,10 @@ ControlDisplay.prototype.update = function (ctx) {
     //     click.y <= gameEngine.surfaceHeight) { 
 
     if (this.destinationSelect && this.moveDelay) {
-        this.moveDestination = selectedRegion;
+        // this.moveDestination = selectedRegion;
         var regionFound = false;
-
+        console.log("this.moveDestination")
+        console.log(this.moveDestination)
         // Check for neighbors
         if (this.moveDestination != null) {
             for (var i = 0; i < this.moveDestination.neighbors.length; i++) {
@@ -1116,6 +1552,7 @@ ControlDisplay.prototype.update = function (ctx) {
 
         // If region is a neighbor, we can moveFight
         if (regionFound) {
+            console.log("move fight triggered")
             moveFight(this.moveSource, this.moveDestination);
             // console.log("HELLLO!")
             // console.log(selectedRegion)
@@ -1135,7 +1572,7 @@ ControlDisplay.prototype.update = function (ctx) {
 
     // console.log(selectedRegion)
     if (this.moveDelay && this.destinationSelectCaptain) {
-        this.moveDestination = selectedRegion;
+        // this.moveDestination = selectedRegion;
         var regionFound = false;
 
         // Check for neighbors
@@ -1150,11 +1587,11 @@ ControlDisplay.prototype.update = function (ctx) {
         // If region is a neighbor, we can moveFight
         if (regionFound) {
             moveCap(this.moveSource, this.moveDestination);
-            console.log("HELLLO!")
-            console.log(selectedRegion)
+            // console.log("HELLLO!")
+            // console.log(selectedRegion)
             selectedRegion = null;
-            console.log("HELLLO!222")
-            console.log(selectedRegion)
+            // console.log("HELLLO!222")
+            // console.log(selectedRegion)
         } else {
             selectedRegion = null;
         }
@@ -1557,7 +1994,7 @@ InputHandler.prototype.update = function (ctx) {
     }
 
 
-
+    // console.log(selectedRegion)
     // Control clicks on the map
     var click = gameEngine.click;
     if (click != null) {
@@ -1565,14 +2002,19 @@ InputHandler.prototype.update = function (ctx) {
         var tempRegion = getClickedRegion(onScreenRegions, click.x, click.y);
 
         if (tempRegion != null &&
-            (tempRegion.owner == currentPlayerTurn ||
-                gameEngine.GUIEntities[2].destinationSelect ||
-                gameEngine.GUIEntities[2].destinationSelectCaptain)) {
+            ((tempRegion.owner == currentPlayerTurn || tempRegion.owner == -1) &&
+                (gameEngine.GUIEntities[3].destinationSelect ||
+                    gameEngine.GUIEntities[3].destinationSelectCaptain))) {
+            //if (selectedRegion != null) setSpritesToUnselected(selectedRegion);
+
+            gameEngine.GUIEntities[3].moveDestination = tempRegion;
+            // selectedRegion = null;
+            // setSpritesToSelected(selectedRegion);
+        } else if (tempRegion != null &&
+            (tempRegion.owner == currentPlayerTurn)) {
             //if (selectedRegion != null) setSpritesToUnselected(selectedRegion);
             selectedRegion = tempRegion;
-            // setSpritesToSelected(selectedRegion);
         } else {
-            //if (selectedRegion != null) setSpritesToUnselected(selectedRegion);
             selectedRegion = null;
         }
 
@@ -1583,9 +2025,9 @@ InputHandler.prototype.update = function (ctx) {
         // console.log(gameEngine.GUIEntities[2].moveDelay)
         // console.log(gameEngine.GUIEntities[2].destinationSelect)
 
-        if (gameEngine.GUIEntities[2].destinationSelect || gameEngine.GUIEntities[2].destinationSelectCaptain) {
+        if (gameEngine.GUIEntities[3].destinationSelect || gameEngine.GUIEntities[3].destinationSelectCaptain) {
 
-            gameEngine.GUIEntities[2].moveDelay = true;
+            gameEngine.GUIEntities[3].moveDelay = true;
             // console.log("movedelay after moveDelay set " + gameEngine.GUIEntities[2].moveDelay)
         }
 
@@ -1630,13 +2072,12 @@ InputHandler.prototype.update = function (ctx) {
 // ===================================================================
 
 
-
 // ===================================================================
 // Start - Audio Handler
 // ===================================================================
 function AudioHandler(game) {
     var audio = new Audio("./sound/bg_music.mp3");
-    audio.play();
+    // audio.play();
     Entity.call(this, game, 0, 0);
 }
 
@@ -1655,29 +2096,181 @@ AudioHandler.prototype.draw = function (ctx) {
 
 
 // ===================================================================
+// Start - Fog of War
+// ===================================================================
+function FogOfWar(game) {
+    this.fow = [];
+    this.fow[10] = AM.getAsset("./img/fog_of_war/10.png");
+    this.fow[11] = AM.getAsset("./img/fog_of_war/11.png");
+    this.fow[12] = AM.getAsset("./img/fog_of_war/12.png");
+    this.fow[13] = AM.getAsset("./img/fog_of_war/13.png");
+    this.fow[14] = AM.getAsset("./img/fog_of_war/14.png");
+    this.fow[15] = AM.getAsset("./img/fog_of_war/15.png");
+    this.fow[16] = AM.getAsset("./img/fog_of_war/16.png");
+    this.fow[17] = AM.getAsset("./img/fog_of_war/17.png");
+    this.fow[18] = AM.getAsset("./img/fog_of_war/18.png");
+    this.fow[19] = AM.getAsset("./img/fog_of_war/19.png");
+    this.fow[29] = AM.getAsset("./img/fog_of_war/29.png");
+    this.fow[30] = AM.getAsset("./img/fog_of_war/30.png");
+    this.fow[31] = AM.getAsset("./img/fog_of_war/31.png");
+    this.fow[32] = AM.getAsset("./img/fog_of_war/32.png");
+    this.fow[33] = AM.getAsset("./img/fog_of_war/33.png");
+    this.fow[34] = AM.getAsset("./img/fog_of_war/34.png");
+    this.fow[35] = AM.getAsset("./img/fog_of_war/35.png");
+    this.fow[36] = AM.getAsset("./img/fog_of_war/36.png");
+    this.fow[37] = AM.getAsset("./img/fog_of_war/37.png");
+    this.fow[38] = AM.getAsset("./img/fog_of_war/38.png");
+    this.fow[39] = AM.getAsset("./img/fog_of_war/39.png");
+    this.fow[40] = AM.getAsset("./img/fog_of_war/40.png");
+    this.fow[41] = AM.getAsset("./img/fog_of_war/41.png");
+    this.fow[42] = AM.getAsset("./img/fog_of_war/42.png");
+    this.fow[43] = AM.getAsset("./img/fog_of_war/43.png");
+    this.fow[44] = AM.getAsset("./img/fog_of_war/44.png");
+    this.fow[45] = AM.getAsset("./img/fog_of_war/45.png");
+    this.fow[46] = AM.getAsset("./img/fog_of_war/46.png");
+    this.fow[47] = AM.getAsset("./img/fog_of_war/47.png");
+    this.fow[48] = AM.getAsset("./img/fog_of_war/48.png");
+    this.fow[49] = AM.getAsset("./img/fog_of_war/49.png");
+    this.fow[50] = AM.getAsset("./img/fog_of_war/50.png");
+    this.fow[60] = AM.getAsset("./img/fog_of_war/60.png");
+    this.fow[61] = AM.getAsset("./img/fog_of_war/61.png");
+    this.fow[62] = AM.getAsset("./img/fog_of_war/62.png");
+    this.fow[63] = AM.getAsset("./img/fog_of_war/63.png");
+    this.fow[64] = AM.getAsset("./img/fog_of_war/64.png");
+    this.fow[65] = AM.getAsset("./img/fog_of_war/65.png");
+    this.fow[66] = AM.getAsset("./img/fog_of_war/66.png");
+    this.fow[67] = AM.getAsset("./img/fog_of_war/67.png");
+    this.fow[68] = AM.getAsset("./img/fog_of_war/68.png");
+    this.fow[69] = AM.getAsset("./img/fog_of_war/69.png");
+    this.displays = new Set();
+    GUIEntity.call(this, game, 0, 0);
+}
+
+FogOfWar.prototype = new GUIEntity();
+FogOfWar.prototype.constructor = FogOfWar;
+
+FogOfWar.prototype.update = function (ctx) {
+
+}
+
+function getFogOfWar() {
+    var output = new Set();
+    // gameEngine.GUIEntities[0].displays = new Set();
+    for (var i = 0; i < onScreenRegions.length; i++) {
+        for (var j = 0; j < onScreenRegions[i].length; j++) {
+
+
+            if (onScreenRegions[i][j] != null &&
+                regionsList[onScreenRegions[i][j].name] != null &&
+                regionsList[onScreenRegions[i][j].name].owner != currentPlayerTurn) {
+                // console.log("ADDING" + onScreenRegions[i][j].name)
+                output.add(onScreenRegions[i][j].name);
+            }
+
+        }
+    }
+
+    for (var i = 0; i < onScreenRegions.length; i++) {
+        for (var j = 0; j < onScreenRegions[i].length; j++) {
+
+            if (onScreenRegions[i][j] != null &&
+                regionsList[onScreenRegions[i][j].name] != null &&
+                regionsList[onScreenRegions[i][j].name].owner == currentPlayerTurn) {
+
+                for (var k = 0; k < regionsList[onScreenRegions[i][j].name].neighbors.length; k++) {
+                    output.delete(regionsList[onScreenRegions[i][j].name].neighbors[k]);
+
+                    // console.log("DELETING" + regionsList[onScreenRegions[i][j].name].neighbors[k])
+                }
+
+
+            }
+        }
+    }
+
+    // for (var i = 0; i < regionsList.length; i++) {
+    //     if (regionsList[i] != null && regionsList[i].owner != currentPlayerTurn) {
+    //         output.add(i);
+    //     }
+    // }
+
+    // this.displays = output;
+
+    return output;
+}
+
+FogOfWar.prototype.draw = function (ctx) {
+    // console.log(Object.keys(this.displays).length)
+    // console.log(this.displays.size)
+
+    // for (var i = 0; i < this.displays.size; i++) {
+    //     // console.log("FOG OF WAR")
+    //     console.log(regionsList[this.displays[i]);
+    //     highlightRegion(ctx, regionsList[this.displays[i]]);
+    //     // ctx.drawImage(this.fow[displays[i]], this.x - (cameraOrigin.x * dim), this.y - (cameraOrigin.y * dim))
+    // }
+
+
+
+    //  this.displays.forEach((element) => 
+    //             ctx.drawImage(this.fow[element], this.x - (cameraOrigin.x * dim), this.y - (cameraOrigin.y * dim)));
+
+    ctx.fillStyle = "black";
+    this.displays.forEach((element) =>
+        fillRegion(ctx, regionsList[element]));
+
+
+    // for (var i = 0; i < onScreenRegions.length; i++) {
+    //     for (var j = 0; j < onScreenRegions[i].length; j++) {
+    //         if (onScreenRegions[i][j] != null &&
+    //             regionsList[onScreenRegions[i][j].name] != null &&
+    //             regionsList[onScreenRegions[i][j].name].owner != currentPlayerTurn) {
+    //             ctx.drawImage(this.fow[onScreenRegions[i][j].name],
+    //                 this.x - (cameraOrigin.x * dim),
+    //                 this.y - (cameraOrigin.y * dim));
+    //         }
+    //     }
+    // }
+
+}
+// ===================================================================
+// End - Fog of War
+// ===================================================================
+
+
+
+// ===================================================================
 // Start - Welcome Screen
 // ===================================================================
 
 function WelcomeScreen(game) {
     // Welcome Screen Background
-    this.animation = new Animation(AM.getAsset("./img/welcome_screen.png"), 1280, 720, 7680, .08, 6, true, 1);
-    this.background = AM.getAsset("./img/welcome_background.png");
-    this.hover = AM.getAsset("./img/welcome_hover2.png");
+    this.animation = new Animation(AM.getAsset("./img/welcome_screen.png"), 1280, 720, 8960, .9, 7, true, 1);
 
-    this.display = this.background;
+    this.newGame = AM.getAsset("./img/new_game.png");
+    this.newGameHighlighted = AM.getAsset("./img/new_game_highlighted.png");
+    this.instructions = AM.getAsset("./img/instructions.png");
+    this.instructionsHighlighted = AM.getAsset("./img/instructions_highlighted.png");
+
+    this.ngDisplay = this.newGame;
+    this.insDisplay = this.instructions;
     this.ctx = game.ctx;
 
     // New Game Button Paramters
-    this.newGameButton = AM.getAsset("./img/button_new-game.png");
-    this.ngbWidth = 270;
-    this.ngbHeight = 72;
-    this.ngbX = (gameEngine.surfaceWidth / 2) - (270 / 2); //This is to center the button
-    this.ngbY = 500; //Y-coordinate of button
+    this.ngWidth = 172;
+    this.ngHeight = 40;
+    this.ngX = (gameEngine.surfaceWidth / 2) - (this.ngWidth / 2); //This is to center the button
+    this.ngY = 500; //Y-coordinate of button
+
+    // Instructions Button Paramters
+    this.insWidth = 197;
+    this.insHeight = 40;
+    this.insX = (gameEngine.surfaceWidth / 2) - (this.insWidth / 2); //This is to center the button
+    this.insY = 580; //Y-coordinate of button
 
     // Hitboxes for the buttons
-    this.hitBoxes = [{ name: "newGame", x: 591, y: 388, w: 567, h: 165 }];
-    // this.insButtons = [{name: "back", x: , y: , w: , h: },{name: "next", x: , y: , w: , h: }, 
-    //                     {name: "home", x:2110 , y: 34 ,w: 58 , h: 53}]
+    this.hitBoxes = [{ name: "newGame", x: this.ngX + 3, y: this.ngY + 3, w: this.ngWidth - 3, h: this.ngHeight - 3 },
+    { name: "instructions", x: this.insX + 3, y: this.insY + 3, w: this.insWidth - 3, h: this.insHeight - 3 }];
 
     this.audio = new Audio("./sound/welcome_music.mp3");
     this.audio.autoplay = true;
@@ -1692,17 +2285,25 @@ WelcomeScreen.prototype.constructor = WelcomeScreen;
 WelcomeScreen.prototype.update = function (ctx) {
 
 
+    // Hover actions
     if (gameEngine.mouseOver != null) {
         var temp = getClickedItem(this.hitBoxes, gameEngine.mouseOver.layerX, gameEngine.mouseOver.layerY);
         console.log(temp);
         if (temp != null && temp.name === "newGame") {
-            this.display = this.hover;
+            this.ngDisplay = this.newGameHighlighted;
         } else {
-            this.display = this.background;
+            this.ngDisplay = this.newGame;
+        }
+
+        if (temp != null && temp.name === "instructions") {
+            this.insDisplay = this.instructionsHighlighted;
+        } else {
+            this.insDisplay = this.instructions;
         }
         gameEngine.mouseOver = null;
     }
 
+    // Click actions
     if (gameEngine.click != null) {
 
         var hit = getClickedItem(this.hitBoxes, gameEngine.click.x, gameEngine.click.y);
@@ -1722,9 +2323,12 @@ WelcomeScreen.prototype.update = function (ctx) {
     if (gameEngine.newGame) {
         this.removeFromWorld = true;
         gameEngine.addEntity(new MapDisplay(gameEngine));
+        gameEngine.addGUIEntity(new FogOfWar(gameEngine));
         gameEngine.addGUIEntity(new MinimapDisplay(gameEngine));
         gameEngine.addGUIEntity(new ResourceDisplay(gameEngine));
         gameEngine.addGUIEntity(new ControlDisplay(gameEngine));
+        // gameEngine.addGUIEntity(new FogOfWar(gameEngine));
+
 
         gameEngine.addEntity(new InputHandler(gameEngine));
         gameEngine.addEntity(new AudioHandler(gameEngine));
@@ -1734,9 +2338,9 @@ WelcomeScreen.prototype.update = function (ctx) {
         changeCameraOrigin(59, 0);
         createArray(cameraOrigin);
         players.push(new Player(0, 0, { x: 59, y: 0 }));
-        players[0].foodCount = 245;
+        players[0].foodCount = 367;
         players.push(new Player(1, 0, { x: 0, y: 90 }));
-        players[1].foodCount = 3;
+        players[1].foodCount = 15;
 
         // Start buildings, troops
         for (var i = 0; i < regionsList.length; i++) {
@@ -1744,12 +2348,33 @@ WelcomeScreen.prototype.update = function (ctx) {
                 //if ((i >= 40 && i <= 50) || (i >= 29 && i <= 39)) {
                     buildSoldier(regionsList[i]);
                     regionsList[i].troop["soldier"].hasMoved = 0;
+                    buildSoldierRanged(regionsList[i]);
+                    regionsList[i].troop["soldierRanged"].hasMoved = 0;
+
+                    updateFlag(regionsList[i]);
+
                     buildFarm(regionsList[i]);
                     buildBarracks(regionsList[i]);
                // }
 
             }
         }
+
+        // Tester
+        // for (var i = 0; i < regionsList.length; i++) {
+        //     if (regionsList[i] != undefined) {
+
+        //         buildSoldier(regionsList[i]);
+        //         regionsList[i].troop["soldier"].hasMoved = 0;
+        //         buildSoldierRanged(regionsList[i]);
+        //         // regionsList[i].troop["soldierRanged"].hasMoved = 0;
+        //         buildFarm(regionsList[i]);
+        //         buildBarracks(regionsList[i]);
+        //         addCaptainToRegion(regionsList[i]);
+
+
+        //     }
+        // }
 
         // Start captains
         addCaptainToRegion(regionsList[43]);
@@ -1764,8 +2389,9 @@ WelcomeScreen.prototype.update = function (ctx) {
 
 WelcomeScreen.prototype.draw = function (ctx) {
     this.animation.drawFrame(this.game.clockTick, this.ctx, this.x, this.y);
-    ctx.drawImage(this.newGameButton, this.ngbX, this.ngbY, this.ngbWidth, this.ngbHeight);
-    ctx.drawImage(this.display, 0, 0);
+    // ctx.drawImage(this.newGameButton, this.ngbX, this.ngbY, this.ngbWidth, this.ngbHeight);
+    ctx.drawImage(this.ngDisplay, this.ngX, this.ngY);
+    ctx.drawImage(this.insDisplay, this.insX, this.insY);
 }
 // ===================================================================
 // End - Welcome SCreen
@@ -1780,7 +2406,7 @@ function Main() {
     // Resource Display
     AM.queueDownload("./img/sidebar/resource_display.png");
     AM.queueDownload("./img/sidebar/food_icon.png");
-    AM.queueDownload("./img/sidebar/money_icon.png");
+    AM.queueDownload("./img/sidebar/gold_icon.png");
 
     // Game Map Display
     AM.queueDownload("./img/map/map_master4.png");
@@ -1790,10 +2416,19 @@ function Main() {
     AM.queueDownload("./img/sprites/alien_standing.png");
     AM.queueDownload("./img/sprites/soldier_standing.png");
     AM.queueDownload("./img/sprites/soldier_animated.png");
+    AM.queueDownload("./img/sprites/alien_ranged_animated.png");
+    AM.queueDownload("./img/sprites/alien_ranged_standing.png");
+    AM.queueDownload("./img/sprites/soldier_ranged_standing.png");
+    AM.queueDownload("./img/sprites/soldier_ranged_animated.png");
     AM.queueDownload("./img/sprites/cap_alien_animated.png");
     AM.queueDownload("./img/sprites/cap_alien_standing.png");
     AM.queueDownload("./img/sprites/cap_soldier_standing.png");
     AM.queueDownload("./img/sprites/cap_soldier_animated.png");
+
+    AM.queueDownload("./img/sprites/red_flag_animated.png");
+    AM.queueDownload("./img/sprites/red_flag_standing.png");
+    AM.queueDownload("./img/sprites/blue_flag_standing.png");
+    AM.queueDownload("./img/sprites/blue_flag_animated.png");
 
 
     //Building Entities
@@ -1816,6 +2451,11 @@ function Main() {
     AM.queueDownload("./img/welcome_hover.png");
     AM.queueDownload("./img/welcome_hover2.png");
 
+    AM.queueDownload("./img/new_game_highlighted.png");
+    AM.queueDownload("./img/new_game.png");
+    AM.queueDownload("./img/instructions_highlighted.png");
+    AM.queueDownload("./img/instructions.png");
+
     // Control Display
     AM.queueDownload("./img/control/button.png");
     AM.queueDownload("./img/control/action_on.png");
@@ -1836,9 +2476,55 @@ function Main() {
     AM.queueDownload("./img/control/troop_on.png");
     AM.queueDownload("./img/control/troop_off.png");
     AM.queueDownload("./img/control/king_on.png");
-    AM.queueDownload("./img/control/king_off.png");
     AM.queueDownload("./img/control/archer_on.png");
     AM.queueDownload("./img/control/archer_off.png");
+
+
+    // Map
+    AM.queueDownload("./img/fog_of_war/10.png");
+    AM.queueDownload("./img/fog_of_war/11.png");
+    AM.queueDownload("./img/fog_of_war/12.png");
+    AM.queueDownload("./img/fog_of_war/13.png");
+    AM.queueDownload("./img/fog_of_war/14.png");
+    AM.queueDownload("./img/fog_of_war/15.png");
+    AM.queueDownload("./img/fog_of_war/16.png");
+    AM.queueDownload("./img/fog_of_war/17.png");
+    AM.queueDownload("./img/fog_of_war/18.png");
+    AM.queueDownload("./img/fog_of_war/19.png");
+    AM.queueDownload("./img/fog_of_war/29.png");
+    AM.queueDownload("./img/fog_of_war/30.png");
+    AM.queueDownload("./img/fog_of_war/31.png");
+    AM.queueDownload("./img/fog_of_war/32.png");
+    AM.queueDownload("./img/fog_of_war/33.png");
+    AM.queueDownload("./img/fog_of_war/34.png");
+    AM.queueDownload("./img/fog_of_war/35.png");
+    AM.queueDownload("./img/fog_of_war/36.png");
+    AM.queueDownload("./img/fog_of_war/37.png");
+    AM.queueDownload("./img/fog_of_war/38.png");
+    AM.queueDownload("./img/fog_of_war/39.png");
+    AM.queueDownload("./img/fog_of_war/40.png");
+    AM.queueDownload("./img/fog_of_war/41.png");
+    AM.queueDownload("./img/fog_of_war/42.png");
+    AM.queueDownload("./img/fog_of_war/43.png");
+    AM.queueDownload("./img/fog_of_war/44.png");
+    AM.queueDownload("./img/fog_of_war/45.png");
+    AM.queueDownload("./img/fog_of_war/46.png");
+    AM.queueDownload("./img/fog_of_war/47.png");
+    AM.queueDownload("./img/fog_of_war/48.png");
+    AM.queueDownload("./img/fog_of_war/49.png");
+    AM.queueDownload("./img/fog_of_war/50.png");
+    AM.queueDownload("./img/fog_of_war/60.png");
+    AM.queueDownload("./img/fog_of_war/61.png");
+    AM.queueDownload("./img/fog_of_war/62.png");
+    AM.queueDownload("./img/fog_of_war/63.png");
+    AM.queueDownload("./img/fog_of_war/64.png");
+    AM.queueDownload("./img/fog_of_war/65.png");
+    AM.queueDownload("./img/fog_of_war/66.png");
+    AM.queueDownload("./img/fog_of_war/67.png");
+    AM.queueDownload("./img/fog_of_war/68.png");
+    AM.queueDownload("./img/fog_of_war/68.png");
+    AM.queueDownload("./img/fog_of_war/69.png");
+
 
 
     AM.downloadAll(function () {
