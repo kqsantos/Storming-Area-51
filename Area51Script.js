@@ -380,51 +380,51 @@ function getClickedItem(items, x, y) {
 
 
 function BuildRegions() {
-    regionsList[10] = new Region(10, -1, [1025, 568], [949, 745], [1121, 665], null, [963, 604], 'plains', [11, 12, 46, 47]);
-    regionsList[11] = new Region(11, -1, [1040, 990], [1100, 1050], [1225, 997], null, [1125, 904], 'plains', [10, 12, 50, 60]);
-    regionsList[12] = new Region(12, -1, [750, 800], [752, 1044], [810, 898], null, [842, 920], 'plains', [10, 11, 13, 18, 36]);
-    regionsList[13] = new Region(13, -1, [479, 1013], [481, 1090], [509, 951], null, [643, 1053], 'plains', [12, 14, 36]);
-    regionsList[14] = new Region(14, -1, [189, 811], [199, 991], [233, 913], null, [291, 997], 'plains', [13, 36, 35, 19]);
-    regionsList[15] = new Region(15, -1, [145, 260], [230, 180], [480, 241], null, [384, 217], 'plains', [16, 17]);
-    regionsList[16] = new Region(16, -1, [442, 329], [446, 403], [310, 400], null, [220, 371], 'plains', [15, 17, 18, 19]);
-    regionsList[17] = new Region(17, -1, [575, 163], [575, 255], [620, 399], null, [706, 229], 'plains', [15, 16, 18, 45, 46]);
-    regionsList[18] = new Region(18, -1, [675, 490], [695, 555], [590, 510], null, [585, 575], 'plains', [12, 19, 16, 17, 46]);
-    regionsList[19] = new Region(19, -1, [290, 633], [215, 705], [138, 635], null, [210, 603], 'plains', [16, 18, 14]);
+    regionsList[10] = new Region(10, -1, [1025, 568], [949, 745], [1121, 665], null, [963, 604], 'plains', [11, 12, 46, 47],[[51,30],[65,30],[65,44],[74,44],[74,45],[51,45]]);
+    regionsList[11] = new Region(11, -1, [1040, 990], [1100, 1050], [1225, 997], null, [1125, 904], 'plains', [10, 12, 50, 60],[[51,46],[74,46],[74,62],[51,62]]);
+    regionsList[12] = new Region(12, -1, [750, 800], [752, 1044], [810, 898], null, [842, 920], 'plains', [10, 11, 13, 18, 36],[[31,47],[40,47],[40,35],[50,35],[50,62],[47,62],[47,63],[40,63],[40,51],[31,51]]);
+    regionsList[13] = new Region(13, -1, [479, 1013], [481, 1090], [509, 951], null, [643, 1053], 'plains', [12, 14, 36],[[25,47],[30,47],[30,52],[39,52],[39,63],[25,63]]);
+    regionsList[14] = new Region(14, -1, [189, 811], [199, 991], [233, 913], null, [291, 997], 'plains', [13, 36, 35, 19],[[6,43],[20,43],[20,46],[24,46],[24,63],[23,63],[23,66],[6,66]]);
+    regionsList[15] = new Region(15, -1, [145, 260], [230, 180], [480, 241], null, [384, 217], 'plains', [16, 17],[[6,4],[29,4],[29,16],[22,16],[22,20],[6,20]]);
+    regionsList[16] = new Region(16, -1, [442, 329], [446, 403], [310, 400], null, [220, 371], 'plains', [15, 17, 18, 19],[[6,21], [23,21], [23,17],[29,17],[29,25],[6,25]]);
+    regionsList[17] = new Region(17, -1, [575, 163], [575, 255], [620, 399], null, [706, 229], 'plains', [15, 16, 18, 45, 46],[[30,4],[43,4],[43,22],[40,22],[40,25],[30,25]]);
+    regionsList[18] = new Region(18, -1, [675, 490], [695, 555], [590, 510], null, [585, 575], 'plains', [12, 19, 16, 17, 46],[[26,26],[41,26],[41,23],[43,23],[43,34],[39,34],[39,37],[31,37],[31,32],[26,32]]);
+    regionsList[19] = new Region(19, -1, [290, 633], [215, 705], [138, 635], null, [210, 603], 'plains', [16, 18, 14],[[6, 26], [25,26], [25,32],[20,32],[20,42],[6,42]]);
 
-    regionsList[40] = new Region(40, 0, [1759, 731], [1773, 845], [1635, 1109], null, [1721, 1139], 'tundra', [60, 61, 41, 50, 42, 44]);
-    regionsList[41] = new Region(41, 0, [1957, 881], [2083, 1061], [2117, 767], null, [2033, 771], 'tundra', [42, 40, 61]);
-    regionsList[42] = new Region(42, 0, [2073, 653], [2161, 653], [2015, 655], null, [1907, 649], 'tundra', [41, 40, 44, 43]);
-    regionsList[43] = new Region(43, 0, [2051, 491], [2049, 389], [2141, 223], null, [2065, 273], 'tundra', [42, 49]);
-    regionsList[44] = new Region(44, 0, [1675, 607], [1773, 617], [1685, 523], null, [1781, 515], 'tundra', [42, 40, 50, 48, 49]);
-    regionsList[45] = new Region(45, 0, [1011, 99], [1071, 170], [953, 177], null, [831, 145], 'tundra', [17, 46, 47]);
-    regionsList[46] = new Region(46, 0, [835, 435], [989, 429], [1017, 339], null, [849, 313], 'tundra', [17, 18, 10, 47, 45]);
-    regionsList[47] = new Region(47, 0, [1221, 99], [1307, 395], [1281, 201], null, [1229, 311], 'tundra', [45, 46, 10, 48, 50]);
-    regionsList[48] = new Region(48, 0, [1445, 345], [1443, 549], [1565, 289], null, [1549, 597], 'tundra', [47, 50, 44, 49]);
-    regionsList[49] = new Region(49, 0, [1831, 101], [1903, 301], [1823, 201], null, [1761, 291], 'tundra', [48, 44, 43]);
-    regionsList[50] = new Region(50, 0, [1375, 819], [1371, 969], [1559, 765], null, [1649, 767], 'tundra', [10, 11, 60, 40, 44, 48, 47]);
+    regionsList[40] = new Region(40, 0, [1759, 731], [1773, 845], [1635, 1109], null, [1721, 1139], 'tundra', [60, 61, 41, 50, 42, 44],[[96,39],[103,39],[103,41],[105,41],[105,52],[100,52],[100,67],[89,67],[89,51],[96,51]]);
+    regionsList[41] = new Region(41, 0, [1957, 881], [2083, 1061], [2117, 767], null, [2033, 771], 'tundra', [42, 40, 61],[[106,41],[125,41],[125,45],[117,45],[117,50],[125,50],[125,57],[124,57],[124,64],[106,64]]);
+    regionsList[42] = new Region(42, 0, [2073, 653], [2161, 653], [2015, 655], null, [1907, 649], 'tundra', [41, 40, 44, 43],[[104,32],[125,32],[125,40],[104,40]]);
+    regionsList[43] = new Region(43, 0, [2051, 491], [2049, 389], [2141, 223], null, [2065, 273], 'tundra', [42, 49],[[112,4],[125,4],[125,31],[112,31]]);
+    regionsList[44] = new Region(44, 0, [1675, 607], [1773, 617], [1685, 523], null, [1781, 515], 'tundra', [42, 40, 50, 48, 49],[[92,21],[103,21],[103,38],[92,38]]);
+    regionsList[45] = new Region(45, 0, [1011, 99], [1071, 170], [953, 177], null, [831, 145], 'tundra', [17, 46, 47],[[44,4],[65,4],[65,12],[44,12]]);
+    regionsList[46] = new Region(46, 0, [835, 435], [989, 429], [1017, 339], null, [849, 313], 'tundra', [17, 18, 10, 47, 45],[[44,13],[65,13],[65,29],[44,29]]);
+    regionsList[47] = new Region(47, 0, [1221, 99], [1307, 395], [1281, 201], null, [1229, 311], 'tundra', [45, 46, 10, 48, 50],[[66,4],[77,4],[77,43],[66,43]]);
+    regionsList[48] = new Region(48, 0, [1445, 345], [1443, 549], [1565, 289], null, [1549, 597], 'tundra', [47, 50, 44, 49],[[78,4],[82,4],[82,10],[89,10],[89,4],[99,4],[99,12],[91,12],[91,38],[78,38]]);
+    regionsList[49] = new Region(49, 0, [1831, 101], [1903, 301], [1823, 201], null, [1761, 291], 'tundra', [48, 44, 43],[[100,4],[111,4],[111,20],[92,20],[92,13],[100,13]]);
+    regionsList[50] = new Region(50, 0, [1375, 819], [1371, 969], [1559, 765], null, [1649, 767], 'tundra', [10, 11, 60, 40, 44, 48, 47],[[75,44],[78,44],[78,39],[95,39],[95,50],[88,50],[88,62],[75,62]]);
 
-    regionsList[29] = new Region(29, 1, [707, 1965], [703, 2051], [855, 2059], null, [899, 1971], 'sand', [30, 32, 39, 67]);
-    regionsList[30] = new Region(30, 1, [557, 2033], [553, 2115], [475, 2137], null, [447, 2027], 'sand', [29, 31, 32]);
-    regionsList[31] = new Region(31, 1, [137, 2025], [277, 2027], [255, 2177], null, [247, 2095], 'sand', [30, 32, 33]);
-    regionsList[32] = new Region(32, 1, [363, 1917], [261, 1847], [569, 1855], null, [487, 1907], 'sand', [29, 30, 31, 33, 38]);
-    regionsList[33] = new Region(33, 1, [135, 1783], [137, 1715], [183, 1587], null, [147, 1901], 'sand', [31, 32, 38, 35]);
-    regionsList[34] = new Region(34, 1, [900, 1332], [884, 1532], [1089, 1427], null, [996, 1408], 'sand', [65, 60, 36, 39, 37]);
-    regionsList[35] = new Region(35, 1, [184, 1238], [276, 1432], [366, 1336], null, [270, 1324], 'sand', [14, 36, 37, 38, 33]);
-    regionsList[36] = new Region(36, 1, [466, 1252], [566, 1186], [672, 1184], null, [770, 1188], 'sand', [12, 13, 14, 35, 37, 34]);
-    regionsList[37] = new Region(37, 1, [554, 1432], [548, 1360], [702, 1362], null, [770, 1356], 'sand', [34, 36, 35, 38]);
-    regionsList[38] = new Region(38, 1, [542, 1550], [572, 1716], [490, 1642], null, [384, 1628], 'sand', [39, 32, 33, 35, 37]);
-    regionsList[39] = new Region(39, 1, [822, 1670], [824, 1752], [1024, 1752], null, [978, 1828], 'sand', [34, 38, 29, 65]);
+    regionsList[29] = new Region(29, 1, [707, 1965], [703, 2051], [855, 2059], null, [899, 1971], 'sand', [30, 32, 39, 67],[[37,107],[54,107],[54,114],[58,114],[58,113],[60,113],[60,117],[58,117],[58,116],[54,116],[54,123],[37,123]]);
+    regionsList[30] = new Region(30, 1, [557, 2033], [553, 2115], [475, 2137], null, [447, 2027], 'sand', [29, 31, 32],[[23,111],[36,111],[36,123],[23,123],[23,123]]);
+    regionsList[31] = new Region(31, 1, [137, 2025], [277, 2027], [255, 2177], null, [247, 2095], 'sand', [30, 32, 33],[[6,111],[22,111],[22,124],[5,124],[5,122],[6,122]]);
+    regionsList[32] = new Region(32, 1, [363, 1917], [261, 1847], [569, 1855], null, [487, 1907], 'sand', [29, 30, 31, 33, 38],[[13,101],[36,101],[36,110],[13,110]]);
+    regionsList[33] = new Region(33, 1, [135, 1783], [137, 1715], [183, 1587], null, [147, 1901], 'sand', [31, 32, 38, 35],[[6,84],[12,84],[12,110],[6,110]]);
+    regionsList[34] = new Region(34, 1, [900, 1332], [884, 1532], [1089, 1427], null, [996, 1408], 'sand', [65, 60, 36, 39, 37],[[48,72],[63,72],[63,89],[47,89],[47,74],[48,74]]);
+    regionsList[35] = new Region(35, 1, [184, 1238], [276, 1432], [366, 1336], null, [270, 1324], 'sand', [14, 36, 37, 38, 33],[[6,67],[23,67],[23,74],[24,74],[24,83],[6,83]]);
+    regionsList[36] = new Region(36, 1, [466, 1252], [566, 1186], [672, 1184], null, [770, 1188], 'sand', [12, 13, 14, 35, 37, 34],[[24,64],[47,64],[47,73],[24,73]]);
+    regionsList[37] = new Region(37, 1, [554, 1432], [548, 1360], [702, 1362], null, [770, 1356], 'sand', [34, 36, 35, 38],[[25,74],[46,74],[46,83],[25,83]]);
+    regionsList[38] = new Region(38, 1, [542, 1550], [572, 1716], [490, 1642], null, [384, 1628], 'sand', [39, 32, 33, 35, 37],[[13,84],[36,84],[36,94],[39,94],[39,99],[36,99],[36,100],[13,100]]);
+    regionsList[39] = new Region(39, 1, [822, 1670], [824, 1752], [1024, 1752], null, [978, 1828], 'sand', [34, 38, 29, 65],[[43,90],[63,90],[63,93],[62,93],[62,106],[43,106],[43,99],[40,99],[40,94],[43,94]]);
 
-    regionsList[60] = new Region(60, -1, [1368, 1328], [1464, 1326], [1512, 1170], null, [1326, 1206], 'grassland', [40, 50, 11, 64, 65, 34]);
-    regionsList[61] = new Region(61, -1, [1930, 1214], [2052, 1326], [2198, 1218], null, [2084, 1208], 'grassland', [41, 40, 62]);
-    regionsList[62] = new Region(62, -1, [1838, 1587], [2012, 1559], [2118, 1515], null, [1910, 1479], 'grassland', [61, 64, 63]);
-    regionsList[63] = new Region(63, -1, [1678, 1705], [1988, 1801], [1910, 1807], null, [1964, 1715], 'grassland', [62, 64, 66, 68, 69]);
-    regionsList[64] = new Region(64, -1, [1494, 1463], [1590, 1543], [1706, 1517], null, [1726, 1443], 'grassland', [62, 63, 66, 65, 60]);
-    regionsList[65] = new Region(65, -1, [1174, 1602], [1182, 1449], [1336, 1471], null, [1222, 1497], 'grassland', [34, 39, 66, 60, 64]);
-    regionsList[66] = new Region(66, -1, [1361, 1646], [1369, 1728], [1477, 1628], null, [1487, 1708], 'grassland', [64, 65, 63, 67]);
-    regionsList[67] = new Region(67, -1, [1225, 1940], [1377, 1940], [1383, 2088], null, [1313, 2030], 'grassland', [66, 29]);
-    regionsList[68] = new Region(68, -1, [1643, 2002], [1767, 2022], [1623, 2122], null, [1697, 2106], 'grassland', [69, 63]);
-    regionsList[69] = new Region(69, -1, [2007, 2126], [2111, 2136], [2105, 2016], null, [2051, 1958], 'grassland', [63, 68]);
+    regionsList[60] = new Region(60, -1, [1368, 1328], [1464, 1326], [1512, 1170], null, [1326, 1206], 'grassland', [40, 50, 11, 64, 65, 34],[[64,63],[88,63],[88,77],[64,78]]);
+    regionsList[61] = new Region(61, -1, [1930, 1214], [2052, 1326], [2198, 1218], null, [2084, 1208], 'grassland', [41, 40, 62],[[102,65],[124,65],[124,77],[121,77],[121,78],[102,78]]);
+    regionsList[62] = new Region(62, -1, [1838, 1587], [2012, 1559], [2118, 1515], null, [1910, 1479], 'grassland', [61, 64, 63],[[100,79],[121,79],[121,91],[113,91],[113,92],[100,92]]);
+    regionsList[63] = new Region(63, -1, [1678, 1705], [1988, 1801], [1910, 1807], null, [1964, 1715], 'grassland', [62, 64, 66, 68, 69],[[87,93],[113,93],[113,94],[123,94],[123,106],[111,106],[111,105],[96,105],[96,106],[87,106]]);
+    regionsList[64] = new Region(64, -1, [1494, 1463], [1590, 1543], [1706, 1517], null, [1726, 1443], 'grassland', [62, 63, 66, 65, 60],[[77,79],[99,79],[99,92],[87,92],[87,88],[80,88],[80,87],[77,87]]);
+    regionsList[65] = new Region(65, -1, [1174, 1602], [1182, 1449], [1336, 1471], null, [1222, 1497], 'grassland', [34, 39, 66, 60, 64],[[64,79],[76,79],[76,87],[69,87],[69,99],[63,99],[63,94],[64,94]]);
+    regionsList[66] = new Region(66, -1, [1361, 1646], [1369, 1728], [1477, 1628], null, [1487, 1708], 'grassland', [64, 65, 63, 67],[[70,88],[79,88],[79,89],[86,89],[86,105],[70,105]]);
+    regionsList[67] = new Region(67, -1, [1225, 1940], [1377, 1940], [1383, 2088], null, [1313, 2030], 'grassland', [66, 29],[[66,106],[82,106],[82,122],[66,122],[66,116],[62,116],[62,117],[61,117],[61,113],[62,113],[62,114],[66,114]]);
+    regionsList[68] = new Region(68, -1, [1643, 2002], [1767, 2022], [1623, 2122], null, [1697, 2106], 'grassland', [69, 63],[[87,107],[96,107],[96,108],[103,108],[103,124],[87,124]]);
+    regionsList[69] = new Region(69, -1, [2007, 2126], [2111, 2136], [2105, 2016], null, [2051, 1958], 'grassland', [63, 68],[[110,107],[123,107],[123,122],[104,122],[104,115],[110,115]]);
 
 }
 
@@ -941,6 +941,8 @@ function ControlDisplay(game) {
     this.troopIconOff = AM.getAsset("./img/control/knight_off.png")
     this.soldierIconOn = AM.getAsset("./img/control/troop_on.png")
     this.soldierIconOff = AM.getAsset("./img/control/troop_off.png")
+    this.archerIconOn = AM.getAsset("./img/control/archer_on.png")
+    this.archerIconOff = AM.getAsset("./img/control/archer_off.png")
 
     this.endTurnIconOn = AM.getAsset("./img/control/end_turn_on.png")
     this.endTurnIconOff = AM.getAsset("./img/control/end_turn_off.png")
@@ -957,6 +959,7 @@ function ControlDisplay(game) {
     this.a_moveBtn = { x: w - this.btnDim * 4, y: h - this.btnDim * 2 };
     this.a_capBtn = { x: w - this.btnDim * 5, y: h - this.btnDim * 2 };
     this.t_infBtn = { x: w - this.btnDim * 3, y: h - this.btnDim * 2 };
+    this.t_arcBtn = { x: w - this.btnDim * 4, y: h - this.btnDim * 2 };
     this.b_farmBtn = { x: w - this.btnDim * 2, y: h - this.btnDim * 2 };
     this.b_barBtn = { x: w - this.btnDim * 3, y: h - this.btnDim * 2 };
 
@@ -968,7 +971,8 @@ function ControlDisplay(game) {
     this.actionMenu = [{ name: "moveCap", x: this.a_capBtn.x, y: this.a_capBtn.y, w: this.btnDim, h: this.btnDim },
     { name: "moveFight", x: this.a_moveBtn.x, y: this.a_moveBtn.y, w: this.btnDim, h: this.btnDim }];
 
-    this.troopMenu = [{ name: "troop1", x: this.t_infBtn.x, y: this.t_infBtn.y, w: this.btnDim, h: this.btnDim }];
+    this.troopMenu = [{ name: "troop1", x: this.t_infBtn.x, y: this.t_infBtn.y, w: this.btnDim, h: this.btnDim },
+    {name: "troop2", x: this.t_arcBtn.x, y: this.t_arcBtn.y, w: this.btnDim, h: this.btnDim}];
 
     this.buildingMenu = [{ name: "farm", x: this.b_farmBtn.x, y: this.b_farmBtn.y, w: this.btnDim, h: this.btnDim },
     { name: "barracks", x: this.b_barBtn.x, y: this.b_barBtn.y, w: this.btnDim, h: this.btnDim }];
@@ -995,6 +999,7 @@ function ControlDisplay(game) {
     this.moveActive = false;
     this.capActive = false;
     this.soldierActive = false;
+    this.archerActive = false;
     this.barracksActive = false;
     this.farmActive = false;
 
@@ -1063,8 +1068,10 @@ ControlDisplay.prototype.update = function (ctx) {
     if (selectedRegion != null && selectedRegion.bldg["barracks"] != null &&
         players[currentPlayerTurn].foodCount >= (new Soldier(gameEngine, 0, 0).cost)) {
         this.soldierActive = true;
+        this.archerActive = true;
     } else {
         this.soldierActive = false;
+        this.archerActive = false;
     }
 
     // Barracks flag
@@ -1416,6 +1423,16 @@ ControlDisplay.prototype.draw = function (ctx) {
             ctx.drawImage(this.soldierIconOff, this.t_infBtn.x + 10, this.t_infBtn.y + 10, this.btnDim - 20, this.btnDim - 20);
 
         }
+        if (this.archerActive) {
+            ctx.drawImage(this.buttonIcon, this.t_arcBtn.x, this.t_arcBtn.y, this.btnDim, this.btnDim);
+            ctx.drawImage(this.archerIconOn, this.t_arcBtn.x + 10, this.t_arcBtn.y + 10, this.btnDim - 20, this.btnDim - 20);
+
+        } else {
+            ctx.drawImage(this.buttonIcon, this.t_arcBtn.x, this.t_arcBtn.y, this.btnDim, this.btnDim);
+            ctx.drawImage(this.archerIconOff, this.t_arcBtn.x + 10, this.t_arcBtn.y + 10, this.btnDim - 20, this.btnDim - 20);
+
+        }
+
 
         // if (debug) {
         //     console.log("ac" + this.actionFlag);
@@ -1659,6 +1676,8 @@ function WelcomeScreen(game) {
 
     // Hitboxes for the buttons
     this.hitBoxes = [{ name: "newGame", x: 591, y: 388, w: 567, h: 165 }];
+    // this.insButtons = [{name: "back", x: , y: , w: , h: },{name: "next", x: , y: , w: , h: }, 
+    //                     {name: "home", x:2110 , y: 34 ,w: 58 , h: 53}]
 
     this.audio = new Audio("./sound/welcome_music.mp3");
     this.audio.autoplay = true;
@@ -1722,12 +1741,12 @@ WelcomeScreen.prototype.update = function (ctx) {
         // Start buildings, troops
         for (var i = 0; i < regionsList.length; i++) {
             if (regionsList[i] != undefined) {
-                if ((i >= 40 && i <= 50) || (i >= 29 && i <= 39)) {
+                //if ((i >= 40 && i <= 50) || (i >= 29 && i <= 39)) {
                     buildSoldier(regionsList[i]);
                     regionsList[i].troop["soldier"].hasMoved = 0;
                     buildFarm(regionsList[i]);
                     buildBarracks(regionsList[i]);
-                }
+               // }
 
             }
         }
@@ -1818,7 +1837,8 @@ function Main() {
     AM.queueDownload("./img/control/troop_off.png");
     AM.queueDownload("./img/control/king_on.png");
     AM.queueDownload("./img/control/king_off.png");
-
+    AM.queueDownload("./img/control/archer_on.png");
+    AM.queueDownload("./img/control/archer_off.png");
 
 
     AM.downloadAll(function () {
