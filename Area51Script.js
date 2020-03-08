@@ -796,10 +796,11 @@ function moveFight(source, destination) {
     // console.log(destination)
     var validMove = source.neighbors.includes(destination.id);
     var validSource = source.troop['soldier'] !== null;
-    // console.log("HERRO")
-    // console.log(destination)
+    console.log("HERRO")
+    console.log(destination)
     // console.log("Hello " + destination.troop === [])
 
+    
     if ((destination.owner === -1 || destination.owner === source.owner || destination.troop === []) && validMove && validSource) {
         destination.owner = source.owner;
 
@@ -1436,6 +1437,13 @@ function ControlDisplay(game) {
     this.barracksActive = false;
     this.farmActive = false;
 
+
+    //Hover mega menu
+    this.actionHover = false;
+    this.troopHover = false;
+    this.buildingHover = false;
+    this.endHover = false;
+
     GUIEntity.call(this, game, 0, 0);
 }
 
@@ -1456,6 +1464,34 @@ ControlDisplay.prototype.update = function (ctx) {
     //     console.log("select"+selectedRegion.id);
     // }
 
+    if(gameEngine.mouseOver != null){
+        var temp = getClickedItem(this.menu, gameEngine.mouseOver.layerX, gameEngine.mouseOver.layerY);
+        
+            if(temp != null && temp.name == "action"){
+                this.actionHover = true;
+            }else{
+                this.actionHover = false;
+            }
+            if(temp != null && temp.name == "building"){
+                this.buildingHover = true;
+            }
+            else{
+                this.buildingHover = false;
+            }
+            if(temp != null && temp.name == "troop"){
+                this.troopHover = true;
+            }else{
+                this.troopHover = false;
+            }
+            if(temp != null && temp.name == "endTurn"){
+                this.endHover = true;
+            }else{
+                this.endHover = false;
+            }
+
+        
+        gameEngine.mouseOver = null;
+    }
 
 
     if (selectedRegion != this.currentRegion) {
@@ -1903,6 +1939,13 @@ ControlDisplay.prototype.draw = function (ctx) {
         //     console.log("tr" + this.troopFlag);
         //     console.log("bu" + this.buildingFlag);
         // }
+    }
+
+    if(this.actionHover){
+        ctx.fillStyle = "grey"
+        ctx.fillRect(this.aBtn.x - 50, this.aBtn.y-50, 100,40);
+        ctx.fillStyle = 'black';
+        ctx.fillText("Action", this.aBtn.x-35, this.aBtn.y-20)
     }
 }
 // ===================================================================
@@ -2456,6 +2499,9 @@ function Main() {
     AM.queueDownload("./img/instructions_highlighted.png");
     AM.queueDownload("./img/instructions.png");
 
+    AM.queueDownload("./img/ins_control.png");
+    AM.queueDownload("./img/ins_play.png");
+
     // Control Display
     AM.queueDownload("./img/control/button.png");
     AM.queueDownload("./img/control/action_on.png");
@@ -2476,6 +2522,7 @@ function Main() {
     AM.queueDownload("./img/control/troop_on.png");
     AM.queueDownload("./img/control/troop_off.png");
     AM.queueDownload("./img/control/king_on.png");
+    AM.queueDownload("./img/control/king_off.png");
     AM.queueDownload("./img/control/archer_on.png");
     AM.queueDownload("./img/control/archer_off.png");
 
