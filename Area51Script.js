@@ -447,7 +447,7 @@ function getClickedItem(items, x, y) {
 
 
 function BuildRegions() {
-    regionsList[10] = new Region(10, -1, [1025, 568], [949, 745], [1121, 665], null, [963, 604], 'plains', [11, 12, 46, 47], [[51, 30], [65, 30], [65, 44], [74, 44], [74, 45], [51, 45]], [1069, 703], [1058, 660]);
+    regionsList[10] = new Region(10, -1, [1025, 568], [949, 745], [1121, 665], null, [963, 604], 'plains', [11, 12, 46, 47, 50], [[51, 30], [65, 30], [65, 44], [74, 44], [74, 45], [51, 45]], [1069, 703], [1058, 660]);
     regionsList[11] = new Region(11, -1, [1040, 990], [1100, 1050], [1225, 997], null, [1125, 904], 'plains', [10, 12, 50, 60], [[51, 46], [74, 46], [74, 62], [51, 62]], [1293, 1001], [1154, 991]);
     regionsList[12] = new Region(12, -1, [750, 800], [752, 1044], [810, 898], null, [842, 920], 'plains', [10, 11, 13, 18, 36], [[31, 47], [40, 47], [40, 35], [50, 35], [50, 62], [47, 62], [47, 63], [40, 63], [40, 51], [31, 51]], [753, 884], [853, 862]);
     regionsList[13] = new Region(13, -1, [479, 1013], [481, 1090], [509, 951], null, [643, 1053], 'plains', [12, 14, 36], [[25, 47], [30, 47], [30, 52], [39, 52], [39, 63], [25, 63]], [576, 961], [481, 930]);
@@ -2525,53 +2525,6 @@ function Main() {
     AM.queueDownload("./img/control/king_off.png");
     AM.queueDownload("./img/control/archer_on.png");
     AM.queueDownload("./img/control/archer_off.png");
-
-
-    // Map
-    AM.queueDownload("./img/fog_of_war/10.png");
-    AM.queueDownload("./img/fog_of_war/11.png");
-    AM.queueDownload("./img/fog_of_war/12.png");
-    AM.queueDownload("./img/fog_of_war/13.png");
-    AM.queueDownload("./img/fog_of_war/14.png");
-    AM.queueDownload("./img/fog_of_war/15.png");
-    AM.queueDownload("./img/fog_of_war/16.png");
-    AM.queueDownload("./img/fog_of_war/17.png");
-    AM.queueDownload("./img/fog_of_war/18.png");
-    AM.queueDownload("./img/fog_of_war/19.png");
-    AM.queueDownload("./img/fog_of_war/29.png");
-    AM.queueDownload("./img/fog_of_war/30.png");
-    AM.queueDownload("./img/fog_of_war/31.png");
-    AM.queueDownload("./img/fog_of_war/32.png");
-    AM.queueDownload("./img/fog_of_war/33.png");
-    AM.queueDownload("./img/fog_of_war/34.png");
-    AM.queueDownload("./img/fog_of_war/35.png");
-    AM.queueDownload("./img/fog_of_war/36.png");
-    AM.queueDownload("./img/fog_of_war/37.png");
-    AM.queueDownload("./img/fog_of_war/38.png");
-    AM.queueDownload("./img/fog_of_war/39.png");
-    AM.queueDownload("./img/fog_of_war/40.png");
-    AM.queueDownload("./img/fog_of_war/41.png");
-    AM.queueDownload("./img/fog_of_war/42.png");
-    AM.queueDownload("./img/fog_of_war/43.png");
-    AM.queueDownload("./img/fog_of_war/44.png");
-    AM.queueDownload("./img/fog_of_war/45.png");
-    AM.queueDownload("./img/fog_of_war/46.png");
-    AM.queueDownload("./img/fog_of_war/47.png");
-    AM.queueDownload("./img/fog_of_war/48.png");
-    AM.queueDownload("./img/fog_of_war/49.png");
-    AM.queueDownload("./img/fog_of_war/50.png");
-    AM.queueDownload("./img/fog_of_war/60.png");
-    AM.queueDownload("./img/fog_of_war/61.png");
-    AM.queueDownload("./img/fog_of_war/62.png");
-    AM.queueDownload("./img/fog_of_war/63.png");
-    AM.queueDownload("./img/fog_of_war/64.png");
-    AM.queueDownload("./img/fog_of_war/65.png");
-    AM.queueDownload("./img/fog_of_war/66.png");
-    AM.queueDownload("./img/fog_of_war/67.png");
-    AM.queueDownload("./img/fog_of_war/68.png");
-    AM.queueDownload("./img/fog_of_war/68.png");
-    AM.queueDownload("./img/fog_of_war/69.png");
-
 
 
     AM.downloadAll(function () {
