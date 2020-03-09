@@ -75,6 +75,9 @@ Animation.prototype.drawFrame = function (tick, ctx, x, y) {
     this.elapsedTime += tick;
     if (this.isDone()) {
         if (this.loop) this.elapsedTime = 0;
+        else{
+            ctx.drawImage(this.spriteSheet, 1122, 0, 187, 128, (gameEngine.surfaceWidth/2)-(187/2), 180, 187, 128);
+        }
     }
     var frame = this.currentFrame();
     var xindex = 0;
@@ -2772,7 +2775,7 @@ WelcomeScreen.prototype.update = function (ctx) {
         gameEngine.addGUIEntity(new ControlDisplay(gameEngine));
 
         gameEngine.addGUIEntity(new ResourceDisplay(gameEngine));
-
+        gameEngine.addGUIEntity(new EndResultDisplay(gameEngine));
         // gameEngine.addGUIEntity(new FogOfWar(gameEngine));
 
 
@@ -2869,6 +2872,65 @@ WelcomeScreen.prototype.draw = function (ctx) {
 
 
 
+// ===================================================================
+// Start - End Result Display Screen
+// ===================================================================
+
+function EndResultDisplay(game) {
+    // Welcome Screen Background
+    //this.animation = new Animation(AM.getAsset("./img/welcome_screen.png"), 1280, 720, 8960, .9, 7, true, 1);
+
+    this.sword = new Animation(AM.getAsset("./img/swords_animated.png"), 187, 128, 1307, 0.25, 7, false, 1);
+    this.paper = AM.getAsset("./img/result_paper.png")
+    this.continueBtn = AM.getAsset("./img/continue_button.png")
+
+    // Hitboxes for the buttons
+    this.hitBoxes = [{ name: "newGame", x: this.ngX + 3, y: this.ngY + 3, w: this.ngWidth - 3, h: this.ngHeight - 3 },
+    { name: "instructions", x: this.insX + 3, y: this.insY + 3, w: this.insWidth - 3, h: this.insHeight - 3 }];
+
+   
+    Entity.call(this, game, 0, 0);
+}
+
+EndResultDisplay.prototype = new GUIEntity();
+EndResultDisplay.prototype.constructor = EndResultDisplay;
+
+EndResultDisplay.prototype.update = function () {
+
+
+    
+}
+
+EndResultDisplay.prototype.draw = function (ctx) {
+
+    ctx.drawImage(this.paper, (gameEngine.surfaceWidth/2)-(300), (gameEngine.surfaceHeight/2)-(150));
+    this.sword.drawFrame(this.game.clockTick, ctx, (gameEngine.surfaceWidth/2)-(187/2), 180);
+    ctx.drawImage(this.continueBtn, (gameEngine.surfaceWidth/2)-(109), 450)
+
+}
+// ===================================================================
+// End - End Result Display SCreen
+// ===================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 // ===================================================================
 // Start - Main
@@ -2934,6 +2996,11 @@ function Main() {
 
     AM.queueDownload("./img/ins_control.png");
     AM.queueDownload("./img/ins_play.png");
+
+    // End Turn Display
+    AM.queueDownload("./img/swords_animated.png"); 
+    AM.queueDownload("./img/result_paper.png"); 
+    AM.queueDownload("./img/continue_button.png"); 
 
     // Control Display
     AM.queueDownload("./img/control/button.png");
