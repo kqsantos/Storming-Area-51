@@ -627,8 +627,7 @@ function DefenceAiTurn(aiplayer, inputRegions) {
                     //return {destination: potentialDestination, source: [sourceRegion.id]};      // Stores destination as the index of the zeroTroopAttack array and the source as an array
 
                     if (!regionData[potentialDestination].troop['soldier'] || (sourceRegion.troop['soldier'] &&
-                        regionData[potentialDestination].troop['soldier'].count / 2 < sourceRegion.troop['soldier'].count / 2)) {
-
+                        regionData[potentialDestination].troop['soldier'].count + regionData[potentialDestination].troop['soldierRanged'].count < 2)) {
                         return { destination: potentialDestination, source: sourceRegion.id };
                     }
 
@@ -658,11 +657,11 @@ function DefenceAiTurn(aiplayer, inputRegions) {
         // console.log(aiOwnedRegions[i].troop);
 
 
-        if (!aiOwnedRegions[i].troop || !aiOwnedRegions[i].troop['soldier']) {                  // Checks is region has troops
-            soldier = 10;
-        } else if (aiOwnedRegions[i].troop['soldier'].count < 15) {
+        if (!aiOwnedRegions[i].troop || !aiOwnedRegions[i].troop['soldier'] || !aiOwnedRegions[i].troop['soldierRanged']) {                  // Checks is region has troops
+            soldier = 8;
+        } else if (aiOwnedRegions[i].troop['soldier'].count + aiOwnedRegions[i].troop['soldierRanged'].count < 8) {
             // console.log(3 - aiOwnedRegions[i].troop['soldier'].count);                              
-            soldier = 15 - aiOwnedRegions[i].troop['soldier'].count;
+            soldier = 8 - aiOwnedRegions[i].troop['soldier'].count - aiOwnedRegions[i].troop['soldierRanged'].count;
         } else {
             soldier = 0;
         }
@@ -702,10 +701,14 @@ function DefenceAiTurn(aiplayer, inputRegions) {
                 b--;
             }
         }
+        // console.log('source');
         // console.log(zeroTroopAttack[i].source);
-        sourcesUsed.push(zeroTroopAttack[i].source);                                            // Attacks if only one source can reach destination
+        // console.log('destination');
+        // console.log(inputRegions[zeroTroopAttack[i].destination]);                                        // Attacks if only one source can reach destination
+        // console.log(inputRegions[zeroTroopAttack[i].source].troop['soldier']);
 
-        if (inputRegions[zeroTroopAttack[i].source].troop['soldier'] !== undefined) {
+        console.log(inputRegions[zeroTroopAttack[i].source]);
+        if (inputRegions[zeroTroopAttack[i].source].troop['soldier'] !== undefined && inputRegions[zeroTroopAttack[i].source].troop['soldier'].count !== 0) {
             moveFight(inputRegions[zeroTroopAttack[i].source], inputRegions[zeroTroopAttack[i].destination]);
             console.log("source")
             console.log(inputRegions[zeroTroopAttack[i].source])
@@ -732,7 +735,7 @@ function DefenceAiTurn(aiplayer, inputRegions) {
                 if (inputRegions[temp[i].id].bldg['barracks']) {
                     buildSoldier(inputRegions[temp[i].id]);
                     if (temp[i].sold != 0) {
-                        buildSoldier(inputRegions[temp[i].id]);
+                        buildSoldierRanged(inputRegions[temp[i].id]);
                     }
                 }
                 temp[i].sold--;
@@ -969,15 +972,17 @@ function moveFight(source, destination) {
         var atkPow = 0;
 
         atkPow += (source.troop['soldier'].count - source.troop['soldier'].hasMoved) * source.troop['soldier'].atk;
+        atkPow += (source.troop['soldierRanged'].count - source.troop['soldierRanged'].hasMoved) * source.troop['soldierRanged'].atk;
 
         var defPow = 0;
         defPow += Number(destination.troop['soldier'].count) * Number(destination.troop['soldier'].def);
+        defPow += Number(destination.troop['soldierRanged'].count) * Number(destination.troop['soldierRanged'].def);
 
         while (defPow > 0 && atkPow > 0) {
             Math.random() > 0.5 ? atkPow-- : defPow--;
         }
 
-        console.log('ATTACK = ' + atkPow);
+        //console.log('ATTACK = ' + atkPow);
 
         if (atkPow > defPow) {
             // The captain will die if you defeat the enemy
@@ -990,7 +995,8 @@ function moveFight(source, destination) {
                 destination.troop['soldier'].removeFromWorld = true;
                 destination.owner = source.owner;
                 destination.troop = source.troop;
-                destination.troop['soldier'].count = atkPow;
+                destination.troop['soldierRanged'].count = atkPow/2;
+                destination.troop['soldierRanged'].count = atkPow % 2;
                 destination.troop['soldier'].x = destination.troopXY[0];
                 destination.troop['soldier'].y = destination.troopXY[1];
                 destination.troop['soldier'].hasMoved = destination.troop['soldier'].count;
@@ -1005,18 +1011,24 @@ function moveFight(source, destination) {
                 }
                 destination.owner = source.owner;
                 gameEngine.addEntity(destination.troop["soldier"]);
-                destination.troop['soldier'].count = atkPow;
-                destination.troop['soldier'].hasMoved = atkPow;
+                destination.troop['soldierRanged'].count = atkPow/2;
+                destination.troop['soldier'].count = atkPow % 2;
+                destination.troop['soldierRanged'].hasMoved = atkPow/2;
+                destination.troop['soldier'].hasMoved = atkPow % 2;
                 source.troop['soldier'].count = source.troop['soldier'].hasMoved;
+                source.troop['soldierRanged'].count = source.troop['soldierRanged'].hasMoved;
             }
             // Attacker won
         } else {
             if (source.troop['soldier'].hasMoved == 0) {
-                destination.troop['soldier'].count = defPow;
+                destination.troop['soldier'].count = defPow/2;
+                destination.troop['soldierRanged'].count = defPow % 2;
                 source.troop['soldier'].removeFromWorld = true;
+                source.troop['soldierRanged'].removeFromWorld = true;
                 source.troop = [];
             } else {
                 source.troop['soldier'].count = source.troop['soldier'].hasMoved;
+                source.troop['soldierRanged'].count = source.troop['soldierRanged'].hasMoved;
             }
 
             // Defender won
