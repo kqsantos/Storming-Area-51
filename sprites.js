@@ -294,7 +294,7 @@ function Barracks(game, owner, x, y) {
     this.owner = owner;
     this.x = x;
     this.y = y;
-    this.cost = 5;
+    this.cost = 8;
     Entity.call(this, game, this.x, this.y);
 }
 
@@ -326,7 +326,7 @@ function Farm(game, owner, x, y) {
     this.owner = owner;
     this.x = x;
     this.y = y;
-    this.cost = 5;
+    this.cost = 8;
     Entity.call(this, game, this.x, this.y);
 }
 

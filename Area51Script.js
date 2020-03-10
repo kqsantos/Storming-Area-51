@@ -44,6 +44,7 @@ var modbgHeight = bgHeight;
 
 var debug = false;
 var debugGrid = false;
+var toggleFogOfWar = true;
 
 var selectedRegion = null;
 var currentPlayerTurn = 0;
@@ -74,6 +75,9 @@ Animation.prototype.drawFrame = function (tick, ctx, x, y) {
     this.elapsedTime += tick;
     if (this.isDone()) {
         if (this.loop) this.elapsedTime = 0;
+        else{
+            ctx.drawImage(this.spriteSheet, 1122, 0, 187, 128, (gameEngine.surfaceWidth/2)-(187/2), 180, 187, 128);
+        }
     }
     var frame = this.currentFrame();
     var xindex = 0;
@@ -212,6 +216,10 @@ function toggleTurn() {
             regionsList[i].troop["soldier"].hasMoved = 0;
         }
 
+        if (regionsList[i] != null && regionsList[i].troop["soldierRanged"] != null) {
+            regionsList[i].troop["soldierRanged"].hasMoved = 0;
+        }
+
         if (regionsList[i] != null && regionsList[i].cap != null) {
             regionsList[i].cap.hasMoved = false;
 
@@ -226,8 +234,8 @@ function toggleTurn() {
     console.log("GOING TO " + players[currentPlayerTurn].cameraCoord.x + " " + players[currentPlayerTurn].cameraCoord.y)
     changeCameraOrigin(players[currentPlayerTurn].cameraCoord.x, players[currentPlayerTurn].cameraCoord.y);
     createArray(cameraOrigin);
-  
-      if(currentPlayerTurn = 1){
+
+    if (currentPlayerTurn = 1) {
         DefenceAiTurn(players[1], regionsList);
     }
 }
@@ -249,7 +257,7 @@ function buildFarm(region) {
     region.bldg["farm"] = newFarm;
     gameEngine.addEntity(newFarm);
 
-    players[currentPlayerTurn].foodCount -= new Farm(gameEngine, 0, 0, 0).cost;
+    players[currentPlayerTurn].goldCount -= new Farm(gameEngine, 0, 0, 0).cost;
 }
 
 function buildBarracks(region) {
@@ -258,7 +266,7 @@ function buildBarracks(region) {
     region.bldg["barracks"] = newBarracks;
     gameEngine.addEntity(newBarracks);
 
-    players[currentPlayerTurn].foodCount -= new Barracks(gameEngine, 0, 0, 0).cost;
+    players[currentPlayerTurn].goldCount -= new Barracks(gameEngine, 0, 0, 0).cost;
 }
 
 function buildSoldier(region) {
@@ -592,8 +600,8 @@ function DefenceAiTurn(aiplayer, inputRegions) {
 
     var aiOwnedRegions = [];
 
-    for (var i = 0; i < regions.length; i++){
-        if (regions[i].owner === aiplayer.ID){
+    for (var i = 0; i < regions.length; i++) {
+        if (regions[i].owner === aiplayer.ID) {
             aiOwnedRegions.push(regions[i]);
         }
     }
@@ -604,42 +612,42 @@ function DefenceAiTurn(aiplayer, inputRegions) {
     var needsUpgrade = [];
     var zeroTroopAttack = [];                                                                   // Stores objects {sourceID, barracks, farm}
 
-    for (var i = 0; i < aiOwnedRegions.length; i++){                                            // Iterates through owned regions
-        for(var neigh = 0; neigh < aiOwnedRegions[i].neighbors.length; neigh++){                // Iterates through owned neighbors
+    for (var i = 0; i < aiOwnedRegions.length; i++) {                                            // Iterates through owned regions
+        for (var neigh = 0; neigh < aiOwnedRegions[i].neighbors.length; neigh++) {                // Iterates through owned neighbors
             // console.log(aiOwnedRegions[i].neighbor[neigh]);
             let potentialEnemy = aiOwnedRegions[i].neighbors[neigh];
 
             zeroTroopAttack.push(checkZeroEnemies(aiOwnedRegions[i], potentialEnemy, inputRegions));
 
-            function checkZeroEnemies (sourceRegion, potentialDestination, regionData){
+            function checkZeroEnemies(sourceRegion, potentialDestination, regionData) {
                 // console.log('ENEMY CHECK '+ potentialDestination)
                 // console.log('Destination is' + (regionData[potentialDestination].ID !== 1))
-                if(regionData[potentialDestination].owner !== 1) {                                         // Checks if neighbor is enemy
+                if (regionData[potentialDestination].owner !== 1) {                                         // Checks if neighbor is enemy
                     // console.log('<<<<<<<<<<<<<<<ADD ENEMIES>>>>>>>>>>>>>>>>>>>>');
                     //return {destination: potentialDestination, source: [sourceRegion.id]};      // Stores destination as the index of the zeroTroopAttack array and the source as an array
 
-                    if (!regionData[potentialDestination].troop['soldier'] || (sourceRegion.troop['soldier'] && 
-                        regionData[potentialDestination].troop['soldier'].count / 2 < sourceRegion.troop['soldier'].count / 2)){
+                    if (!regionData[potentialDestination].troop['soldier'] || (sourceRegion.troop['soldier'] &&
+                        regionData[potentialDestination].troop['soldier'].count / 2 < sourceRegion.troop['soldier'].count / 2)) {
 
-                        return {destination: potentialDestination, source: sourceRegion.id}; 
+                        return { destination: potentialDestination, source: sourceRegion.id };
                     }
-                                                                 
+
                 }
             }
-        
+
         }
 
         let farm, barracks, soldier;
 
         //console.log(aiOwnedRegions);
 
-        if (!aiOwnedRegions[i].bldg['farm']){                                                   // Checks if there is a farm
+        if (!aiOwnedRegions[i].bldg['farm']) {                                                   // Checks if there is a farm
             farm = true;
         } else {
             farm = false;
         }
 
-        if (!aiOwnedRegions[i].bldg['barracks']){                                                   // Checks if there is a barracks
+        if (!aiOwnedRegions[i].bldg['barracks']) {                                                   // Checks if there is a barracks
             barracks = true;
         } else {
             barracks = false;
@@ -648,20 +656,22 @@ function DefenceAiTurn(aiplayer, inputRegions) {
         // console.log('AI Troops');
         // console.log(aiOwnedRegions[i].troop);
         // console.log(aiOwnedRegions[i].troop);
-        
+
 
         if (!aiOwnedRegions[i].troop || !aiOwnedRegions[i].troop['soldier']) {                  // Checks is region has troops
             soldier = 10;
-        } else if (aiOwnedRegions[i].troop['soldier'].count < 15) {  
+        } else if (aiOwnedRegions[i].troop['soldier'].count < 15) {
             // console.log(3 - aiOwnedRegions[i].troop['soldier'].count);                              
             soldier = 15 - aiOwnedRegions[i].troop['soldier'].count;
         } else {
             soldier = 0;
         }
 
-        if (farm || barracks || soldier){
-            needsUpgrade.push({id: aiOwnedRegions[i].id, bar: barracks, 
-                farm: farm, sold: soldier})                                                     // Stores easy access call so that if a barracks/farm needs to be built.
+        if (farm || barracks || soldier) {
+            needsUpgrade.push({
+                id: aiOwnedRegions[i].id, bar: barracks,
+                farm: farm, sold: soldier
+            })                                                     // Stores easy access call so that if a barracks/farm needs to be built.
         }
 
     }
@@ -681,23 +691,23 @@ function DefenceAiTurn(aiplayer, inputRegions) {
      * Have all single attack regions attack and then have multi-attack regions attack with the reduced options.
      */
 
-    for (var i = 0; i < zeroTroopAttack.length; i++){
+    for (var i = 0; i < zeroTroopAttack.length; i++) {
 
         let sourcesUsed = [-1];                                                                 // Makes the first element not null
 
-        for (var b = 0; b < zeroTroopAttack.length; b++){                                       // Removes all sources that have already attacked
+        for (var b = 0; b < zeroTroopAttack.length; b++) {                                       // Removes all sources that have already attacked
             // console.log(sourcesUsed.includes(zeroTroopAttack[b].source));
-            if (sourcesUsed.includes(zeroTroopAttack[b].source)){
+            if (sourcesUsed.includes(zeroTroopAttack[b].source)) {
                 zeroTroopAttack.pop(zeroTroopAttack[b]);
                 b--;
             }
-        }       
+        }
         // console.log(zeroTroopAttack[i].source);
         sourcesUsed.push(zeroTroopAttack[i].source);                                            // Attacks if only one source can reach destination
 
-        if (inputRegions[zeroTroopAttack[i].source].troop['soldier'] !== undefined){
-            moveFight(inputRegions[zeroTroopAttack[i].source], inputRegions[zeroTroopAttack[i].destination]); 
-        }        
+        if (inputRegions[zeroTroopAttack[i].source].troop['soldier'] !== undefined) {
+            moveFight(inputRegions[zeroTroopAttack[i].source], inputRegions[zeroTroopAttack[i].destination]);
+        }
 
     }
 
@@ -712,23 +722,23 @@ function DefenceAiTurn(aiplayer, inputRegions) {
 
 
     while (players[1].foodCount > 0 && count < temp.length) {                                       // Foodcount is not zero and there is a soldier upgrade still needed
-        for (var i = 0; i < temp.length; i++){
+        for (var i = 0; i < temp.length; i++) {
             // console.log('Sold ' + temp[i].sold);
-            if (temp[i].sold != 0 && players[1].foodCount > 5){                     // If the soldiers needed is not zero, the player has food and the player does not need a barracks.
-                if (inputRegions[temp[i].id].bldg['barracks']){
+            if (temp[i].sold != 0 && players[1].foodCount > 5) {                     // If the soldiers needed is not zero, the player has food and the player does not need a barracks.
+                if (inputRegions[temp[i].id].bldg['barracks']) {
                     buildSoldier(inputRegions[temp[i].id]);
-                    if (temp[i].sold != 0){
+                    if (temp[i].sold != 0) {
                         buildSoldier(inputRegions[temp[i].id]);
                     }
                 }
                 temp[i].sold--;
                 count = 0;
-            } else if (needsUpgrade[i].farm){
+            } else if (needsUpgrade[i].farm) {
                 buildFarm(inputRegions[temp[i].id]);
                 //console.log('FARM BUILT');
                 temp[i].farm = false;
                 count = 0;
-            } else if (needsUpgrade[i].bar){
+            } else if (needsUpgrade[i].bar) {
                 buildBarracks(inputRegions[temp[i].id]);
                 //console.log('FARM BUILT');
                 temp[i].bar = false;
@@ -740,7 +750,7 @@ function DefenceAiTurn(aiplayer, inputRegions) {
 
 
     }
-    
+
 
     /**
      * End Turn
@@ -800,7 +810,7 @@ function moveFight(source, destination) {
     console.log(destination)
     // console.log("Hello " + destination.troop === [])
 
-    
+
     if ((destination.owner === -1 || destination.owner === source.owner || destination.troop === []) && validMove && validSource) {
         destination.owner = source.owner;
 
@@ -836,12 +846,19 @@ function moveFight(source, destination) {
 
         } else if (source.troop['soldier'].count != 0) {
             // Move all troops from allied region to region with no troops
-            if (source.troop['soldier'].hasMoved == 0) {
+            if (source.troop['soldier'].hasMoved == 0 && source.troop['soldierRanged'].hasMoved == 0) {
                 destination.troop = source.troop;
                 destination.troop['soldier'].hasMoved = source.troop['soldier'].count;
+                destination.troop['soldierRanged'].hasMoved = source.troop['soldierRanged'].count;
                 destination.troop['soldier'].x = destination.troopXY[0];
                 destination.troop['soldier'].y = destination.troopXY[1];
-                source.troop['soldier'] = null;
+                destination.troop['soldierRanged'].x = destination.rangedXY[0];
+                destination.troop['soldierRanged'].y = destination.rangedXY[1];
+                source.troop = [];
+                console.log("destination")
+                console.log(destination)
+                console.log("source")
+                console.log(source)
             }
             // Move only the troops that hasn't moved from allied region to region with no troops
             else {
@@ -857,31 +874,9 @@ function moveFight(source, destination) {
                 source.troop['soldier'].count = source.troop['soldier'].hasMoved;
             }
 
-            // Move all troops from allied region to region with no troops
-            if (source.troop['soldierRanged'].hasMoved == 0) {
-                destination.troop = source.troop;
-                destination.troop['soldierRanged'].hasMoved = source.troop['soldierRanged'].count;
-                destination.troop['soldierRanged'].x = destination.troopXY[0];
-                destination.troop['soldierRanged'].y = destination.troopXY[1];
-                source.troop['soldierRanged'] = null;
-            }
-            // Move only the troops that hasn't moved from allied region to region with no troops
-            else {
-                if (source.owner == 0) {
-                    destination.troop["soldierRanged"] = new soldierRanged(gameEngine, destination.troopXY[0], destination.troopXY[1]);
-                } else {
-                    destination.troop["soldierRanged"] = new Alien(gameEngine, destination.troopXY[0], destination.troopXY[1]);
-                }
-
-                gameEngine.addEntity(destination.troop["soldierRanged"]);
-                destination.troop['soldierRanged'].count = source.troop['soldierRanged'].count - source.troop['soldierRanged'].hasMoved;
-                destination.troop['soldierRanged'].hasMoved = source.troop['soldierRanged'].count - source.troop['soldierRanged'].hasMoved;
-                source.troop['soldierRanged'].count = source.troop['soldierRanged'].hasMoved;
-            }
-
 
         }
-    } 
+    }
     // This is moving to an empty region
     else if (validMove && validSource && destination.troop["soldier"] == null) {
         destination.owner = source.owner;
@@ -987,18 +982,58 @@ function ResourceDisplay(game) {
     this.border = AM.getAsset("./img/sidebar/resource_display.png");
     this.foodIcon = AM.getAsset("./img/sidebar/food_icon.png")
     this.goldIcon = AM.getAsset("./img/sidebar/gold_icon.png")
+
+
+    this.foodFlag = false;
+    this.goldFlag = false;
+
+    this.hit = [{ name: "food", x: 962, y: 15, w: 90, h: 25 },
+    { name: "gold", x: 1096, y: 10, w: 90, h: 25 }];
+
+
     GUIEntity.call(this, game, gameEngine.surfaceWidth - 380, 0);
 }
 
 ResourceDisplay.prototype = new GUIEntity();
 ResourceDisplay.prototype.constructor = ResourceDisplay;
 
+
+ResourceDisplay.prototype.update = function () {
+
+    if (gameEngine.mouseOver != null &&
+        gameEngine.mouseOver.layerX >= this.x &&
+        gameEngine.mouseOver.layerY >= this.y &&
+        gameEngine.mouseOver.layerX <= gameEngine.surfaceWidth &&
+        gameEngine.mouseOver.layerY <= 50) {
+        var temp = getClickedItem(this.hit, gameEngine.mouseOver.layerX, gameEngine.mouseOver.layerY);
+        console.log(temp);
+        // Submenu
+        if (temp != null && temp.name == "food") {
+            this.foodFlag = true;
+        } else {
+            this.foodFlag = false;
+        }
+        if (temp != null && temp.name == "gold") {
+            this.goldFlag = true;
+        } else {
+            this.goldFlag = false;
+        }
+        temp=null;
+        gameEngine.mouseOver = null;
+    }
+
+
+
+}
 ResourceDisplay.prototype.draw = function (ctx) {
     ctx.fillStyle = "black";
     ctx.font = "24px Arial";
+    
 
     // Draw the border
+    ctx.globalAlpha = 0.9;
     ctx.drawImage(this.border, this.x, this.y);
+    ctx.globalAlpha = 1.0;
 
     // Draw the Food Icon and Count
     ctx.drawImage(this.foodIcon, this.x + 60, this.y + 10);
@@ -1007,10 +1042,211 @@ ResourceDisplay.prototype.draw = function (ctx) {
     //Draw the Money Icon and Count
     ctx.drawImage(this.goldIcon, this.x + 200, this.y + 10);
     ctx.fillText(players[currentPlayerTurn].goldCount, this.x + 230, this.y + 35);
+
+
+    if (this.foodFlag) {
+        displayTooltip("Generating " + getFood() + " food per turn", this.x, this.y + 85, 325, 35)
+    }
+    if (this.goldFlag) {
+        displayTooltip("Generating " + getGold() + " gold per turn", this.x + 100, this.y + 85, 325, 35)
+    }
+
+
+    function getFood() {
+        var output = 0;
+        for (var i = 0; i < regionsList.length; i++) {
+
+            if (regionsList[i] != null && regionsList[i].owner == currentPlayerTurn && regionsList[i].bldg["farm"] != null) {
+                output += 1;
+
+            }
+        }
+        return output;
+    }
+
+    function getGold() {
+        var output = 0;
+        for (var i = 0; i < regionsList.length; i++) {
+
+            if (regionsList[i] != null && regionsList[i].owner == currentPlayerTurn) {
+                output += 1;
+            }
+        }
+        return output;
+    }
+    function displayTooltip(text, x, y, w, h) {
+        ctx.globalAlpha = 0.8;
+        ctx.fillStyle = "#222"
+        ctx.fillRect(x - 50, y - 35, w, h);
+        ctx.fillStyle = '#bada55';
+        ctx.fillText(text, x - 35, y - 10)
+        ctx.globalAlpha = 1.0;
+    }
+
+
+
 }
 // ===================================================================
 // End - Resource Display
 // ===================================================================
+
+
+
+
+// ===================================================================
+// Start - Stats Display
+// ===================================================================
+function StatDisplay(game) {
+
+    this.soldierCaptain = AM.getAsset("./img/sprites/cap_soldier_standing.png");
+    this.soldier = AM.getAsset("./img/sprites/soldier_standing.png");
+    this.soldierRanged = AM.getAsset("./img/sprites/soldier_ranged_standing.png");
+    this.barracksBlue = AM.getAsset("./img/sprites/barracks_blue.png");
+    this.farmBlue = AM.getAsset("./img/sprites/farm_blue.png");
+
+    this.showBtn = AM.getAsset("./img/show_stat.png");
+    this.hideBtn = AM.getAsset("./img/hide_stat.png");
+
+    this.isHidden = false;
+
+    this.hit = [{ name: "show", x: gameEngine.surfaceWidth - 36, y: 80, w: 36, h: 45 },
+    { name: "hide", x: gameEngine.surfaceWidth - 414, y: 80, w: 36, h: 45 }];
+
+    this.display = AM.getAsset("./img/sidebar/stat_display.png");
+    GUIEntity.call(this, game, gameEngine.surfaceWidth - 380, 50);
+}
+
+StatDisplay.prototype = new GUIEntity();
+StatDisplay.prototype.constructor = StatDisplay;
+
+StatDisplay.prototype.update = function () {
+
+    if (selectedRegion != null &&
+        gameEngine.click != null &&
+        gameEngine.click.x >= this.hit[0].x &&
+        gameEngine.click.x <= this.hit[0].x + this.hit[0].w &&
+        gameEngine.click.y >= this.hit[0].y &&
+        gameEngine.click.y <= this.hit[0].y + this.hit[0].h) {
+        this.isHidden = false;
+        gameEngine.click = null;
+    }
+    else if (selectedRegion != null &&
+        gameEngine.click != null &&
+        gameEngine.click.x >= this.hit[1].x &&
+        gameEngine.click.x <= this.hit[1].x + this.hit[1].w &&
+        gameEngine.click.y >= this.hit[1].y &&
+        gameEngine.click.y <= this.hit[1].y + this.hit[1].h) {
+        this.isHidden = true;
+        gameEngine.click = null;
+    }
+}
+
+StatDisplay.prototype.draw = function (ctx) {
+    // Barracks
+
+
+
+    if (selectedRegion != null && !this.isHidden) {
+        ctx.drawImage(this.hideBtn, gameEngine.surfaceWidth - 414, 80);
+        var tempText = "";
+        ctx.fillStyle = "black";
+        ctx.font = "24px Arial";
+        ctx.globalAlpha = 0.9;
+        // Draw the border
+        ctx.drawImage(this.display, this.x, this.y);
+        ctx.globalAlpha = 1.0;
+        ctx.fillText("Selected Region Stats", gameEngine.surfaceWidth - 350, 85);
+
+        ctx.font = "19px Arial";
+
+        // Soldier
+        ctx.drawImage(this.soldier, gameEngine.surfaceWidth - 350, 100, 35, 40);
+
+        if (selectedRegion.troop != null && selectedRegion.troop["soldier"] != null) {
+            var soldierCount = selectedRegion.troop["soldier"].count;
+            var soldierAtk = selectedRegion.troop["soldier"].atk;
+            var soldierDef = selectedRegion.troop["soldier"].def;
+            if (selectedRegion.cap != null) {
+                soldierAtk *= 2;
+                soldierDef *= 2;
+            }
+            tempText = "X " + soldierCount +
+                " (Total atk: " + soldierCount * soldierAtk +
+                " Total def: " + soldierCount * soldierDef + ")"
+        } else {
+            tempText = "X 0 (Total atk: 0 Total def: 0)"
+        }
+        ctx.fillText(tempText, gameEngine.surfaceWidth - 310, 130);
+
+
+        // Ranged
+        ctx.drawImage(this.soldierRanged, gameEngine.surfaceWidth - 350, 148, 35, 40);
+        if (selectedRegion.troop != null && selectedRegion.troop["soldierRanged"] != null) {
+
+            var rangedCount = selectedRegion.troop["soldierRanged"].count;
+            var rangedAtk = selectedRegion.troop["soldierRanged"].atk;
+            var rangedDef = selectedRegion.troop["soldierRanged"].def;
+            if (selectedRegion.cap != null) {
+
+                rangedAtk *= 2;
+                rangedDef *= 2;
+            }
+            tempText = "X " + rangedCount +
+                " (Total atk: " + rangedCount * rangedAtk +
+                " Total def: " + rangedCount * rangedDef + ")"
+        } else {
+            tempText = "X 0 (Total atk: 0 Total def: 0)"
+        }
+        ctx.fillText(tempText, gameEngine.surfaceWidth - 310, 178);
+
+        // Soldier Captain
+        ctx.drawImage(this.soldierCaptain, gameEngine.surfaceWidth - 350, 196, 35, 40);
+
+        if (selectedRegion.cap != null) {
+            tempText = "Present";
+        } else {
+            tempText = "Not Present";
+        }
+        ctx.fillText(tempText, gameEngine.surfaceWidth - 310, 226);
+
+        // Farm
+        ctx.drawImage(this.farmBlue, gameEngine.surfaceWidth - 350, 246, 64, 40);
+        if (selectedRegion.bldg["farm"] != null) {
+            tempText = "Built";
+        } else {
+            tempText = "Not Built";
+        }
+        ctx.fillText(tempText, gameEngine.surfaceWidth - 280, 271);
+
+        // Barracks
+        ctx.drawImage(this.barracksBlue, gameEngine.surfaceWidth - 350, 297, 46, 40);
+        if (selectedRegion.bldg["barracks"] != null) {
+            tempText = "Built";
+        } else {
+            tempText = "Not Built";
+        }
+        ctx.fillText(tempText, gameEngine.surfaceWidth - 298, 325);
+
+
+
+
+    } else if (selectedRegion != null) {
+        ctx.drawImage(this.showBtn, gameEngine.surfaceWidth - 36, 80);
+    }
+
+}
+// ===================================================================
+// End - Stat Display
+// ===================================================================
+
+
+
+
+
+
+
+
+
 
 
 
@@ -1071,13 +1307,13 @@ MapDisplay.prototype.update = function (ctx) {
 
     if (!isThereCaptainForPlayer1) {
         // console.log("PLAYER 0 WINS");
-        deleteEverything("0");
+        deleteEverything("YOU WIN");
         // TRIGGER GAME OVER SCREEN
     }
 
     if (!isThereCaptainForPlayer0) {
         // console.log("PLAYER 1 WINS");
-        deleteEverything("1");
+        deleteEverything("YOU LOST");
         // TRIGGER GAME OVER SCREEN
     }
 
@@ -1119,16 +1355,16 @@ MapDisplay.prototype.draw = function (ctx) {
     if (this.endGame != null) {
         ctx.fillStyle = "black";
         ctx.font = "150px Arial";
-        ctx.fillText("PLAYER " + this.endGame + " WINS", (gameEngine.surfaceWidth / 2) - (570), 430);
+        ctx.fillText(this.endGame, (gameEngine.surfaceWidth / 2) - (370), 430);
 
         ctx.fillStyle = "white";
         ctx.font = "150px Arial";
-        ctx.fillText("PLAYER " + this.endGame + " WINS", (gameEngine.surfaceWidth / 2) - (570) + 3, 430 + 3);
+        ctx.fillText(this.endGame, (gameEngine.surfaceWidth / 2) - (370) + 3, 430 + 3);
     } else {
         // ctx.globalAlpha = 0.6;
-        ctx.fillStyle = "black";
-        ctx.font = "24px Arial";
-        ctx.fillText("Player " + currentPlayerTurn, (gameEngine.surfaceWidth / 2) - (50), 30);
+        // ctx.fillStyle = "black";
+        // ctx.font = "24px Arial";
+        // ctx.fillText("Player " + currentPlayerTurn, (gameEngine.surfaceWidth / 2) - (50), 30);
         // ctx.globalAlpha = 1;     
     }
 
@@ -1406,7 +1642,7 @@ function ControlDisplay(game) {
     { name: "moveFight", x: this.a_moveBtn.x, y: this.a_moveBtn.y, w: this.btnDim, h: this.btnDim }];
 
     this.troopMenu = [{ name: "troop1", x: this.t_infBtn.x, y: this.t_infBtn.y, w: this.btnDim, h: this.btnDim },
-    {name: "troop2", x: this.t_arcBtn.x, y: this.t_arcBtn.y, w: this.btnDim, h: this.btnDim}];
+    { name: "troop2", x: this.t_arcBtn.x, y: this.t_arcBtn.y, w: this.btnDim, h: this.btnDim }];
 
     this.buildingMenu = [{ name: "farm", x: this.b_farmBtn.x, y: this.b_farmBtn.y, w: this.btnDim, h: this.btnDim },
     { name: "barracks", x: this.b_barBtn.x, y: this.b_barBtn.y, w: this.btnDim, h: this.btnDim }];
@@ -1444,6 +1680,14 @@ function ControlDisplay(game) {
     this.buildingHover = false;
     this.endHover = false;
 
+    //Sub menu
+    this.moveHover = false;
+    this.capHover = false;
+    this.soldierHover = false;
+    this.archerHover = false;
+    this.barracksHover = false;
+    this.farmHover = false;
+
     GUIEntity.call(this, game, 0, 0);
 }
 
@@ -1464,34 +1708,9 @@ ControlDisplay.prototype.update = function (ctx) {
     //     console.log("select"+selectedRegion.id);
     // }
 
-    if(gameEngine.mouseOver != null){
-        var temp = getClickedItem(this.menu, gameEngine.mouseOver.layerX, gameEngine.mouseOver.layerY);
-        
-            if(temp != null && temp.name == "action"){
-                this.actionHover = true;
-            }else{
-                this.actionHover = false;
-            }
-            if(temp != null && temp.name == "building"){
-                this.buildingHover = true;
-            }
-            else{
-                this.buildingHover = false;
-            }
-            if(temp != null && temp.name == "troop"){
-                this.troopHover = true;
-            }else{
-                this.troopHover = false;
-            }
-            if(temp != null && temp.name == "endTurn"){
-                this.endHover = true;
-            }else{
-                this.endHover = false;
-            }
 
-        
-        gameEngine.mouseOver = null;
-    }
+
+
 
 
     if (selectedRegion != this.currentRegion) {
@@ -1547,7 +1766,7 @@ ControlDisplay.prototype.update = function (ctx) {
 
     // Barracks flag
     if (selectedRegion != null && selectedRegion.bldg["barracks"] == null &&
-        players[currentPlayerTurn].foodCount >= (new Barracks(gameEngine, 0, 0, 0).cost)) {
+        players[currentPlayerTurn].goldCount >= (new Barracks(gameEngine, 0, 0, 0).cost)) {
         this.barracksActive = true
     } else {
         this.barracksActive = false;
@@ -1555,7 +1774,7 @@ ControlDisplay.prototype.update = function (ctx) {
 
     // Farm flag
     if (selectedRegion != null && selectedRegion.bldg["farm"] == null &&
-        players[currentPlayerTurn].foodCount >= (new Farm(gameEngine, 0, 0, 0).cost)) {
+        players[currentPlayerTurn].goldCount >= (new Farm(gameEngine, 0, 0, 0).cost)) {
         this.farmActive = true;
     } else {
         this.farmActive = false;
@@ -1658,6 +1877,7 @@ ControlDisplay.prototype.update = function (ctx) {
         click.x <= (this.a_moveBtn.x + this.btnDim) &&
         click.y <= (this.a_moveBtn.y + this.btnDim)) {
         var actionItem = getClickedItem(this.actionMenu, click.x, click.y);
+
         if (actionItem != null) {
 
             console.log()
@@ -1681,8 +1901,8 @@ ControlDisplay.prototype.update = function (ctx) {
 
     // Sub-menu for Troop Button
     if (click != null && this.troopFlag == true &&
-        click.x >= this.t_infBtn.x &&
-        click.y >= this.t_infBtn.y &&
+        click.x >= this.t_arcBtn.x &&
+        click.y >= this.t_arcBtn.y &&
         click.x <= (this.t_infBtn.x + this.btnDim) &&
         click.y <= (this.t_infBtn.y + this.btnDim)) {
         var troopItem = getClickedItem(this.troopMenu, click.x, click.y);
@@ -1693,7 +1913,12 @@ ControlDisplay.prototype.update = function (ctx) {
                 var source = selectedRegion;
                 buildSoldier(source);
             }
-
+            if (this.soldierActive == true && troopItem.name == "troop2") {
+                this.destinationSelectCaptain = false;
+                this.destinationSelect = false;
+                var source = selectedRegion;
+                buildSoldierRanged(source);
+            }
         }
         gameEngine.click = null;
         toggleAllOff();
@@ -1808,6 +2033,26 @@ ControlDisplay.prototype.update = function (ctx) {
         that.actionFlag = false;
         that.troopFlag = false;
         that.buildingFlag = false;
+        toggleAllToolTipOff();
+    }
+
+    function toggleAllToolTipOff() {
+        that.actionHover = false;
+        that.troopHover = false;
+        that.buildingHover = false;
+        that.endHover = false;
+        that.moveHover = false;
+        that.capHover = false;
+        that.soldierHover = false;
+        that.archerHover = false;
+        that.farmHover = false;
+        that.barracksHover = false;
+    }
+
+    function toggleMegaToolTipOff() {
+        that.actionHover = false;
+        that.troopHover = false;
+        that.buildingHover = false;
     }
 
     function toggleAllOnMega() {
@@ -1824,13 +2069,112 @@ ControlDisplay.prototype.update = function (ctx) {
 
     }
 
+    if (gameEngine.mouseOver != null && this.actionFlag &&
+        gameEngine.mouseOver.layerX >= this.a_capBtn.x &&
+        gameEngine.mouseOver.layerY >= this.a_capBtn.y &&
+        gameEngine.mouseOver.layerX <= (this.a_capBtn.x + (this.btnDim * 2)) &&
+        gameEngine.mouseOver.layerY <= (this.a_capBtn.y + this.btnDim)) {
+        var temp = getClickedItem(this.actionMenu, gameEngine.mouseOver.layerX, gameEngine.mouseOver.layerY);
+        toggleMegaToolTipOff();
+        // Submenu
+        if (temp != null && temp.name == "moveFight") {
+            this.moveHover = true;
+        } else {
+            this.moveHover = false;
+        }
+        if (temp != null && temp.name == "moveCap") {
+            this.capHover = true;
+        } else {
+            this.capHover = false;
+        }
+        gameEngine.mouseOver = null;
+    }
 
+    if (gameEngine.mouseOver != null && this.troopFlag &&
+        gameEngine.mouseOver.layerX >= this.t_arcBtn.x &&
+        gameEngine.mouseOver.layerY >= this.t_arcBtn.y &&
+        gameEngine.mouseOver.layerX <= (this.t_arcBtn.x + (this.btnDim * 2)) &&
+        gameEngine.mouseOver.layerY <= (this.t_arcBtn.y + this.btnDim)) {
+        var temp = getClickedItem(this.troopMenu, gameEngine.mouseOver.layerX, gameEngine.mouseOver.layerY);
+        toggleMegaToolTipOff();
+        // Submenu
+        if (temp != null && temp.name == "troop1") {
+            this.soldierHover = true;
+        } else {
+            this.soldierHover = false;
+        }
+        if (temp != null && temp.name == "troop2") {
+            this.archerHover = true;
+        } else {
+            this.archerHover = false;
+        }
+        gameEngine.mouseOver = null;
+    }
 
+    if (gameEngine.mouseOver != null && this.buildingFlag &&
+        gameEngine.mouseOver.layerX >= this.b_barBtn.x &&
+        gameEngine.mouseOver.layerY >= this.b_barBtn.y &&
+        gameEngine.mouseOver.layerX <= (this.b_barBtn.x + (this.btnDim * 2)) &&
+        gameEngine.mouseOver.layerY <= (this.b_barBtn.y + this.btnDim)) {
+        var temp = getClickedItem(this.buildingMenu, gameEngine.mouseOver.layerX, gameEngine.mouseOver.layerY);
+        toggleMegaToolTipOff();
+        // Submenu
+        if (temp != null && temp.name == "farm") {
+            this.farmHover = true;
+        } else {
+            this.farmHover = false;
+        }
+        if (temp != null && temp.name == "barracks") {
+            this.barracksHover = true;
+
+        } else {
+            this.barracksHover = false;
+        }
+        gameEngine.mouseOver = null;
+    }
+
+    // Mouse over for mega menu
+    if (gameEngine.mouseOver != null &&
+        gameEngine.mouseOver.layerX >= this.aBtn.x &&
+        gameEngine.mouseOver.layerY >= this.aBtn.y &&
+        gameEngine.mouseOver.layerX <= gameEngine.surfaceWidth &&
+        gameEngine.mouseOver.layerY <= gameEngine.surfaceHeight) {
+        var temp = getClickedItem(this.menu, gameEngine.mouseOver.layerX, gameEngine.mouseOver.layerY);
+        toggleAllToolTipOff();
+        console.log(temp)
+        if (temp != null && temp.name == "action") {
+            this.actionHover = true;
+        } else {
+            this.actionHover = false;
+        }
+        if (temp != null && temp.name == "building") {
+            this.buildingHover = true;
+        }
+        else {
+            this.buildingHover = false;
+        }
+        if (temp != null && temp.name == "troop") {
+            this.troopHover = true;
+        } else {
+            this.troopHover = false;
+        }
+        if (temp != null && temp.name == "endTurn") {
+            this.endHover = true;
+        } else {
+            this.endHover = false;
+        }
+        gameEngine.mouseOver = null;
+    }
+
+    if (gameEngine.mouseOver != null) {
+        toggleAllToolTipOff();
+    }
 }
 
 ControlDisplay.prototype.draw = function (ctx) {
     ctx.fillStyle = "#9e9e9e";
     ctx.strokeStyle = "black";
+
 
     // Displays four mega menus
     ctx.drawImage(this.buttonIcon, this.aBtn.x, this.aBtn.y, this.btnDim, this.btnDim);
@@ -1941,13 +2285,55 @@ ControlDisplay.prototype.draw = function (ctx) {
         // }
     }
 
-    if(this.actionHover){
-        ctx.fillStyle = "grey"
-        ctx.fillRect(this.aBtn.x - 50, this.aBtn.y-50, 100,40);
-        ctx.fillStyle = 'black';
-        ctx.fillText("Action", this.aBtn.x-35, this.aBtn.y-20)
+    if (this.actionHover) {
+        displayTooltip("Action", this.aBtn.x, this.aBtn.y, 100, 35)
+    }
+
+    if (this.troopHover) {
+        displayTooltip("Build Troops", this.tBtn.x, this.tBtn.y, 160, 35)
+    }
+
+    if (this.buildingHover) {
+        displayTooltip("Build Buildings", this.bBtn.x, this.bBtn.y, 185, 35)
+    }
+
+    if (this.endHover) {
+        displayTooltip("End Turn", this.eTBtn.x, this.eTBtn.y, 125, 35)
+    }
+
+    if (this.moveHover) {
+        displayTooltip("Move/Fight", this.a_moveBtn.x, this.a_moveBtn.y, 145, 35)
+    }
+
+    if (this.capHover) {
+        displayTooltip("Move Captain", this.a_capBtn.x, this.a_capBtn.y, 175, 35)
+    }
+
+    if (this.soldierHover) {
+        displayTooltip("Build Melee (3 Food)", this.t_infBtn.x, this.t_infBtn.y, 252, 35)
+    }
+
+    if (this.archerHover) {
+        displayTooltip("Build Ranged (3 Food)", this.t_arcBtn.x, this.t_arcBtn.y, 270, 35)
+    }
+
+    if (this.farmHover) {
+        displayTooltip("Build Farm (8 gold)", this.b_farmBtn.x - 30, this.b_farmBtn.y, 232, 35)
+    }
+
+    if (this.barracksHover) {
+        displayTooltip("Build Barracks (8 gold)", this.b_barBtn.x - 30, this.b_barBtn.y, 268, 35)
+    }
+
+    function displayTooltip(text, x, y, w, h) {
+        ctx.font = "24px Arial";
+        ctx.fillStyle = "#222"
+        ctx.fillRect(x - 50, y - 35, w, h);
+        ctx.fillStyle = '#bada55';
+        ctx.fillText(text, x - 35, y - 10)
     }
 }
+
 // ===================================================================
 // End - Control Display
 // ===================================================================
@@ -2082,14 +2468,22 @@ InputHandler.prototype.update = function (ctx) {
         //     (Number(dim * cameraOrigin.y) + Number(click.y)));
 
 
-        var text = "[" + (Number(dim * cameraOrigin.x) + Number(click.x)) + ", " +
-            (Number(dim * cameraOrigin.y) + Number(click.y)) + "]";
+        // var text = "[" + (Number(dim * cameraOrigin.x) + Number(click.x)) + ", " +
+        //     (Number(dim * cameraOrigin.y) + Number(click.y)) + "]";
+        // navigator.clipboard.writeText(text).then(function () {
+        //     // console.log('Async: Copying to clipboard was successful!');
+        // }, function (err) {
+        //     // console.error('Async: Could not copy text: ', err);
+        // });
+
+
+        var text = "[" + (Number(click.x)) + ", " +
+            (Number(click.y)) + "]";
         navigator.clipboard.writeText(text).then(function () {
             // console.log('Async: Copying to clipboard was successful!');
         }, function (err) {
             // console.error('Async: Could not copy text: ', err);
         });
-
 
         gameEngine.click = null;
     }
@@ -2142,49 +2536,7 @@ AudioHandler.prototype.draw = function (ctx) {
 // Start - Fog of War
 // ===================================================================
 function FogOfWar(game) {
-    this.fow = [];
-    this.fow[10] = AM.getAsset("./img/fog_of_war/10.png");
-    this.fow[11] = AM.getAsset("./img/fog_of_war/11.png");
-    this.fow[12] = AM.getAsset("./img/fog_of_war/12.png");
-    this.fow[13] = AM.getAsset("./img/fog_of_war/13.png");
-    this.fow[14] = AM.getAsset("./img/fog_of_war/14.png");
-    this.fow[15] = AM.getAsset("./img/fog_of_war/15.png");
-    this.fow[16] = AM.getAsset("./img/fog_of_war/16.png");
-    this.fow[17] = AM.getAsset("./img/fog_of_war/17.png");
-    this.fow[18] = AM.getAsset("./img/fog_of_war/18.png");
-    this.fow[19] = AM.getAsset("./img/fog_of_war/19.png");
-    this.fow[29] = AM.getAsset("./img/fog_of_war/29.png");
-    this.fow[30] = AM.getAsset("./img/fog_of_war/30.png");
-    this.fow[31] = AM.getAsset("./img/fog_of_war/31.png");
-    this.fow[32] = AM.getAsset("./img/fog_of_war/32.png");
-    this.fow[33] = AM.getAsset("./img/fog_of_war/33.png");
-    this.fow[34] = AM.getAsset("./img/fog_of_war/34.png");
-    this.fow[35] = AM.getAsset("./img/fog_of_war/35.png");
-    this.fow[36] = AM.getAsset("./img/fog_of_war/36.png");
-    this.fow[37] = AM.getAsset("./img/fog_of_war/37.png");
-    this.fow[38] = AM.getAsset("./img/fog_of_war/38.png");
-    this.fow[39] = AM.getAsset("./img/fog_of_war/39.png");
-    this.fow[40] = AM.getAsset("./img/fog_of_war/40.png");
-    this.fow[41] = AM.getAsset("./img/fog_of_war/41.png");
-    this.fow[42] = AM.getAsset("./img/fog_of_war/42.png");
-    this.fow[43] = AM.getAsset("./img/fog_of_war/43.png");
-    this.fow[44] = AM.getAsset("./img/fog_of_war/44.png");
-    this.fow[45] = AM.getAsset("./img/fog_of_war/45.png");
-    this.fow[46] = AM.getAsset("./img/fog_of_war/46.png");
-    this.fow[47] = AM.getAsset("./img/fog_of_war/47.png");
-    this.fow[48] = AM.getAsset("./img/fog_of_war/48.png");
-    this.fow[49] = AM.getAsset("./img/fog_of_war/49.png");
-    this.fow[50] = AM.getAsset("./img/fog_of_war/50.png");
-    this.fow[60] = AM.getAsset("./img/fog_of_war/60.png");
-    this.fow[61] = AM.getAsset("./img/fog_of_war/61.png");
-    this.fow[62] = AM.getAsset("./img/fog_of_war/62.png");
-    this.fow[63] = AM.getAsset("./img/fog_of_war/63.png");
-    this.fow[64] = AM.getAsset("./img/fog_of_war/64.png");
-    this.fow[65] = AM.getAsset("./img/fog_of_war/65.png");
-    this.fow[66] = AM.getAsset("./img/fog_of_war/66.png");
-    this.fow[67] = AM.getAsset("./img/fog_of_war/67.png");
-    this.fow[68] = AM.getAsset("./img/fog_of_war/68.png");
-    this.fow[69] = AM.getAsset("./img/fog_of_war/69.png");
+
     this.displays = new Set();
     GUIEntity.call(this, game, 0, 0);
 }
@@ -2295,6 +2647,14 @@ function WelcomeScreen(game) {
     this.instructions = AM.getAsset("./img/instructions.png");
     this.instructionsHighlighted = AM.getAsset("./img/instructions_highlighted.png");
 
+    this.insPageOne = AM.getAsset("./img/ins_control.png");
+    this.insPageTwo = AM.getAsset("./img/ins_play.png");
+
+
+    this.insFlag = false;
+
+    this.display = this.insPageOne;
+
     this.ngDisplay = this.newGame;
     this.insDisplay = this.instructions;
     this.ctx = game.ctx;
@@ -2315,6 +2675,12 @@ function WelcomeScreen(game) {
     this.hitBoxes = [{ name: "newGame", x: this.ngX + 3, y: this.ngY + 3, w: this.ngWidth - 3, h: this.ngHeight - 3 },
     { name: "instructions", x: this.insX + 3, y: this.insY + 3, w: this.insWidth - 3, h: this.insHeight - 3 }];
 
+
+    this.insHitBoxes = [{ name: "previous", x: 200, y: 627, w: 85, h: 50 },
+    { name: "next", x: 1017, y: 632, w: 85, h: 50 },
+    { name: "home", x: 989, y: 48, w: 70, h: 50 }];
+
+
     this.audio = new Audio("./sound/welcome_music.mp3");
     this.audio.autoplay = true;
     this.audio.play();
@@ -2327,11 +2693,11 @@ WelcomeScreen.prototype.constructor = WelcomeScreen;
 
 WelcomeScreen.prototype.update = function (ctx) {
 
-
+    var that = this;
     // Hover actions
     if (gameEngine.mouseOver != null) {
         var temp = getClickedItem(this.hitBoxes, gameEngine.mouseOver.layerX, gameEngine.mouseOver.layerY);
-        console.log(temp);
+        // console.log(temp);
         if (temp != null && temp.name === "newGame") {
             this.ngDisplay = this.newGameHighlighted;
         } else {
@@ -2346,9 +2712,34 @@ WelcomeScreen.prototype.update = function (ctx) {
         gameEngine.mouseOver = null;
     }
 
+
+
+
+    if (gameEngine.click != null && this.insFlag) {
+        var clicked = getClickedItem(this.insHitBoxes, gameEngine.click.x, gameEngine.click.y);
+        console.log(clicked)
+        if (clicked != null && clicked.name === "previous") {
+            togglePage();
+        }
+        if (clicked != null && clicked.name === "next") {
+            togglePage();
+        }
+        if (clicked != null && clicked.name === "home") {
+            this.insFlag = false;
+        }
+        gameEngine.click = null;
+    }
+
     // Click actions
     if (gameEngine.click != null) {
 
+        // var text = "[" + (Number(dim * cameraOrigin.x) + Number(gameEngine.click.x)) + ", " +
+        //     (Number(dim * cameraOrigin.y) + Number(gameEngine.click.y)) + "]";
+        // navigator.clipboard.writeText(text).then(function () {
+        //     // console.log('Async: Copying to clipboard was successful!');
+        // }, function (err) {
+        //     // console.error('Async: Could not copy text: ', err);
+        // });
         var hit = getClickedItem(this.hitBoxes, gameEngine.click.x, gameEngine.click.y);
 
         if (debug) {
@@ -2360,16 +2751,31 @@ WelcomeScreen.prototype.update = function (ctx) {
         if (hit != null && hit.name === "newGame") {
             gameEngine.newGame = true;
         }
+        if (hit != null && hit.name === "instructions") {
+            this.insFlag = true;
 
+        }
         gameEngine.click = null;
     }
+
+
+
     if (gameEngine.newGame) {
         this.removeFromWorld = true;
         gameEngine.addEntity(new MapDisplay(gameEngine));
-        gameEngine.addGUIEntity(new FogOfWar(gameEngine));
+        if (toggleFogOfWar) {
+            gameEngine.addGUIEntity(new FogOfWar(gameEngine));
+        } else {
+            gameEngine.addGUIEntity(new GUIEntity());
+        }
+
         gameEngine.addGUIEntity(new MinimapDisplay(gameEngine));
-        gameEngine.addGUIEntity(new ResourceDisplay(gameEngine));
+        gameEngine.addGUIEntity(new StatDisplay(gameEngine));
+
         gameEngine.addGUIEntity(new ControlDisplay(gameEngine));
+
+        gameEngine.addGUIEntity(new ResourceDisplay(gameEngine));
+        gameEngine.addGUIEntity(new EndResultDisplay(gameEngine));
         // gameEngine.addGUIEntity(new FogOfWar(gameEngine));
 
 
@@ -2381,14 +2787,16 @@ WelcomeScreen.prototype.update = function (ctx) {
         changeCameraOrigin(59, 0);
         createArray(cameraOrigin);
         players.push(new Player(0, 0, { x: 59, y: 0 }));
-        players[0].foodCount = 367;
+        players[0].foodCount = 147;
+        players[0].goldCount = 352;
+        // players[0].foodCount = 999;
         players.push(new Player(1, 0, { x: 0, y: 90 }));
         players[1].foodCount = 15;
 
         // Start buildings, troops
         for (var i = 0; i < regionsList.length; i++) {
             if (regionsList[i] != undefined) {
-                //if ((i >= 40 && i <= 50) || (i >= 29 && i <= 39)) {
+                if ((i >= 40 && i <= 50) || (i >= 29 && i <= 39)) {
                     buildSoldier(regionsList[i]);
                     regionsList[i].troop["soldier"].hasMoved = 0;
                     buildSoldierRanged(regionsList[i]);
@@ -2398,7 +2806,7 @@ WelcomeScreen.prototype.update = function (ctx) {
 
                     buildFarm(regionsList[i]);
                     buildBarracks(regionsList[i]);
-               // }
+                }
 
             }
         }
@@ -2428,17 +2836,99 @@ WelcomeScreen.prototype.update = function (ctx) {
         // gameEngine.addEntity(new Alien(gameEngine, 300, 250));
 
     }
+
+
+
+    function togglePage() {
+        if (that.display == that.insPageOne) {
+            that.display = that.insPageTwo;
+
+        } else {
+            that.display = that.insPageOne;
+
+        }
+    }
 }
 
 WelcomeScreen.prototype.draw = function (ctx) {
-    this.animation.drawFrame(this.game.clockTick, this.ctx, this.x, this.y);
+
     // ctx.drawImage(this.newGameButton, this.ngbX, this.ngbY, this.ngbWidth, this.ngbHeight);
-    ctx.drawImage(this.ngDisplay, this.ngX, this.ngY);
-    ctx.drawImage(this.insDisplay, this.insX, this.insY);
+
+
+    if (this.insFlag) {
+        ctx.drawImage(this.display, 0, 0);
+    } else {
+        this.animation.drawFrame(this.game.clockTick, this.ctx, this.x, this.y);
+        ctx.drawImage(this.ngDisplay, this.ngX, this.ngY);
+        ctx.drawImage(this.insDisplay, this.insX, this.insY);
+    }
+
 }
 // ===================================================================
 // End - Welcome SCreen
 // ===================================================================
+
+
+
+
+
+// ===================================================================
+// Start - End Result Display Screen
+// ===================================================================
+
+function EndResultDisplay(game) {
+    // Welcome Screen Background
+    //this.animation = new Animation(AM.getAsset("./img/welcome_screen.png"), 1280, 720, 8960, .9, 7, true, 1);
+
+    this.sword = new Animation(AM.getAsset("./img/swords_animated.png"), 187, 128, 1307, 0.25, 7, false, 1);
+    this.paper = AM.getAsset("./img/result_paper.png")
+    this.continueBtn = AM.getAsset("./img/continue_button.png")
+
+    // Hitboxes for the buttons
+    this.hitBoxes = [{ name: "newGame", x: this.ngX + 3, y: this.ngY + 3, w: this.ngWidth - 3, h: this.ngHeight - 3 },
+    { name: "instructions", x: this.insX + 3, y: this.insY + 3, w: this.insWidth - 3, h: this.insHeight - 3 }];
+
+   
+    Entity.call(this, game, 0, 0);
+}
+
+EndResultDisplay.prototype = new GUIEntity();
+EndResultDisplay.prototype.constructor = EndResultDisplay;
+
+EndResultDisplay.prototype.update = function () {
+
+
+    
+}
+
+EndResultDisplay.prototype.draw = function (ctx) {
+
+    ctx.drawImage(this.paper, (gameEngine.surfaceWidth/2)-(300), (gameEngine.surfaceHeight/2)-(150));
+    this.sword.drawFrame(this.game.clockTick, ctx, (gameEngine.surfaceWidth/2)-(187/2), 180);
+    ctx.drawImage(this.continueBtn, (gameEngine.surfaceWidth/2)-(109), 450)
+
+}
+// ===================================================================
+// End - End Result Display SCreen
+// ===================================================================
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -2450,6 +2940,11 @@ function Main() {
     AM.queueDownload("./img/sidebar/resource_display.png");
     AM.queueDownload("./img/sidebar/food_icon.png");
     AM.queueDownload("./img/sidebar/gold_icon.png");
+
+    // Stat Display
+    AM.queueDownload("./img/sidebar/stat_display.png");
+    AM.queueDownload("./img/hide_stat.png");
+    AM.queueDownload("./img/show_stat.png");
 
     // Game Map Display
     AM.queueDownload("./img/map/map_master4.png");
@@ -2501,6 +2996,11 @@ function Main() {
 
     AM.queueDownload("./img/ins_control.png");
     AM.queueDownload("./img/ins_play.png");
+
+    // End Turn Display
+    AM.queueDownload("./img/swords_animated.png"); 
+    AM.queueDownload("./img/result_paper.png"); 
+    AM.queueDownload("./img/continue_button.png"); 
 
     // Control Display
     AM.queueDownload("./img/control/button.png");
