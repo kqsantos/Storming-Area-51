@@ -709,7 +709,7 @@ function DefenceAiTurn(aiplayer, inputRegions) {
         // console.log(inputRegions[zeroTroopAttack[i].source].troop['soldier']);
 
         console.log(inputRegions[zeroTroopAttack[i].source]);
-        if (inputRegions[zeroTroopAttack[i].source].troop['soldier'] !== undefined && inputRegions[zeroTroopAttack[i].source].troop['soldier'].count !== 0) {
+        if (inputRegions[zeroTroopAttack[i].source].troop['soldier'] != null && inputRegions[zeroTroopAttack[i].source].troop['soldier'].count !== 0) {
             moveFight(inputRegions[zeroTroopAttack[i].source], inputRegions[zeroTroopAttack[i].destination]);
             console.log("source")
             console.log(inputRegions[zeroTroopAttack[i].source])
@@ -836,6 +836,8 @@ function moveFight(source, destination) {
                 if (source.troop['soldier'].hasMoved == 0) {
                     destination.troop['soldier'].count = source.troop['soldier'].count;
                     destination.troop['soldier'].hasMoved = source.troop['soldier'].count;
+                    source.troop['soldier'].removeFromWorld = true;
+                    source.troop['soldier'] = null;
                 }
                 else {
                     destination.troop['soldier'].count = source.troop['soldier'].count - source.troop['soldier'].hasMoved;
@@ -859,8 +861,10 @@ function moveFight(source, destination) {
 
                 // Checking if moving all troops from source or not
                 if (source.troop['soldierRanged'].hasMoved == 0) {
-                    destination.troop['soldierRanged'].count = source.troop['sosoldierRangeddier'].count;
+                    destination.troop['soldierRanged'].count = source.troop['soldierRanged'].count;
                     destination.troop['soldierRanged'].hasMoved = source.troop['soldierRanged'].count;
+                    source.troop['soldierRanged'].removeFromWorld = true;
+                    source.troop['soldierRanged'] = null;
                 }
                 else {
                     destination.troop['soldierRanged'].count = source.troop['soldierRanged'].count - source.troop['soldierRanged'].hasMoved;
@@ -914,7 +918,7 @@ function moveFight(source, destination) {
 
                 // Checking if moving all troops from source or not
                 if (source.troop['soldierRanged'].hasMoved == 0) {
-                    destination.troop['soldierRanged'].count = source.troop['sosoldierRangeddier'].count;
+                    destination.troop['soldierRanged'].count = source.troop['sosoldierRanged'].count;
                     destination.troop['soldierRanged'].hasMoved = source.troop['soldierRanged'].count;
                 }
                 else {
