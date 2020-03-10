@@ -845,7 +845,7 @@ function moveFight(source, destination) {
                 source.troop['soldierRanged'].count = source.troop['soldierRanged'].hasMoved;
             }
 
-        } else if (source.troop['soldier'].count != 0 || source.troop['soldierRanged'].count != 0) {
+        } else if (source.troop['soldier'].count != 0 ) {
             // Move all troops from allied region to region with no troops
             if (source.troop['soldier'].hasMoved == 0 && source.troop['soldierRanged'].hasMoved == 0) {
                 destination.troop = source.troop;
