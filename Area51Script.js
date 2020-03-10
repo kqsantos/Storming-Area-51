@@ -12,6 +12,7 @@ var players = [];
 var dim = 18; //Cell size
 var spriteDim = 18;
 
+var displayEnd = false;
 var prevCameraOrigin = { x: 0, y: 0 };
 var cameraOrigin = { x: 0, y: 0 }; //Camera in top left pixel of screen
 
@@ -845,6 +846,7 @@ function moveFight(source, destination) {
                 gameEngine.addEntity(destination.troop["soldier"]);
             }
 
+
             // Movement for the ranged soldiers
             if (destination.troop['soldierRanged'] == null && source.troop['soldierRanged'] != null
                 && source.troop['soldierRanged'].hasMoved < source.troop['soldierRanged'].count) {
@@ -867,6 +869,7 @@ function moveFight(source, destination) {
                 }
 
                 gameEngine.addEntity(destination.troop["soldierRanged"]);
+
             }
 
         }
@@ -2051,14 +2054,17 @@ ControlDisplay.prototype.update = function (ctx) {
                 this.destinationSelect = false;
                 // Ryan's function goes here
                 selectedRegion = null;
-
                 toggleTurn();
+                displayEnd = true;
+                gameEngine.GUIEntities[5].sword.elapsedTime = 0
 
             }
 
         }
         gameEngine.click = null;
         toggleAllOff();
+        
+
     }
 
 
@@ -2971,47 +2977,54 @@ function EndResultDisplay(game) {
     this.paper = AM.getAsset("./img/result_paper.png")
     this.continueBtn = AM.getAsset("./img/continue_button.png")
 
+    this.isContinue = false;
+    
     // Hitboxes for the buttons
-    this.hitBoxes = [{ name: "newGame", x: this.ngX + 3, y: this.ngY + 3, w: this.ngWidth - 3, h: this.ngHeight - 3 },
-    { name: "instructions", x: this.insX + 3, y: this.insY + 3, w: this.insWidth - 3, h: this.insHeight - 3 }];
+    this.hitBox = [{ name: "continue", x: 533, y: 449, w: 211, h: 49 }];
 
-
-    Entity.call(this, game, 0, 0);
+    GUIEntity.call(this, game, 0, 0);
 }
 
 EndResultDisplay.prototype = new GUIEntity();
 EndResultDisplay.prototype.constructor = EndResultDisplay;
 
 EndResultDisplay.prototype.update = function () {
+    if (gameEngine.click != null && displayEnd) {
+        var clicked = getClickedItem(this.hitBox, gameEngine.click.x, gameEngine.click.y);
+        if (clicked != null && clicked.name == "continue") {
+            this.isContinue = true;
+        }
+        displayEnd = false;
+        this.isContinue = false;
+        gameEngine.click = null
+    }
 
+    function displayBattle(numBattle){
 
+    }
 
 }
 
 EndResultDisplay.prototype.draw = function (ctx) {
 
-    ctx.drawImage(this.paper, (gameEngine.surfaceWidth / 2) - (300), (gameEngine.surfaceHeight / 2) - (150));
-    this.sword.drawFrame(this.game.clockTick, ctx, (gameEngine.surfaceWidth / 2) - (187 / 2), 180);
-    ctx.drawImage(this.continueBtn, (gameEngine.surfaceWidth / 2) - (109), 450)
+    if (!this.isContinue && displayEnd) {
+   
+        ctx.drawImage(this.paper, (gameEngine.surfaceWidth / 2) - (300), (gameEngine.surfaceHeight / 2) - (150));
+        
+        this.sword.drawFrame(this.game.clockTick, ctx, (gameEngine.surfaceWidth / 2) - (187 / 2), 180);
+        ctx.font = "24px Arial";
+        ctx.fillText("End Turn Report", (gameEngine.surfaceWidth / 2)-(92), 
+        (gameEngine.surfaceHeight / 2)-(30))
+        ctx.drawImage(this.continueBtn, (gameEngine.surfaceWidth / 2) - (109), 450);
+        
+    }
 
+
+    
 }
 // ===================================================================
 // End - End Result Display SCreen
 // ===================================================================
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
