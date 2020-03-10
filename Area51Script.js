@@ -12,7 +12,9 @@ var players = [];
 var dim = 18; //Cell size
 var spriteDim = 18;
 
-var displayEnd = false;
+var displayEnd = true;
+
+
 var prevCameraOrigin = { x: 0, y: 0 };
 var cameraOrigin = { x: 0, y: 0 }; //Camera in top left pixel of screen
 
@@ -812,7 +814,7 @@ function moveToFriendly(src, dest) {
 
 function moveFight(source, destination) {
     var validMove = source.neighbors.includes(destination.id);
-    var validSource = source.troop['soldier'] !== null;
+    var validSource = source.troop['soldier'] != null || source.troop['soldierRanged'] != null;
 
 
     if ((destination.owner === -1 || destination.owner === source.owner || destination.troop === []) && validMove && validSource) {
@@ -963,27 +965,25 @@ function moveFight(source, destination) {
 
         }
     }
-    // // This is moving to a neutral region
-    // else if (validMove && validSource && destination.troop["soldier"] == null) {
-    //     destination.owner = source.owner;
-    //     destination.troop = source.troop;
-    //     destination.troop['soldier'].x = destination.troopXY[0];
-    //     destination.troop['soldier'].y = destination.troopXY[1];
-    //     destination.troop['soldier'].hasMoved = destination.troop['soldier'].count;
-    //     destination.troop['soldierRanged'].x = destination.troopXY[0];
-    //     destination.troop['soldierRanged'].y = destination.troopXY[1];
-    //     destination.troop['soldierRanged'].hasMoved = destination.troop['soldierRanged'].count;
-    //     source.troop = [];
-    // } 
     else if (validMove && validSource) {
         var atkPow = 0;
 
-        atkPow += (source.troop['soldier'].count - source.troop['soldier'].hasMoved) * source.troop['soldier'].atk;
-        atkPow += (source.troop['soldierRanged'].count - source.troop['soldierRanged'].hasMoved) * source.troop['soldierRanged'].atk;
+        if (source.troop['soldier'] != null) {
+            atkPow += (source.troop['soldier'].count - source.troop['soldier'].hasMoved) * source.troop['soldier'].atk;
+        }
+        if (source.troop['soldierRanged'] != null) {
+            atkPow += (source.troop['soldierRanged'].count - source.troop['soldierRanged'].hasMoved) * source.troop['soldierRanged'].atk;
+        }
+
 
         var defPow = 0;
-        defPow += Number(destination.troop['soldier'].count) * Number(destination.troop['soldier'].def);
-        defPow += Number(destination.troop['soldierRanged'].count) * Number(destination.troop['soldierRanged'].def);
+        if (destination.troop['soldier'] != null) {
+            defPow += Number(destination.troop['soldier'].count) * Number(destination.troop['soldier'].def);
+        }
+        if (destination.troop['soldierRanged'] != null) {
+            defPow += Number(destination.troop['soldierRanged'].count) * Number(destination.troop['soldierRanged'].def);
+        }
+
 
         while (defPow > 0 && atkPow > 0) {
             Math.random() > 0.5 ? atkPow-- : defPow--;
@@ -1002,7 +1002,7 @@ function moveFight(source, destination) {
                 destination.troop['soldier'].removeFromWorld = true;
                 destination.owner = source.owner;
                 destination.troop = source.troop;
-                destination.troop['soldierRanged'].count = atkPow/2;
+                destination.troop['soldierRanged'].count = atkPow / 2;
                 destination.troop['soldierRanged'].count = atkPow % 2;
                 destination.troop['soldier'].x = destination.troopXY[0];
                 destination.troop['soldier'].y = destination.troopXY[1];
@@ -1018,9 +1018,9 @@ function moveFight(source, destination) {
                 }
                 destination.owner = source.owner;
                 gameEngine.addEntity(destination.troop["soldier"]);
-                destination.troop['soldierRanged'].count = atkPow/2;
+                destination.troop['soldierRanged'].count = atkPow / 2;
                 destination.troop['soldier'].count = atkPow % 2;
-                destination.troop['soldierRanged'].hasMoved = atkPow/2;
+                destination.troop['soldierRanged'].hasMoved = atkPow / 2;
                 destination.troop['soldier'].hasMoved = atkPow % 2;
                 source.troop['soldier'].count = source.troop['soldier'].hasMoved;
                 source.troop['soldierRanged'].count = source.troop['soldierRanged'].hasMoved;
@@ -1028,7 +1028,7 @@ function moveFight(source, destination) {
             // Attacker won
         } else {
             if (source.troop['soldier'].hasMoved == 0) {
-                destination.troop['soldier'].count = defPow/2;
+                destination.troop['soldier'].count = defPow / 2;
                 destination.troop['soldierRanged'].count = defPow % 2;
                 source.troop['soldier'].removeFromWorld = true;
                 source.troop['soldierRanged'].removeFromWorld = true;
@@ -2059,15 +2059,18 @@ ControlDisplay.prototype.update = function (ctx) {
                 // Ryan's function goes here
                 selectedRegion = null;
                 toggleTurn();
-                displayEnd = true;
-                gameEngine.GUIEntities[5].sword.elapsedTime = 0
 
+                // FOR RYAN ----------------------------------------------------------------------
+                gameEngine.GUIEntities[5].sword.elapsedTime = 0; // Resets sword animation
+                displayEnd = true; // Displays background
+                gameEngine.GUIEntities[5].displayBattle(2); // Displays text (param: # of battles)
+                // FOR RYAN ----------------------------------------------------------------------
             }
 
         }
         gameEngine.click = null;
         toggleAllOff();
-        
+
 
     }
 
@@ -2875,7 +2878,7 @@ WelcomeScreen.prototype.update = function (ctx) {
         gameEngine.addGUIEntity(new ControlDisplay(gameEngine));
 
         gameEngine.addGUIEntity(new ResourceDisplay(gameEngine));
-        // gameEngine.addGUIEntity(new EndResultDisplay(gameEngine));
+        gameEngine.addGUIEntity(new EndResultDisplay(gameEngine));
         // gameEngine.addGUIEntity(new FogOfWar(gameEngine));
 
 
@@ -2910,7 +2913,7 @@ WelcomeScreen.prototype.update = function (ctx) {
 
             }
         }
-
+        // gameEngine.GUIEntities[5].displayBattle(0);
         // Tester
         // for (var i = 0; i < regionsList.length; i++) {
         //     if (regionsList[i] != undefined) {
@@ -2982,6 +2985,14 @@ function EndResultDisplay(game) {
     this.continueBtn = AM.getAsset("./img/continue_button.png")
 
     this.isContinue = false;
+    this.numberOfBattles = 0;
+    this.displayBattleText = false;
+
+    this.displayBattle = function (numBattle) {
+        this.numberOfBattles = numBattle;
+        this.displayBattleText = true;
+    }
+
     
     // Hitboxes for the buttons
     this.hitBox = [{ name: "continue", x: 533, y: 449, w: 211, h: 49 }];
@@ -3001,31 +3012,43 @@ EndResultDisplay.prototype.update = function () {
         displayEnd = false;
         this.isContinue = false;
         gameEngine.click = null
+        this.displayBattleText = false;
     }
 
-    function displayBattle(numBattle){
 
-    }
 
 }
 
 EndResultDisplay.prototype.draw = function (ctx) {
 
     if (!this.isContinue && displayEnd) {
-   
+
         ctx.drawImage(this.paper, (gameEngine.surfaceWidth / 2) - (300), (gameEngine.surfaceHeight / 2) - (150));
-        
+
         this.sword.drawFrame(this.game.clockTick, ctx, (gameEngine.surfaceWidth / 2) - (187 / 2), 180);
         ctx.font = "24px Arial";
-        ctx.fillText("End Turn Report", (gameEngine.surfaceWidth / 2)-(92), 
-        (gameEngine.surfaceHeight / 2)-(30))
+        ctx.fillText("End Turn Report", (gameEngine.surfaceWidth / 2) - (92),
+            (gameEngine.surfaceHeight / 2) - (30))
         ctx.drawImage(this.continueBtn, (gameEngine.surfaceWidth / 2) - (109), 450);
-        
+
+    }
+
+    if(this.displayBattleText) {
+        ctx.font = "24px Arial";
+        if(this.numberOfBattles > 0) {
+            ctx.fillText("Number of Battles: " + this.numberOfBattles, (gameEngine.surfaceWidth / 2) - (110),
+            390)
+        } else {
+            ctx.fillText("No battles to report.", (gameEngine.surfaceWidth / 2) - (110),
+            390)
+        }
+
     }
 
 
-    
 }
+
+
 // ===================================================================
 // End - End Result Display SCreen
 // ===================================================================
