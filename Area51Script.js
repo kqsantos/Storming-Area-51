@@ -12,7 +12,7 @@ var players = [];
 var dim = 18; //Cell size
 var spriteDim = 18;
 
-var displayEnd = true;
+var displayEnd = false;
 
 
 var prevCameraOrigin = { x: 0, y: 0 };
@@ -766,34 +766,41 @@ function DefenceAiTurn(aiplayer, inputRegions) {
      * End Turn
      */
 
-    toggleTurn();
+    // toggleTurn();
 
-    // players[currentPlayerTurn].cameraCoord = { x: cameraOrigin.x, y: cameraOrigin.y }
+    players[currentPlayerTurn].cameraCoord = { x: cameraOrigin.x, y: cameraOrigin.y }
 
-    // for (var i = 0; i < regionsList.length; i++) {
+    for (var i = 0; i < regionsList.length; i++) {
 
-    //     if (regionsList[i] != null && regionsList[i].owner == currentPlayerTurn && regionsList[i].bldg["farm"] != null) {
-    //         players[currentPlayerTurn].foodCount += 1;
+        if (regionsList[i] != null && regionsList[i].owner == currentPlayerTurn) {
+            players[currentPlayerTurn].goldCount += 1;
+        }
+        if (regionsList[i] != null && regionsList[i].owner == currentPlayerTurn && regionsList[i].bldg["farm"] != null) {
+            players[currentPlayerTurn].foodCount += 1;
+        }
 
-    //     }
+        if (regionsList[i] != null && regionsList[i].troop["soldier"] != null) {
+            regionsList[i].troop["soldier"].hasMoved = 0;
+        }
 
-    //     if (regionsList[i] != null && regionsList[i].troop["soldier"] != null) {
-    //         regionsList[i].troop["soldier"].hasMoved = 0;
-    //     }
+        if (regionsList[i] != null && regionsList[i].troop["soldierRanged"] != null) {
+            regionsList[i].troop["soldierRanged"].hasMoved = 0;
+        }
 
-    //     if (regionsList[i] != null && regionsList[i].cap != null) {
-    //         regionsList[i].cap.hasMoved = false;
+        if (regionsList[i] != null && regionsList[i].cap != null) {
+            regionsList[i].cap.hasMoved = false;
 
-    //     }
+        }
 
 
-    // }
+    }
 
-    // currentPlayerTurn = turnCount % 2;
-    // turnCount++;
+    currentPlayerTurn = turnCount % 2;
+    turnCount++;
 
-    // changeCameraOrigin(players[currentPlayerTurn].cameraCoord.x, players[currentPlayerTurn].cameraCoord.y);
-    // createArray(cameraOrigin);
+    console.log("GOING TO " + players[currentPlayerTurn].cameraCoord.x + " " + players[currentPlayerTurn].cameraCoord.y)
+    changeCameraOrigin(players[currentPlayerTurn].cameraCoord.x, players[currentPlayerTurn].cameraCoord.y);
+    createArray(cameraOrigin);
 
 }
 
@@ -2063,7 +2070,7 @@ ControlDisplay.prototype.update = function (ctx) {
                 // FOR RYAN ----------------------------------------------------------------------
                 gameEngine.GUIEntities[5].sword.elapsedTime = 0; // Resets sword animation
                 displayEnd = true; // Displays background
-                gameEngine.GUIEntities[5].displayBattle(2); // Displays text (param: # of battles)
+                gameEngine.GUIEntities[5].displayBattle(4); // Displays text (param: # of battles)
                 // FOR RYAN ----------------------------------------------------------------------
             }
 
@@ -2913,6 +2920,7 @@ WelcomeScreen.prototype.update = function (ctx) {
 
             }
         }
+
         // gameEngine.GUIEntities[5].displayBattle(0);
         // Tester
         // for (var i = 0; i < regionsList.length; i++) {
