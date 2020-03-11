@@ -2920,6 +2920,7 @@ WelcomeScreen.prototype.update = function (ctx) {
 
             }
         }
+
         // gameEngine.GUIEntities[5].displayBattle(0);
         // Tester
         // for (var i = 0; i < regionsList.length; i++) {
@@ -2969,8 +2970,8 @@ WelcomeScreen.prototype.draw = function (ctx) {
         ctx.drawImage(this.display, 0, 0);
     } else {
         this.animation.drawFrame(this.game.clockTick, this.ctx, this.x, this.y);
-        // ctx.drawImage(this.ngDisplay, this.ngX, this.ngY);
-        // ctx.drawImage(this.insDisplay, this.insX, this.insY);
+        ctx.drawImage(this.ngDisplay, this.ngX, this.ngY);
+        ctx.drawImage(this.insDisplay, this.insX, this.insY);
     }
 
 }
