@@ -745,7 +745,7 @@ function DefenceAiTurn(aiplayer, inputRegions) {
                 }
                 temp[i].sold--;
                 count = 0;
-            }  else {
+            } else {
                 count++;
             }
         }
@@ -754,13 +754,13 @@ function DefenceAiTurn(aiplayer, inputRegions) {
     console.log(players[1].goldCount);
     count = 0;
 
-    while (players[1].goldCount > 0 && count < temp.length){
+    while (players[1].goldCount > 0 && count < temp.length) {
         for (var i = 0; i < temp.length; i++) {
             if (needsUpgrade[i].farm && players[1].goldCount > 0) {
                 buildFarm(inputRegions[temp[i].id]);
                 temp[i].farm = false;
                 count = 0;
-            }  else {
+            } else {
                 count++;
             }
         }
@@ -775,7 +775,7 @@ function DefenceAiTurn(aiplayer, inputRegions) {
             }
         }
 
-        
+
     }
 
 
@@ -985,8 +985,6 @@ function moveFight(source, destination) {
                     source.troop['soldierRanged'].count = source.troop['soldierRanged'].hasMoved;
                 }
             }
-
-
         }
     }
     else if (validMove && validSource) {
@@ -1003,8 +1001,8 @@ function moveFight(source, destination) {
         if (source.troop['soldier'] != null) {
             atkPow += (source.troop['soldier'].count - source.troop['soldier'].hasMoved) * source.troop['soldier'].atk;
             tempAtkSoldier = source.troop['soldier'];
-        } else{
-            tempAtkSoldier = {count: 0, x: 0, y: 0};
+        } else {
+            tempAtkSoldier = { count: 0, x: 0, y: 0 };
         }
 
 
@@ -1012,7 +1010,7 @@ function moveFight(source, destination) {
             atkPow += (source.troop['soldierRanged'].count - source.troop['soldierRanged'].hasMoved) * source.troop['soldierRanged'].atk;
             tempAtkRange = source.troop['soldierRanged'];
         } else {
-            tempAtkRange = {count: 0, x: 0, y: 0};
+            tempAtkRange = { count: 0, x: 0, y: 0 };
         }
 
 
@@ -1021,7 +1019,7 @@ function moveFight(source, destination) {
             defPow += Number(destination.troop['soldier'].count) * Number(destination.troop['soldier'].def);
             tempDefSoldier = destination.troop['soldier'];
         } else {
-            tempDefSoldier = {count: 0, x: 0, y: 0};
+            tempDefSoldier = { count: 0, x: 0, y: 0 };
         }
 
 
@@ -1029,7 +1027,7 @@ function moveFight(source, destination) {
             defPow += Number(destination.troop['soldierRanged'].count) * Number(destination.troop['soldierRanged'].def);
             tempDefRange = destination.troop['soldierRanged'];
         } else {
-            tempDefRange = {count: 0, x: 0, y: 0};
+            tempDefRange = { count: 0, x: 0, y: 0 };
         }
 
 
@@ -1046,8 +1044,13 @@ function moveFight(source, destination) {
                 destination.cap = null;
             }
 
-            destination.troop['soldier'].removeFromWorld = true;
-            destination.troop['soldierRanged'].removeFromWorld = true;
+            if (destination.troop['soldier'] != null) {
+                destination.troop['soldier'].removeFromWorld = true;
+            }
+            if (destination.troop['soldierRanged'] != null) {
+                destination.troop['soldierRanged'].removeFromWorld = true;
+            }
+
 
             if ((tempAtkSoldier.count > 0 && source.troop['soldier'].hasMoved == 0) && (tempAtkRange.count > 0 && source.troop['soldierRanged'].hasMoved == 0) ||
                 (tempAtkSoldier.count = 0) && (tempAtkRange.count > 0 && source.troop['soldierRanged'].hasMoved == 0) ||
@@ -1055,13 +1058,13 @@ function moveFight(source, destination) {
 
                 destination.owner = source.owner;
                 destination.troop = source.troop;
-                                
-                if (tempAtkRange.count !== 0){
+
+                if (tempAtkRange.count !== 0) {
                     destination.troop['soldierRanged'].count = (atkPow - atkPow % 2) / 2;
                     destination.troop['soldierRanged'].x = destination.rangedXY[0];
                     destination.troop['soldierRanged'].y = destination.rangedXY[1];
 
-                    if (tempAtkSoldier.count !== 0){
+                    if (tempAtkSoldier.count !== 0) {
 
                         if (atkPow % 2 === 1) {
                             destination.troop['soldier'].count = 1;
@@ -1102,25 +1105,25 @@ function moveFight(source, destination) {
                 gameEngine.addEntity(destination.troop["soldier"]);
                 gameEngine.addEntity(destination.troop["soldierRanged"]);
 
-                if (tempAtkRange.count !== 0){
+                if (tempAtkRange.count !== 0) {
                     destination.troop['soldierRanged'].count = (atkPow - atkPow % 2) / 2;
                     destination.troop['soldierRanged'].hasMoved = (atkPow - atkPow % 2) / 2;
 
-                    if (tempAtkSoldier.count !== 0){
-                        if (atkPow % 2 === 1){
+                    if (tempAtkSoldier.count !== 0) {
+                        if (atkPow % 2 === 1) {
                             destination.troop['soldier'].count = 1;
                             destination.troop['soldier'].hasMoved = 1;
                         } else {
                             destination.troop['soldier'].removeFromWorld = true;
                         }
-                    } 
+                    }
 
                 } else {
                     destination.troop['soldier'].count = atkPow;
                 }
             }
 
-            
+
             console.log('DESTINATION');
             console.log(destination);
             // Attacker won
@@ -1130,12 +1133,12 @@ function moveFight(source, destination) {
 
                 destination.troop['soldier'].count = (defPow - defPow % 2) / 2;
 
-                if (defPow % 2 === 1){
+                if (defPow % 2 === 1) {
                     destination.troop['soldierRanged'].count = defPow % 2;
                 } else {
                     destination.troop['soldierRanged'].removeFromWorld = true;
                 }
-                
+
                 source.troop['soldier'].removeFromWorld = true;
                 source.troop['soldierRanged'].removeFromWorld = true;
                 source.troop = [];
@@ -2642,7 +2645,7 @@ InputHandler.prototype.update = function (ctx) {
         var tempRegion = getClickedRegion(onScreenRegions, click.x, click.y);
 
         if (tempRegion != null &&
-            ((tempRegion.owner == currentPlayerTurn || tempRegion.owner == -1) &&
+            (
                 (gameEngine.GUIEntities[3].destinationSelect ||
                     gameEngine.GUIEntities[3].destinationSelectCaptain))) {
             //if (selectedRegion != null) setSpritesToUnselected(selectedRegion);
@@ -3102,7 +3105,7 @@ function EndResultDisplay(game) {
         this.displayBattleText = true;
     }
 
-    
+
     // Hitboxes for the buttons
     this.hitBox = [{ name: "continue", x: 533, y: 449, w: 211, h: 49 }];
 
@@ -3142,14 +3145,14 @@ EndResultDisplay.prototype.draw = function (ctx) {
 
     }
 
-    if(this.displayBattleText) {
+    if (this.displayBattleText) {
         ctx.font = "24px Arial";
-        if(this.numberOfBattles > 0) {
+        if (this.numberOfBattles > 0) {
             ctx.fillText("Number of Battles: " + this.numberOfBattles, (gameEngine.surfaceWidth / 2) - (110),
-            390)
+                390)
         } else {
             ctx.fillText("No battles to report.", (gameEngine.surfaceWidth / 2) - (110),
-            390)
+                390)
         }
 
     }
