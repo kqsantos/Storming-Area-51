@@ -852,13 +852,18 @@ function moveFight(source, destination) {
     var validSource = source.troop['soldier'] != null || source.troop['soldierRanged'] != null;
 
 
-    if ((destination.owner === -1 || destination.owner === source.owner || destination.troop === []) && validMove && validSource) {
-        destination.owner = source.owner;
+    if ((destination.owner === -1 || destination.owner === source.owner || 
+        (destination.troop['soldier'] == null && destination.troop['soldierRanged'] == null && destination.owner != source.owner))
+        && validMove && validSource) {
+        
 
+        console.log("move to empty")
         // Move to empty region
         if ((destination.troop['soldier'] == null && destination.troop['soldierRanged'] == null) &&
             ((source.troop['soldier'] != null && source.troop['soldier'].hasMoved < source.troop['soldier'].count)
                 || (source.troop['soldierRanged'] != null && source.troop['soldierRanged'].hasMoved < source.troop['soldierRanged'].count))) {
+
+            destination.owner = source.owner;
 
             // Movement for the melee soldiers
             if (destination.troop['soldier'] == null && source.troop['soldier'] != null
