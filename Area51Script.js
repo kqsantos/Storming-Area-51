@@ -698,6 +698,7 @@ function DefenceAiTurn(aiplayer, inputRegions) {
     for (var i = 0; i < zeroTroopAttack.length; i++) {
 
         let sourcesUsed = [-1];                                                                 // Makes the first element not null
+        var fightCount = 0;
 
         for (var b = 0; b < zeroTroopAttack.length; b++) {                                       // Removes all sources that have already attacked
             // console.log(sourcesUsed.includes(zeroTroopAttack[b].source));
@@ -715,6 +716,8 @@ function DefenceAiTurn(aiplayer, inputRegions) {
         // console.log(inputRegions[zeroTroopAttack[i].source]);
         if (inputRegions[zeroTroopAttack[i].source].troop['soldier'] != null && inputRegions[zeroTroopAttack[i].source].troop['soldier'].count !== 0) {
             moveFight(inputRegions[zeroTroopAttack[i].source], inputRegions[zeroTroopAttack[i].destination]);
+
+            fightCount++;
             // console.log("source")
             // console.log(inputRegions[zeroTroopAttack[i].source])
             // console.log("destination")
@@ -818,6 +821,14 @@ function DefenceAiTurn(aiplayer, inputRegions) {
     // console.log("GOING TO " + players[currentPlayerTurn].cameraCoord.x + " " + players[currentPlayerTurn].cameraCoord.y)
     changeCameraOrigin(players[currentPlayerTurn].cameraCoord.x, players[currentPlayerTurn].cameraCoord.y);
     createArray(cameraOrigin);
+
+    // FOR RYAN ----------------------------------------------------------------------
+    gameEngine.GUIEntities[5].sword.elapsedTime = 0; // Resets sword animation
+    displayEnd = true; // Displays background
+    gameEngine.GUIEntities[5].displayBattle(fightCount); // Displays text (param: # of battles)
+    // FOR RYAN ----------------------------------------------------------------------
+
+    
 
 }
 
@@ -2176,11 +2187,7 @@ ControlDisplay.prototype.update = function (ctx) {
                 selectedRegion = null;
                 toggleTurn();
 
-                // FOR RYAN ----------------------------------------------------------------------
-                gameEngine.GUIEntities[5].sword.elapsedTime = 0; // Resets sword animation
-                displayEnd = true; // Displays background
-                gameEngine.GUIEntities[5].displayBattle(4); // Displays text (param: # of battles)
-                // FOR RYAN ----------------------------------------------------------------------
+
             }
 
         }
