@@ -1802,6 +1802,8 @@ ControlDisplay.prototype.update = function (ctx) {
     var click = gameEngine.click;
     var that = this;
 
+    // console.log(regionsList);
+
     // if(this.currentRegion != null){
     //     console.log("here"+this.currentRegion.id)
 
@@ -2539,14 +2541,16 @@ InputHandler.prototype.update = function (ctx) {
     if (click != null) {
 
         var tempRegion = getClickedRegion(onScreenRegions, click.x, click.y);
-
+        console.log("tempRegion")
+        console.log(tempRegion)
         if (tempRegion != null &&
-            ((tempRegion.owner == currentPlayerTurn || tempRegion.owner == -1) &&
+            ((tempRegion.owner == currentPlayerTurn || tempRegion.owner == -1 || tempRegion.owner == 1) &&
                 (gameEngine.GUIEntities[3].destinationSelect ||
                     gameEngine.GUIEntities[3].destinationSelectCaptain))) {
             //if (selectedRegion != null) setSpritesToUnselected(selectedRegion);
 
             gameEngine.GUIEntities[3].moveDestination = tempRegion;
+            console.log("HELLO")
             // selectedRegion = null;
             // setSpritesToSelected(selectedRegion);
         } else if (tempRegion != null &&
