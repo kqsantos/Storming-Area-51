@@ -853,7 +853,9 @@ function moveFight(source, destination) {
     var validSource = source.troop['soldier'] != null || source.troop['soldierRanged'] != null;
 
 
-    if ((destination.owner === -1 || destination.owner === source.owner || destination.troop === []) && validMove && validSource) {
+    if ((destination.owner === -1 || destination.owner === source.owner ||
+        (destination.troop['soldier'] == null && destination.troop['soldierRanged'] == null && destination.owner != source.owner))
+        && validMove && validSource) {
         destination.owner = source.owner;
 
         // Move to empty region
