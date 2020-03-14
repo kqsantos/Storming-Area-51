@@ -1098,8 +1098,8 @@ function moveFight(source, destination) {
                     destination.troop['soldier'].y = destination.troopXY[1];
                 }
 
-                destination.troop['soldier'].hasMoved = destination.troop['soldier'].count;
-                destination.troop['soldierRanged'].hasMoved = destination.troop['soldier'].count;
+                if(destination.troop['soldier'] && destination.troop['soldier'].count) destination.troop['soldier'].hasMoved = destination.troop['soldier'].count;
+                if(destination.troop['soldierRanged'] && destination.troop['soldierRanged'].count) destination.troop['soldierRanged'].hasMoved = destination.troop['soldierRanged'].count;
 
                 source.troop = [];
 
@@ -1152,7 +1152,7 @@ function moveFight(source, destination) {
                     destination.troop['soldier'].count = (defPow - defPow % 2) / 2;
                 }               
 
-                if (soldierRanged){
+                if (destination.troop['soldierRanged']){
                     if (defPow % 2 === 1 ){
                         destination.troop['soldierRanged'].count = defPow % 2;
                     } else {
