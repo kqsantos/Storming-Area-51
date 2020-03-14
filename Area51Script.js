@@ -47,7 +47,7 @@ var modbgHeight = bgHeight;
 
 var debug = false;
 var debugGrid = false;
-var toggleFogOfWar = false;
+var toggleFogOfWar = true;
 
 var selectedRegion = null;
 var currentPlayerTurn = 0;
@@ -3167,7 +3167,7 @@ EndResultDisplay.prototype.draw = function (ctx) {
     if(this.displayBattleText) {
         ctx.font = "24px Arial";
         if(this.numberOfBattles > 0) {
-            ctx.fillText("Number of Battles: " + this.numberOfBattles, (gameEngine.surfaceWidth / 2) - (110),
+            ctx.fillText("Number of Alien Activity: " + this.numberOfBattles, (gameEngine.surfaceWidth / 2) - (110),
             390)
         } else {
             ctx.fillText("No battles to report.", (gameEngine.surfaceWidth / 2) - (110),
