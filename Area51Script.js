@@ -958,7 +958,7 @@ function moveFight(source, destination) {
 
                 // Checking if moving all troops from source or not
                 if (source.troop['soldierRanged'].hasMoved == 0) {
-                    destination.troop['soldierRanged'].count = source.troop['sosoldierRanged'].count;
+                    destination.troop['soldierRanged'].count = source.troop['soldierRanged'].count;
                     destination.troop['soldierRanged'].hasMoved = source.troop['soldierRanged'].count;
                 }
                 else {
@@ -1977,8 +1977,9 @@ ControlDisplay.prototype.update = function (ctx) {
     }
 
     // Move flag
-    if (selectedRegion != null && selectedRegion.troop["soldier"] != null &&
-        selectedRegion.troop["soldier"].hasMoved != selectedRegion.troop["soldier"].count) {
+    if (selectedRegion != null && 
+        ((selectedRegion.troop["soldier"] != null && selectedRegion.troop["soldier"].hasMoved != selectedRegion.troop["soldier"].count) ||
+        (selectedRegion.troop["soldierRanged"] != null && selectedRegion.troop["soldierRanged"].hasMoved != selectedRegion.troop["soldierRanged"].count))) {
         this.moveActive = true;
     } else {
         this.moveActive = false;
