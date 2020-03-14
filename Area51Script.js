@@ -47,7 +47,7 @@ var modbgHeight = bgHeight;
 
 var debug = false;
 var debugGrid = false;
-var toggleFogOfWar = true;
+var toggleFogOfWar = false;
 
 var selectedRegion = null;
 var currentPlayerTurn = 0;
