@@ -720,6 +720,7 @@ function DefenceAiTurn(aiplayer, inputRegions) {
             console.log(inputRegions[zeroTroopAttack[i].source])
             console.log("move to")
             console.log(inputRegions[zeroTroopAttack[i].destination])
+
             fightCount++;
             // console.log("source")
             // console.log(inputRegions[zeroTroopAttack[i].source])
@@ -830,8 +831,6 @@ function DefenceAiTurn(aiplayer, inputRegions) {
     displayEnd = true; // Displays background
     gameEngine.GUIEntities[5].displayBattle(fightCount); // Displays text (param: # of battles)
     // FOR RYAN ----------------------------------------------------------------------
-
-
 
 }
 
