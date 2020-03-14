@@ -118,7 +118,7 @@ Alien.prototype.draw = function (ctx) {
     // var recX = this.x - (cameraOrigin.x * dim) - ((Number(((this.count-this.hasMoved)/10).toFixed(0)) + Number(this.count)) * 2) + 10;
     // var recWidth = ((Number(((this.count-this.hasMoved)/10).toFixed(0)) + Number(this.count)) * 2) + 24;
 
-    ctx.fillRect(this.x - (cameraOrigin.x * dim) + 10, this.y - (cameraOrigin.y * dim) + 40, 38, 20);
+    ctx.fillRect(this.x - (cameraOrigin.x * dim) + 10, this.y - (cameraOrigin.y * dim) + 40, 48, 20);
     ctx.globalAlpha = 1.0;
     ctx.fillStyle = "#bada55";
     ctx.font = "14px Arial";
@@ -164,7 +164,7 @@ Soldier.prototype.draw = function (ctx) {
     }
     ctx.fillStyle = "black";
     ctx.globalAlpha = 0.6;
-    ctx.fillRect(this.x - (cameraOrigin.x * dim) + 8, this.y - (cameraOrigin.y * dim) + 40, 30, 20);
+    ctx.fillRect(this.x - (cameraOrigin.x * dim) + 8, this.y - (cameraOrigin.y * dim) + 40, 40, 20);
     ctx.globalAlpha = 1.0;
     ctx.fillStyle = "#bada55";
     ctx.font = "14px Arial";
@@ -227,7 +227,7 @@ AlienRanged.prototype.draw = function (ctx) {
     // var recX = this.x - (cameraOrigin.x * dim) - ((Number(((this.count-this.hasMoved)/10).toFixed(0)) + Number(this.count)) * 2) + 10;
     // var recWidth = ((Number(((this.count-this.hasMoved)/10).toFixed(0)) + Number(this.count)) * 2) + 24;
 
-    ctx.fillRect(this.x - (cameraOrigin.x * dim) + 10, this.y - (cameraOrigin.y * dim) + 40, 38, 20);
+    ctx.fillRect(this.x - (cameraOrigin.x * dim) + 10, this.y - (cameraOrigin.y * dim) + 40, 48, 20);
     ctx.globalAlpha = 1.0;
     ctx.fillStyle = "#bada55";
     ctx.font = "14px Arial";
@@ -273,7 +273,7 @@ SoldierRanged.prototype.draw = function (ctx) {
     }
     ctx.fillStyle = "black";
     ctx.globalAlpha = 0.6;
-    ctx.fillRect(this.x - (cameraOrigin.x * dim) + 8, this.y - (cameraOrigin.y * dim) + 40, 30, 20);
+    ctx.fillRect(this.x - (cameraOrigin.x * dim) + 8, this.y - (cameraOrigin.y * dim) + 40, 40, 20);
     ctx.globalAlpha = 1.0;
     ctx.fillStyle = "#bada55";
     ctx.font = "14px Arial";
