@@ -3168,10 +3168,10 @@ EndResultDisplay.prototype.draw = function (ctx) {
     if(this.displayBattleText) {
         ctx.font = "24px Arial";
         if(this.numberOfBattles > 0) {
-            ctx.fillText("Number of Alien Activity: " + this.numberOfBattles, (gameEngine.surfaceWidth / 2) - (110),
+            ctx.fillText("Number of Alien Activity: " + this.numberOfBattles, (gameEngine.surfaceWidth / 2) - (130),
             390)
         } else {
-            ctx.fillText("No battles to report.", (gameEngine.surfaceWidth / 2) - (110),
+            ctx.fillText("No activity to report.", (gameEngine.surfaceWidth / 2) - (110),
             390)
         }
 
