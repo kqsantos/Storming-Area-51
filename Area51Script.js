@@ -853,9 +853,7 @@ function moveFight(source, destination) {
     var validSource = source.troop['soldier'] != null || source.troop['soldierRanged'] != null;
 
 
-    if ((destination.owner === -1 || destination.owner === source.owner ||
-        (destination.troop['soldier'] == null && destination.troop['soldierRanged'] == null && destination.owner != source.owner))
-        && validMove && validSource) {
+    if ((destination.owner === -1 || destination.owner === source.owner || destination.troop === []) && validMove && validSource) {
         destination.owner = source.owner;
 
         // Move to empty region
@@ -1122,8 +1120,8 @@ function moveFight(source, destination) {
                 gameEngine.addEntity(destination.troop["soldierRanged"]);
 
                 if (tempAtkRange.count !== 0){
-                    destination.troop['soldierRanged'].count = (atkPow - atkPow % 2) / 2;
-                    destination.troop['soldierRanged'].hasMoved = destination.troop['soldierRanged'].count;
+                    if(destination.troop['soldierRanged']) destination.troop['soldierRanged'].count = (atkPow - atkPow % 2) / 2;
+                    if(destination.troop['soldierRanged']) destination.troop['soldierRanged'].hasMoved = destination.troop['soldierRanged'].count;
 
                     if (tempAtkSoldier.count !== 0){
                         if (atkPow % 2 === 1){
@@ -1148,7 +1146,7 @@ function moveFight(source, destination) {
         } else {
             if (source.troop['soldier'].hasMoved == 0) {
 
-                if (destination.troop['soldier'].count >= (defPow - defPow % 2) / 2 && destination.troop['soldier']) {
+                if (destination.troop['soldier'] && destination.troop['soldier'].count >= (defPow - defPow % 2) / 2 && destination.troop['soldier']) {
                     destination.troop['soldier'].count = (defPow - defPow % 2) / 2;
                 }               
 
@@ -1977,9 +1975,8 @@ ControlDisplay.prototype.update = function (ctx) {
     }
 
     // Move flag
-    if (selectedRegion != null && 
-        ((selectedRegion.troop["soldier"] != null && selectedRegion.troop["soldier"].hasMoved != selectedRegion.troop["soldier"].count) ||
-        (selectedRegion.troop["soldierRanged"] != null && selectedRegion.troop["soldierRanged"].hasMoved != selectedRegion.troop["soldierRanged"].count))) {
+    if (selectedRegion != null && selectedRegion.troop["soldier"] != null &&
+        selectedRegion.troop["soldier"].hasMoved != selectedRegion.troop["soldier"].count) {
         this.moveActive = true;
     } else {
         this.moveActive = false;
