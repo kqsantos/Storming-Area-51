@@ -2659,9 +2659,7 @@ InputHandler.prototype.update = function (ctx) {
         var tempRegion = getClickedRegion(onScreenRegions, click.x, click.y);
 
         if (tempRegion != null &&
-            (
-                (gameEngine.GUIEntities[3].destinationSelect ||
-                    gameEngine.GUIEntities[3].destinationSelectCaptain))) {
+            (gameEngine.GUIEntities[3].destinationSelect || gameEngine.GUIEntities[3].destinationSelectCaptain)) {
             //if (selectedRegion != null) setSpritesToUnselected(selectedRegion);
 
             gameEngine.GUIEntities[3].moveDestination = tempRegion;
