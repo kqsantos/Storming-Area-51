@@ -144,13 +144,17 @@ GameEngine.prototype.update = function () {
         }
     }
     for (var i = this.entities.length - 1; i >= 0; --i) {
-        if (this.entities[i].removeFromWorld) {
-            // console.log("Splicing")
-            // console.log(this.entities);
-            // console.log(this.entities[i]);
+        if(this.entities[i] !== undefined){
+            if (this.entities[i].removeFromWorld) {
+                // console.log("Splicing")
+                // console.log(this.entities);
+                // console.log(this.entities[i]);
+                this.entities.splice(i, 1);
+                // console.log(this.entities);
+                
+            }
+        } else {
             this.entities.splice(i, 1);
-            // console.log(this.entities);
-            
         }
     }
 
