@@ -2544,13 +2544,12 @@ InputHandler.prototype.update = function (ctx) {
         console.log("tempRegion")
         console.log(tempRegion)
         if (tempRegion != null &&
-            ((tempRegion.owner == currentPlayerTurn || tempRegion.owner == -1 || tempRegion.owner == 1) &&
+            ((tempRegion.owner == currentPlayerTurn || tempRegion.owner == -1  || tempRegion.owner == 1) &&
                 (gameEngine.GUIEntities[3].destinationSelect ||
                     gameEngine.GUIEntities[3].destinationSelectCaptain))) {
             //if (selectedRegion != null) setSpritesToUnselected(selectedRegion);
 
             gameEngine.GUIEntities[3].moveDestination = tempRegion;
-            console.log("HELLO")
             // selectedRegion = null;
             // setSpritesToSelected(selectedRegion);
         } else if (tempRegion != null &&
