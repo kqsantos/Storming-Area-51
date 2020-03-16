@@ -20,7 +20,7 @@ function GameEngine() {
     this.cameraOrigin = null;
     this.newGame = false;
     this.zoomIn = false;
-    this.zoomOut= false;
+    this.zoomOut = false;
     this.mouseOver = null;
     this.GUIEntities = [];
 }
@@ -70,18 +70,18 @@ GameEngine.prototype.startInput = function () {
         elem.addEventListener("mousemove", function (e) {
             //console.log(e);
             that.mouseOver = e;
-            
+
             // console.log("%c KeyDown info below this:", "background: #222; color: #bada55");
             // console.log(e);
             // console.log("Key Down Event - Char " + e.code + " Code " + e.keyCode);
         }, false);
 
         elem.addEventListener("wheel", function (e) {
-            if(e.deltaY < 0) {
+            if (e.deltaY < 0) {
                 that.zoomIn = true;
                 console.log("zoom in");
             }
-            if(e.deltaY > 0) {
+            if (e.deltaY > 0) {
                 that.zoomOut = true;
                 console.log("zoom out");
             }
@@ -136,22 +136,28 @@ GameEngine.prototype.update = function () {
         }
     }
 
-    
+
     for (var i = this.GUIEntities.length - 1; i >= 0; --i) {
         if (this.GUIEntities[i].removeFromWorld) {
             this.GUIEntities.splice(i, 1);
-            
         }
     }
     for (var i = this.entities.length - 1; i >= 0; --i) {
-        if (this.entities[i].removeFromWorld) {
-            // console.log("Splicing")
+        // if (this.entities[i] !== undefined) {
+            // console.log("Splicing Outside")
             // console.log(this.entities);
             // console.log(this.entities[i]);
-            this.entities.splice(i, 1);
-            // console.log(this.entities);
-            
-        }
+            if (this.entities[i].removeFromWorld) {
+                // console.log("Splicing")
+                // console.log(this.entities);
+                // console.log(this.entities[i]);
+                this.entities.splice(i, 1);
+                // console.log(this.entities);
+
+            }
+        // } else {
+        //     this.entities.splice(i, 1);
+        // }
     }
 
 }
