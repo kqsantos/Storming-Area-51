@@ -2910,7 +2910,7 @@ function WelcomeScreen(game) {
     this.audio = new Audio("./sound/welcome_music.mp3");
     this.audio.autoplay = true;
     this.audio.volume = 0.2;
-    this.audio.play();
+    // this.audio.play();
 
     Entity.call(this, game, 0, 0);
 }
