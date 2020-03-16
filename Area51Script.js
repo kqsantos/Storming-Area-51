@@ -2739,7 +2739,8 @@ InputHandler.prototype.update = function (ctx) {
 // ===================================================================
 function AudioHandler(game) {
     var audio = new Audio("./sound/bg_music.mp3");
-    // audio.play();
+    audio.volume = 0.1;
+    audio.play();
     Entity.call(this, game, 0, 0);
 }
 
@@ -2908,6 +2909,7 @@ function WelcomeScreen(game) {
 
     this.audio = new Audio("./sound/welcome_music.mp3");
     this.audio.autoplay = true;
+    this.audio.volume = 0.2;
     this.audio.play();
 
     Entity.call(this, game, 0, 0);
@@ -2986,6 +2988,7 @@ WelcomeScreen.prototype.update = function (ctx) {
 
 
     if (gameEngine.newGame) {
+        this.audio.pause();
         this.removeFromWorld = true;
         gameEngine.addEntity(new MapDisplay(gameEngine));
         if (toggleFogOfWar) {
