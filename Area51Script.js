@@ -1036,6 +1036,9 @@ function moveFight(source, destination) {
                     source.troop['soldier'].count--;
                 } else if (source.troop['soldierRanged'] && source.troop['soldierRanged'].count - source.troop['soldierRanged'].hasMoved > 0 && atkCount == 1) {
                     source.troop['soldierRanged'].count--;
+                    atkCount--;
+                } else {
+                    atkCount++;
                 }
 
             } else {
@@ -1071,66 +1074,70 @@ function moveFight(source, destination) {
                 destination.troop['soldierRanged'] = null;
             }
 
-            if (destination.troop['soldier'] != null && destination.troop['soldier'].count == 0) {
-                destination.troop['soldierRanged'].removeFromWorld = true;
-                destination.troop['soldierRanged'] = null;
+            if (source.troop['soldier'] != null && source.troop['soldier'].count == 0) {
+                source.troop['soldierRanged'].removeFromWorld = true;
+                source.troop['soldierRanged'] = null;
             }
 
-            if (destination.troop['soldierRanged'] != null && destination.troop['soldierRanged'].count == 0) {
-                destination.troop['soldier'].removeFromWorld = true;
-                destination.troop['soldier'] = null;
+            if (source.troop['soldierRanged'] != null && source.troop['soldierRanged'].count == 0) {
+                source.troop['soldier'].removeFromWorld = true;
+                source.troop['soldier'] = null;
             } 
 
-            var noRangedMovement = source.troop['soldierRanged'] && (source.troop['soldierRanged'].count > 0 && source.troop['soldierRanged'].hasMoved == 0 && source.troop['soldier'] == null);
-            var noSoldierMovement = source.troop['soldier'] && (source.troop['soldier'].count > 0 && source.troop['soldier'].hasMoved == 0 && source.troop['soldierRanged'] == null);
-            var noMovementEither = source.troop['soldierRanged'] && source.troop['soldier'] && (source.troop['soldier'].count > 0 && source.troop['soldier'].hasMoved == 0) && (source.troop['soldierRanged'].count > 0 && source.troop['soldierRanged'].hasMoved == 0);            
-            var noMovement = noSoldierMovement || noRangedMovement || noMovementEither;
+            destination.owner = source.owner;
+            moveFight(source, destination);
 
-            if (noMovement) {
+            // var noRangedMovement = source.troop['soldierRanged'] && (source.troop['soldierRanged'].count > 0 && source.troop['soldierRanged'].hasMoved == 0 && source.troop['soldier'] == null);
+            // var noSoldierMovement = source.troop['soldier'] && (source.troop['soldier'].count > 0 && source.troop['soldier'].hasMoved == 0 && source.troop['soldierRanged'] == null);
+            // var noMovementEither = source.troop['soldierRanged'] && source.troop['soldier'] && (source.troop['soldier'].count > 0 && source.troop['soldier'].hasMoved == 0) && (source.troop['soldierRanged'].count > 0 && source.troop['soldierRanged'].hasMoved == 0);            
+            // var noMovement = noSoldierMovement || noRangedMovement || noMovementEither;
 
-                console.log('No Movement');
+            // if (noMovement) {
 
-                destination.owner = source.owner;
-                destination.troop = new Object(source.troop);
+            //     console.log('No Movement');
 
-                if (destination.troop['soldier'] != null) {
-                    destination.troop['soldier'].hasMoved = destination.troop['soldier'].count;
-                    destination.troop['soldier'].x = destination.troopXY[0];
-                    destination.troop['soldier'].y = destination.troopXY[1];
-                }
-                if (destination.troop['soldierRanged'] != null) {
-                    destination.troop['soldierRanged'].hasMoved = destination.troop['soldierRanged'].count;
-                    destination.troop['soldierRanged'].x = destination.rangedXY[0];
-                    destination.troop['soldierRanged'].y = destination.rangedXY[1];
-                }
+            //     destination.owner = source.owner;
+            //     destination.troop = new Object(source.troop);
+
+            //     if (destination.troop['soldier'] != null) {
+            //         destination.troop['soldier'].hasMoved = destination.troop['soldier'].count;
+            //         destination.troop['soldier'].x = destination.troopXY[0];
+            //         destination.troop['soldier'].y = destination.troopXY[1];
+            //     }
+            //     if (destination.troop['soldierRanged'] != null) {
+            //         destination.troop['soldierRanged'].hasMoved = destination.troop['soldierRanged'].count;
+            //         destination.troop['soldierRanged'].x = destination.rangedXY[0];
+            //         destination.troop['soldierRanged'].y = destination.rangedXY[1];
+            //     }
 
 
-            } else {
+            // } else {
 
-                console.log('Movement');
+            //     console.log('Movement');
 
-                destination.owner = source.owner;
-                destination.troop = [];
+            //     destination.owner = source.owner;
+            //     destination.troop = [];
 
-                if (source.owner == 0 && source.troop['soldier'].count > 0) {
-                    destination.troop["soldier"] = new Soldier(gameEngine, destination.troopXY[0], destination.troopXY[1]);
-                    gameEngine.addEntity(destination.troop["soldier"]);
-                } else if (source.owner == 1 && source.troop['soldier'].count > 0) {
-                    destination.troop["soldier"] = new Alien(gameEngine, destination.troopXY[0], destination.troopXY[1]);
-                    gameEngine.addEntity(destination.troop["soldier"]);
-                }
-                if (source.owner == 0 && source.troop['soldierRanged'].count > 0) {
-                    destination.troop["soldierRanged"] = new SoldierRanged(gameEngine, destination.rangedXY[0], destination.rangedXY[1]);
-                    gameEngine.addEntity(destination.troop["soldierRanged"]);
-                } else if (source.owner == 1 && source.troop['soldierRanged'].count > 0) {
-                    destination.troop["soldierRanged"] = new AlienRanged(gameEngine, destination.rangedXY[0], destination.rangedXY[1]);
-                    gameEngine.addEntity(destination.troop["soldierRanged"]);
-                }
+            //     if (source.owner == 0 && source.troop['soldier'].count > 0) {
+            //         destination.troop["soldier"] = new Soldier(gameEngine, destination.troopXY[0], destination.troopXY[1]);
+            //         gameEngine.addEntity(destination.troop["soldier"]);
+            //     } else if (source.owner == 1 && source.troop['soldier'].count > 0) {
+            //         destination.troop["soldier"] = new Alien(gameEngine, destination.troopXY[0], destination.troopXY[1]);
+            //         gameEngine.addEntity(destination.troop["soldier"]);
+            //     }
 
-                if (destination.troop['soldier'] != null) destination.troop['soldier'].hasMoved = destination.troop['soldier'].count - source.troop['soldier'].hasMoved;
-                if (destination.troop['soldierRanged'] != null) destination.troop['soldierRanged'].hasMoved = destination.troop['soldierRanged'].count - source.troop['soldierRanged'].hasMoved;
+            //     if (source.owner == 0 && source.troop['soldierRanged'].count > 0) {
+            //         destination.troop["soldierRanged"] = new SoldierRanged(gameEngine, destination.rangedXY[0], destination.rangedXY[1]);
+            //         gameEngine.addEntity(destination.troop["soldierRanged"]);
+            //     } else if (source.owner == 1 && source.troop['soldierRanged'].count > 0) {
+            //         destination.troop["soldierRanged"] = new AlienRanged(gameEngine, destination.rangedXY[0], destination.rangedXY[1]);
+            //         gameEngine.addEntity(destination.troop["soldierRanged"]);
+            //     }
+
+            //     if (destination.troop['soldier'] != null) destination.troop['soldier'].hasMoved = destination.troop['soldier'].count - source.troop['soldier'].hasMoved;
+            //     if (destination.troop['soldierRanged'] != null) destination.troop['soldierRanged'].hasMoved = destination.troop['soldierRanged'].count - source.troop['soldierRanged'].hasMoved;
                 
-            }
+            // }
 
         }
     }
