@@ -1036,6 +1036,9 @@ function moveFight(source, destination) {
                     source.troop['soldier'].count--;
                 } else if (source.troop['soldierRanged'] && source.troop['soldierRanged'].count - source.troop['soldierRanged'].hasMoved > 0 && atkCount == 1) {
                     source.troop['soldierRanged'].count--;
+                    atkCount--;
+                } else {
+                    atkCount++;
                 }
 
             } else {
@@ -1071,14 +1074,14 @@ function moveFight(source, destination) {
                 destination.troop['soldierRanged'] = null;
             }
 
-            if (destination.troop['soldier'] != null && destination.troop['soldier'].count == 0) {
-                destination.troop['soldierRanged'].removeFromWorld = true;
-                destination.troop['soldierRanged'] = null;
+            if (source.troop['soldier'] != null && source.troop['soldier'].count == 0) {
+                source.troop['soldierRanged'].removeFromWorld = true;
+                source.troop['soldierRanged'] = null;
             }
 
-            if (destination.troop['soldierRanged'] != null && destination.troop['soldierRanged'].count == 0) {
-                destination.troop['soldier'].removeFromWorld = true;
-                destination.troop['soldier'] = null;
+            if (source.troop['soldierRanged'] != null && source.troop['soldierRanged'].count == 0) {
+                source.troop['soldier'].removeFromWorld = true;
+                source.troop['soldier'] = null;
             } 
 
             var noRangedMovement = source.troop['soldierRanged'] && (source.troop['soldierRanged'].count > 0 && source.troop['soldierRanged'].hasMoved == 0 && source.troop['soldier'] == null);
@@ -1119,6 +1122,7 @@ function moveFight(source, destination) {
                     destination.troop["soldier"] = new Alien(gameEngine, destination.troopXY[0], destination.troopXY[1]);
                     gameEngine.addEntity(destination.troop["soldier"]);
                 }
+
                 if (source.owner == 0 && source.troop['soldierRanged'].count > 0) {
                     destination.troop["soldierRanged"] = new SoldierRanged(gameEngine, destination.rangedXY[0], destination.rangedXY[1]);
                     gameEngine.addEntity(destination.troop["soldierRanged"]);
