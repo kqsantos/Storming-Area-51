@@ -3019,7 +3019,7 @@ WelcomeScreen.prototype.update = function (ctx) {
         players[0].goldCount = 0;
         // players[0].foodCount = 999;
         players.push(new Player(1, 0, { x: 0, y: 90 }));
-        players[1].foodCount = 15;
+        players[1].foodCount = 100;
 
         // Start buildings, troops
         for (var i = 0; i < regionsList.length; i++) {
